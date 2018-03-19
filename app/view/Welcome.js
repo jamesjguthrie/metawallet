@@ -95,6 +95,7 @@ Ext.define('FW.view.Welcome', {
         // Defer by 1/2 a second to allow screen to update and show spinner
         Ext.defer(function(){
             me.main.generateWallet(phrase, cb);
+            me.main.generateETHWallet(phrase, cb); //might need different phrase, cb
         },500)
     },
 
