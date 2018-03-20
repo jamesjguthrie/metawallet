@@ -14,6 +14,10 @@ Ext.define('FW.store.Addresses', {
         proxy: {
             type: 'localstorage',
             id: 'Addresses'
+        },
+        proxy: {
+            type: 'localstorage',
+            id: 'Addresses'
         }
     }
 });

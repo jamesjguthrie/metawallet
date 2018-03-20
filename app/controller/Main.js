@@ -18,7 +18,7 @@ Ext.define('FW.controller.Main', {
             wall = sm.getItem('wallet'),
             pass = sm.getItem('passcode');
         var ETHme = this,
-            ETHsm = ETHlocalStorage,
+            ETHsm = localStorage,
             ETHvp = Ext.ETHViewport,
             ETHwall = sm.getItem('ETHwallet'),
             ETHpass = sm.getItem('ETHpasscode');
@@ -327,7 +327,7 @@ Ext.define('FW.controller.Main', {
 
     generateETHWallet: function (phrase, callback) {
         var me = this,
-            sm = ETHlocalStorage,
+            sm = localStorage,
             m = new Mnemonic(128);
         // If passphrase was specified, use it
         if (phrase)
@@ -343,7 +343,7 @@ Ext.define('FW.controller.Main', {
         //     list = CryptoJS.enc.Utf8.parse(seed),
         //     str  = CryptoJS.enc.Base64.stringify(list);
         // Encrypt the wallet and save it to disk so we can load on next run
-        me.ETHencryptWallet();
+        me.encryptETHWallet();
         // Set the wallet prefix to the first 5 chars of the hex
         FW.ETHWALLET_PREFIX = String(h.substr(0, 5));
         sm.setItem('prefix', FW.ETHWALLET_PREFIX);
@@ -369,9 +369,9 @@ Ext.define('FW.controller.Main', {
     },
 
     showETHWalletPassphrase: function () {
-        var ETHme = this,
-            ETHm = Mnemonic.fromHex(FW.ETHWALLET_HEX),
-            ETHp = m.toWords().toString().replace(/,/gi, " ");
+        var me = this,
+            m = Mnemonic.fromHex(FW.ETHWALLET_HEX),
+            p = m.toWords().toString().replace(/,/gi, " ");
         me.showETHPassphraseView({ phrase: p });
     },
 
@@ -387,8 +387,6 @@ Ext.define('FW.controller.Main', {
         var enc = CryptoJS.AES.encrypt(Ext.encode(FW.WALLET_KEYS), String(FW.PASSCODE)).toString();
         sm.setItem('privkey', enc);
     },
-
-
 
     // Handle decrypting stored wallet seed using passcode
     decryptWallet: function(){
@@ -411,8 +409,8 @@ Ext.define('FW.controller.Main', {
 
     // Handle encrypting wallet information using passcode and saving
     encryptETHWallet: function () {
-        var ETHme = this,
-            sm = ETHlocalStorage;
+        var me = this,
+            sm = localStorage;
         // Encrypt the wallet seed
         var enc = CryptoJS.AES.encrypt(FW.ETHWALLET_HEX, String(FW.PASSCODE)).toString();
         sm.setItem('wallet', enc);
@@ -425,19 +423,19 @@ Ext.define('FW.controller.Main', {
 
     // Handle decrypting stored wallet seed using passcode
     decryptETHWallet: function () {
-        var ETHme = this,
-            sm = ETHlocalStorage,
+        var me = this,
+            sm = localStorage,
             w = sm.getItem('ETHwallet'),
             p = sm.getItem('ETHprivkey');
         // Decrypt wallet
         if (w) {
-            var ETHdec = CryptoJS.AES.decrypt(w, String(FW.ETHPASSCODE)).toString(CryptoJS.enc.Utf8);
-            FW.ETHWALLET_HEX = ETHdec;
+            var dec = CryptoJS.AES.decrypt(w, String(FW.ETHPASSCODE)).toString(CryptoJS.enc.Utf8);
+            FW.ETHWALLET_HEX = dec;
         }
         // Decrypt any saved/imported private keys
         if (p) {
-            var ETHdec = CryptoJS.AES.decrypt(p, String(FW.ETHPASSCODE)).toString(CryptoJS.enc.Utf8);
-            FW.ETHWALLET_KEYS = Ext.decode(ETHdec);
+            var dec = CryptoJS.AES.decrypt(p, String(FW.ETHPASSCODE)).toString(CryptoJS.enc.Utf8);
+            FW.ETHWALLET_KEYS = Ext.decode(dec);
         }
     },
 
@@ -490,10 +488,10 @@ Ext.define('FW.controller.Main', {
 
     addETHWalletPrivkey: function (key, alert) {
         // Verify that the private key is added
-        var ETHme = this,
-            sm = ETHlocalStorage,
+        var me = this,
+            sm = localStorage,
             address = false,
-            bc = bitcore, //use web3 https://github.com/ethereum/web3.js/
+            bc = bitcore, //use web3 https://github.com/ethereum/web3.js/ implement here 20/03/2018
             store = Ext.getStore('ETHAddresses'),
             n = (FW.ETHWALLET_NETWORK == 2) ? 'testnet' : 'mainnet',
             force = (force) ? true : false,
@@ -508,10 +506,10 @@ Ext.define('FW.controller.Main', {
         // Add wallet to address
         if (address) {
             var rec = store.add({
-                id: FW.WALLET_PREFIX + '-' + FW.WALLET_NETWORK + '-' + String(address).substring(0, 4),
+                id: FW.ETHWALLET_PREFIX + '-' + FW.ETHWALLET_NETWORK + '-' + String(address).substring(0, 4),
                 index: 9999,
-                prefix: FW.WALLET_PREFIX,
-                network: FW.WALLET_NETWORK,
+                prefix: FW.ETHWALLET_PREFIX,
+                network: FW.ETHWALLET_NETWORK,
                 address: address,
                 label: 'Imported Address'
             });
@@ -520,10 +518,10 @@ Ext.define('FW.controller.Main', {
             me.saveStore('Addresses');
         }
         // Save data in localStorage
-        if (FW.WALLET_KEYS) {
-            console.log('FW.WALLET_KEYS=', FW.WALLET_KEYS);
-            FW.WALLET_KEYS[address] = key;
-            me.encryptWallet();
+        if (FW.ETHWALLET_KEYS) {
+            console.log('FW.ETHWALLET_KEYS=', FW.ETHWALLET_KEYS);
+            FW.ETHWALLET_KEYS[address] = key;
+            me.encryptETHWallet();
         }
         // Notify user that address was added
         if (alert && address) {
@@ -666,7 +664,7 @@ Ext.define('FW.controller.Main', {
     setETHWalletNetwork: function (network, load) {
         // console.log('setWalletNetwork network, load=',network,load);
         var me = this,
-            sm = ETHlocalStorage,
+            sm = localStorage,
             net = (network == 2) ? 'testnet' : 'mainnet';
         // Update wallet network san d
         FW.ETHWALLET_NETWORK = network;
@@ -732,7 +730,7 @@ Ext.define('FW.controller.Main', {
     setETHWalletAddress: function (address, load) {
         // console.log('setWalletAddress address, load=',address,load);
         var me = this,
-            sm = ETHlocalStorage,
+            sm = localStorage,
             info = false,
             prefix = String(address).substr(0, 5),
             addresses = Ext.getStore('Addresses'),
@@ -1092,6 +1090,26 @@ Ext.define('FW.controller.Main', {
                 quantity: quantity,
                 estimated_value: estimated_value
             });
+        // Mark record as dirty, so we save it to disk on the next sync
+        record[0].setDirty();
+    },
+
+    updateETHAddressBalance: function (address, type, asset, asset_longname, quantity, estimated_value) {
+        // console.log('updateAddressBalance address, type, asset, asset_longname, quantity, estimated_value=',address, type, asset, asset_longname, quantity, estimated_value);
+        var me = this,
+            addr = (address) ? address : FW.ETHWALLET_ADDRESS,
+            prefix = addr.substr(0, 5),
+            store = Ext.getStore('ETHBalances');
+        record = store.add({
+            id: prefix + '-' + asset,
+            type: type,
+            prefix: prefix,
+            asset: asset,
+            asset_longname: asset_longname,
+            display_name: (asset_longname != '') ? asset_longname : asset,
+            quantity: quantity,
+            estimated_value: estimated_value
+        });
         // Mark record as dirty, so we save it to disk on the next sync
         record[0].setDirty();
     },
