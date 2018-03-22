@@ -1,0 +1,15 @@
+﻿<Properties StartupConfiguration="{508430AB-CFD1-41AD-92B8-06EA8B8CE810}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="metawallet/app/controller/Main.js">
+    <Files>
+      <File FileName="metawallet/app/controller/Main.js" Line="347" Column="54" />
+      <File FileName="metawallet/app.json" Line="123" Column="11" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.metawallet PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>
