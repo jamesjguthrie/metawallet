@@ -1897,7 +1897,7 @@ Ext.Loader.addClassPathMappings({
   "Ext.Element-static": "../../../../../touch/src/dom/Element.static.js",
   "Ext.Element-style": "../../../../../touch/src/dom/Element.style.js",
   "Ext.Element-traversal": "../../../../../touch/src/dom/Element.traversal.js",
-  "Ext.cmd": "../../../../../../../../bin/Sencha/Cmd/6.5.3.6/plugins/src",
+  "Ext.cmd": "../../../../../../../../../bin/Sencha/Cmd/6.5.3.6/plugins/src",
   "Ext.core.DomQuery": "../../../../../touch/src/dom/Query.js",
   "Ext.device.Purchases.Product": "../../../../../touch/src/device/purchases/Sencha.js",
   "Ext.device.filesystem.DirectoryEntry": "../../../../../touch/src/device/filesystem/Sencha.js",
@@ -3426,7 +3426,7 @@ Ext.ClassManager.addNameAliasMappings({
 
 
 Ext.Boot.loadSync([
-    "/C:/Users/Jabo/bin/Sencha/Cmd/6.5.3.6/ant/build/slicer/render.js",
+    "/Users/jabo/bin/Sencha/Cmd/6.5.3.6/ant/build/slicer/render.js",
     "../../../../../touch/packages/ext-theme-base/sass/example/manifest.js",
     "../../../../../touch/packages/ext-theme-base/sass/example/shortcuts.js",
     "custom.js"

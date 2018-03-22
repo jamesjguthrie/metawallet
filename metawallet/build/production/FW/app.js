@@ -29254,11 +29254,12 @@ Ext.cmd.derive('FW.model.Addresses', Ext.data.Model, {config:{fields:[{name:'id'
 Ext.cmd.derive('FW.model.Balances', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'integer'}, {name:'asset', type:'string'}, {name:'asset_longname', type:'string'}, {name:'display_name', type:'string'}, {name:'quantity', type:'string'}, {name:'estimated_value', type:'object'}], idProperty:'id', proxy:{type:'localstorage', id:'Balances'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'Balances'], 0);
 Ext.cmd.derive('FW.model.Transactions', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'string'}, {name:'hash', type:'string'}, {name:'asset', type:'string'}, {name:'quantity', type:'string'}, {name:'time', type:'string'}], idProperty:'id'}}, 0, 0, 0, 0, 0, 0, [FW.model, 'Transactions'], 0);
 Ext.cmd.derive('FW.model.MenuTree', Ext.data.Model, {config:{fields:[{name:'text', type:'string'}, {name:'icon', type:'string'}]}}, 0, 0, 0, 0, 0, 0, [FW.model, 'MenuTree'], 0);
-Ext.cmd.derive('FW.store.Addresses', Ext.data.Store, {config:{model:'FW.model.Addresses', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'Addresses'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'Addresses'], 0);
+Ext.cmd.derive('FW.store.Addresses', Ext.data.Store, {config:{model:'FW.model.Addresses', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'Addresses'}, proxy:{type:'localstorage', id:'Addresses'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'Addresses'], 0);
 Ext.cmd.derive('FW.store.Balances', Ext.data.Store, {config:{model:'FW.model.Balances', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'Balances'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'Balances'], 0);
 Ext.cmd.derive('FW.store.Transactions', Ext.data.Store, {config:{model:'FW.model.Transactions', autoLoad:true, autoSync:true}}, 0, 0, 0, 0, 0, 0, [FW.store, 'Transactions'], 0);
 Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   var me = this, sm = localStorage, vp = Ext.Viewport, wall = sm.getItem('wallet'), pass = sm.getItem('passcode');
+  var ETHme = this, ETHsm = localStorage, ETHvp = Ext.ETHViewport, ETHwall = sm.getItem('ETHwallet'), ETHpass = sm.getItem('ETHpasscode');
   me.counterparty = FW.app.getController('Counterparty');
   me.isNative = typeof cordova === 'undefined' ? false : true;
   me.deviceType = me.getDeviceType();
@@ -29271,14 +29272,31 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   FW.TOUCHID = sm.getItem('touchid') || false;
   FW.NETWORK_INFO = {};
   FW.API_KEYS = {BLOCKTRAIL:'efb0aae5420f167113cc81a9edf7b276d40c2565'};
+  FW.ETHWALLET_HEX = null;
+  FW.ETHWALLET_KEYS = {};
+  FW.ETHWALLET_NETWORK = sm.getItem('ETHnetwork') || 1;
+  FW.ETHWALLET_PREFIX = sm.getItem('ETHprefix') || null;
+  FW.ETHWALLET_ADDRESS = sm.getItem('ETHaddress') || null;
+  FW.ETHNETWORK_INFO = {};
+  FW.ETHAPI_KEYS = {BLOCKTRAIL:'efb0aae5420f167113cc81a9edf7b276d40c2565'};
   FW.SERVER_INFO = {mainnet:{cpHost:'public.coindaddy.io', cpPort:4001, cpUser:'rpc', cpPass:'1234', cpSSL:true}, testnet:{cpHost:'public.coindaddy.io', cpPort:14001, cpUser:'rpc', cpPass:'1234', cpSSL:true}};
+  FW.ETHSERVER_INFO = {ETHmainnet:{cpHost:'public.coindaddy.io', cpPort:4001, cpUser:'rpc', cpPass:'1234', cpSSL:true}, ETHtestnet:{cpHost:'public.coindaddy.io', cpPort:14001, cpUser:'rpc', cpPass:'1234', cpSSL:true}};
   var std = 1.0E-4;
   FW.MINER_FEES = {standard:std, medium:std * 2, fast:std * 5};
+  var ETHstd = 1.0E-4;
+  FW.ETHMINER_FEES = {standard:std, medium:std * 2, fast:std * 5};
   var serverInfo = sm.getItem('serverInfo');
   if (serverInfo) {
     var o = Ext.decode(serverInfo);
     if (o) {
       FW.SERVER_INFO = o;
+    }
+  }
+  var ETHserverInfo = sm.getItem('ETHserverInfo');
+  if (ETHserverInfo) {
+    var o = Ext.decode(ETHserverInfo);
+    if (o) {
+      FW.ETHSERVER_INFO = o;
     }
   }
   if (wall) {
@@ -29439,9 +29457,26 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   if (typeof callback === 'function') {
     callback(p);
   }
+}, generateETHWallet:function(phrase, callback) {
+  var Web3 = require('web3');
+  var web3 = new Web3('http://52.87.221.111:8545');
+  if (phrase) {
+    var ETHaddr = web3.eth.accounts.create(phrase);
+  } else {
+    var ETHaddr = web3.eth.accounts.create();
+  }
+  if (ETHaddr) {
+    me.setETHWalletAddress(ETHaddr, true);
+  }
+  if (typeof callback === 'function') {
+    callback(p);
+  }
 }, showWalletPassphrase:function() {
   var me = this, m = Mnemonic.fromHex(FW.WALLET_HEX), p = m.toWords().toString().replace(/,/gi, ' ');
   me.showPassphraseView({phrase:p});
+}, showETHWalletPassphrase:function() {
+  var me = this, m = Mnemonic.fromHex(FW.ETHWALLET_HEX), p = m.toWords().toString().replace(/,/gi, ' ');
+  me.showETHPassphraseView({phrase:p});
 }, encryptWallet:function() {
   var me = this, sm = localStorage;
   var enc = CryptoJS.AES.encrypt(FW.WALLET_HEX, String(FW.PASSCODE)).toString();
@@ -29457,6 +29492,22 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   if (p) {
     var dec = CryptoJS.AES.decrypt(p, String(FW.PASSCODE)).toString(CryptoJS.enc.Utf8);
     FW.WALLET_KEYS = Ext.decode(dec);
+  }
+}, encryptETHWallet:function() {
+  var me = this, sm = localStorage;
+  var enc = CryptoJS.AES.encrypt(FW.ETHWALLET_HEX, String(FW.PASSCODE)).toString();
+  sm.setItem('wallet', enc);
+  var enc = CryptoJS.AES.encrypt(Ext.encode(FW.ETHWALLET_KEYS), String(FW.PASSCODE)).toString();
+  sm.setItem('privkey', enc);
+}, decryptETHWallet:function() {
+  var me = this, sm = localStorage, w = sm.getItem('ETHwallet'), p = sm.getItem('ETHprivkey');
+  if (w) {
+    var dec = CryptoJS.AES.decrypt(w, String(FW.ETHPASSCODE)).toString(CryptoJS.enc.Utf8);
+    FW.ETHWALLET_HEX = dec;
+  }
+  if (p) {
+    var dec = CryptoJS.AES.decrypt(p, String(FW.ETHPASSCODE)).toString(CryptoJS.enc.Utf8);
+    FW.ETHWALLET_KEYS = Ext.decode(dec);
   }
 }, addWalletPrivkey:function(key, alert) {
   var me = this, sm = localStorage, address = false, bc = bitcore, store = Ext.getStore('Addresses'), n = FW.WALLET_NETWORK == 2 ? 'testnet' : 'mainnet', force = force ? true : false, net = bc.Networks[n];
@@ -29476,6 +29527,30 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     console.log('FW.WALLET_KEYS\x3d', FW.WALLET_KEYS);
     FW.WALLET_KEYS[address] = key;
     me.encryptWallet();
+  }
+  if (alert && address) {
+    Ext.defer(function() {
+      Ext.Msg.alert('New Address', address);
+    }, 10);
+  }
+}, addETHWalletPrivkey:function(key, alert) {
+  var me = this, sm = localStorage, address = false, bc = bitcore, store = Ext.getStore('ETHAddresses'), n = FW.ETHWALLET_NETWORK == 2 ? 'testnet' : 'mainnet', force = force ? true : false, net = bc.Networks[n];
+  try {
+    privkey = new bc.PrivateKey.fromWIF(key);
+    pubkey = privkey.toPublicKey();
+    address = pubkey.toAddress(net).toString();
+  } catch (e$20) {
+    console.log('error : ', e$20);
+  }
+  if (address) {
+    var rec = store.add({id:FW.ETHWALLET_PREFIX + '-' + FW.ETHWALLET_NETWORK + '-' + String(address).substring(0, 4), index:9999, prefix:FW.ETHWALLET_PREFIX, network:FW.ETHWALLET_NETWORK, address:address, label:'Imported Address'});
+    rec[0].setDirty();
+    me.saveStore('Addresses');
+  }
+  if (FW.ETHWALLET_KEYS) {
+    console.log('FW.ETHWALLET_KEYS\x3d', FW.ETHWALLET_KEYS);
+    FW.ETHWALLET_KEYS[address] = key;
+    me.encryptETHWallet();
   }
   if (alert && address) {
     Ext.defer(function() {
@@ -29511,6 +29586,35 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     Ext.Msg.alert('New Address', addr);
   }
   return addr;
+}, addETHWalletAddress:function(count, network, force, alert) {
+  var me = this, addr = null, network = network ? network : FW.ETHWALLET_NETWORK, bc = bitcore, n = network == 2 ? 'testnet' : 'mainnet', force = force ? true : false, net = bc.Networks[n], key = bc.HDPrivateKey.fromSeed(FW.ETHWALLET_HEX, net);
+  count = typeof count === 'number' ? count : 1, store = Ext.getStore('Addresses'), total = 0;
+  for (var i = 0; total < count; i++) {
+    var derived = key.derive("m/0'/0/" + i), address = bc.Address(derived.publicKey, net).toString();
+    found = false;
+    Ext.each(store.data.all, function(rec) {
+      if (rec.data.address == address) {
+        found = true;
+        return false;
+      }
+    });
+    if (!force) {
+      total++;
+    }
+    if (!found) {
+      if (force) {
+        total++;
+      }
+      var rec = store.add({id:FW.ETHWALLET_PREFIX + '-' + network + '-' + (i + 1), index:i, prefix:FW.ETHWALLET_PREFIX, network:network, address:address, label:'Address #' + (i + 1)});
+      rec[0].setDirty();
+      addr = address;
+    }
+  }
+  me.saveStore('Addresses');
+  if (alert) {
+    Ext.Msg.alert('New Address', addr);
+  }
+  return addr;
 }, setWalletNetwork:function(network, load) {
   var me = this, sm = localStorage, net = network == 2 ? 'testnet' : 'mainnet';
   FW.WALLET_NETWORK = network;
@@ -29522,7 +29626,47 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
       me.setWalletAddress(addr, true);
     }
   }
+}, setETHWalletNetwork:function(network, load) {
+  var me = this, sm = localStorage, net = network == 2 ? 'testnet' : 'mainnet';
+  FW.ETHWALLET_NETWORK = network;
+  sm.setItem('network', network);
+  window.NETWORK = bitcore.Networks[net];
+  if (load) {
+    var addr = me.getFirstWalletAddress(network);
+    if (addr) {
+      me.setWalletAddress(addr, true);
+    }
+  }
 }, setWalletAddress:function(address, load) {
+  var me = this, sm = localStorage, info = false, prefix = String(address).substr(0, 5), addresses = Ext.getStore('Addresses'), balances = Ext.getStore('Balances'), history = Ext.getStore('Transactions');
+  addresses.clearFilter();
+  balances.clearFilter();
+  addresses.each(function(rec) {
+    if (rec.data.address == address) {
+      info = rec.data;
+    }
+  });
+  if (info) {
+    sm.setItem('address', info.address);
+    FW.WALLET_ADDRESS = info;
+    var cmp = Ext.getCmp('settingsPanel');
+    if (cmp) {
+      cmp.address.setValue(info.address);
+      cmp.label.setValue(info.label);
+    }
+    if (load) {
+      history.removeAll();
+      me.getAddressBalances(address);
+      me.getAddressHistory(address);
+    }
+    balances.filter('prefix', prefix);
+    history.filter('prefix', prefix);
+    var view = Ext.getCmp('receiveView');
+    if (view) {
+      view.address.setValue(address);
+    }
+  }
+}, setETHWalletAddress:function(address, load) {
   var me = this, sm = localStorage, info = false, prefix = String(address).substr(0, 5), addresses = Ext.getStore('Addresses'), balances = Ext.getStore('Balances'), history = Ext.getStore('Transactions');
   addresses.clearFilter();
   balances.clearFilter();
@@ -29572,6 +29716,27 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   if (cmp) {
     cmp.tb.tb.setTitle(val);
   }
+}, setETHWalletAddressLabel:function(val, addr) {
+  var me = this, sm = localStorage, store = Ext.getStore('Addresses'), addr = addr ? addr : FW.ETHWALLET_ADDRESS.address;
+  store.clearFilter();
+  store.each(function(rec) {
+    var o = rec.data;
+    if (o.network == FW.ETHWALLET_NETWORK && o.prefix == FW.ETHWALLET_PREFIX && o.address == addr) {
+      FW.ETHWALLET_ADDRESS.label = val;
+      o.label = val;
+      rec.setDirty(true);
+      return false;
+    }
+  });
+  store.sync();
+  var cmp = Ext.getCmp('balancesView');
+  if (cmp) {
+    cmp.list.tb.tb.setTitle(val);
+  }
+  var cmp = Ext.getCmp('transactionsList');
+  if (cmp) {
+    cmp.tb.tb.setTitle(val);
+  }
 }, getFirstWalletAddress:function(network) {
   var me = this, store = Ext.getStore('Addresses'), addr = false;
   store.clearFilter();
@@ -29583,6 +29748,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     }
   });
   return addr;
+}, getFirstETHWalletAddress:function(network) {
 }, getCurrencyPrice:function(currency, type) {
   var value = false;
   Ext.each(FW.NETWORK_INFO.currency_info, function(item) {
@@ -29592,6 +29758,22 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
       }
       if (type == 'btc') {
         value = item.price_btc;
+      }
+    }
+  });
+  return value;
+}, getETHCurrencyPrice:function(currency, type) {
+  var value = false;
+  Ext.each(FW.ETHNETWORK_INFO.currency_info, function(item) {
+    if (item.id == currency) {
+      if (type == 'usd') {
+        value = item.price_usd;
+      }
+      if (type == 'btc') {
+        value = item.price_btc;
+      }
+      if (type == 'eth') {
+        value = item.price_eth;
       }
     }
   });
@@ -29643,6 +29825,53 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     }
     me.saveStore('Balances');
   }}, true);
+}, getETHAddressBalances:function(address, callback) {
+  var me = this, addr = address ? address : FW.ETHWALLET_ADDRESS.address, prefix = addr.substr(0, 5), store = Ext.getStore('Balances'), net = FW.ETHWALLET_NETWORK == 2 ? 'tbtc' : 'btc', hostA = FW.ETHWALLET_NETWORK == 2 ? 'tbtc.blockr.io' : 'btc.blockr.io', hostB = FW.ETHWALLET_NETWORK == 2 ? 'testnet.xchain.io' : 'xchain.io';
+  me.ajaxRequest({url:'https://api.blocktrail.com/v1/' + net + '/address/' + address + '?api_key\x3d' + FW.API_KEYS.BLOCKTRAIL, success:function(o) {
+    if (o.address) {
+      var quantity = o.balance ? numeral(o.balance * 1.0E-8).format('0.00000000') : '0.00000000', price_usd = me.getCurrencyPrice('ethereum', 'usd'), price_eth = me.getCurrencyPrice('counterparty', 'eth'), values = {usd:numeral(parseFloat(price_usd * quantity)).format('0.00000000'), btc:'1.00000000', xcp:price_btc ? numeral(1 / price_btc).format('0.00000000') : '0.00000000'};
+      me.updateAddressBalance(address, 1, 'ETH', '', quantity, values);
+      me.saveStore('Balances');
+      if (Ext.os.name == 'iOS') {
+        var cmp = Ext.getCmp('aboutView');
+        if (cmp) {
+          if (quantity == '0.00000000') {
+            cmp.donate.hide();
+          } else {
+            cmp.donate.show();
+          }
+        }
+      }
+    }
+    if (callback) {
+      callback();
+    }
+  }, failure:function(o) {
+    me.ajaxRequest({url:'https://' + hostA + '/api/v1/address/info/' + address, success:function(o) {
+      if (o.data) {
+        var quantity = o.data.balance ? numeral(o.data.balance).format('0.00000000') : '0.00000000', price_usd = me.getCurrencyPrice('ethereum', 'usd'), price_eth = me.getCurrencyPrice('counterparty', 'eth'), values = {usd:numeral(price_usd * quantity).format('0.00000000'), btc:'1.00000000', xcp:price_eth ? numeral(1 / price_eth).format('0.00000000') : '0.00000000'};
+        me.updateAddressBalance(address, 1, 'ETH', '', quantity, values);
+        me.saveStore('Balances');
+      }
+    }, callback:function() {
+      if (callback) {
+        callback();
+      }
+    }});
+  }});
+  me.ajaxRequest({url:'https://' + hostB + '/api/balances/' + address, success:function(o) {
+    if (o.data) {
+      Ext.each(o.data, function(item) {
+        var type = item.asset == 'XCP' ? 1 : 2;
+        me.updateAddressBalance(address, type, item.asset, item.asset_longname, item.quantity, item.estimated_value);
+      });
+    } else {
+      if (!(me.isNative && Ext.os.name == 'iOS')) {
+        me.updateAddressBalance(address, 1, 'XCP', '', '0.00000000');
+      }
+    }
+    me.saveStore('Balances');
+  }}, true);
 }, saveStore:function(id) {
   var store = Ext.getStore(id);
   if (store) {
@@ -29650,6 +29879,10 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   }
 }, updateAddressBalance:function(address, type, asset, asset_longname, quantity, estimated_value) {
   var me = this, addr = address ? address : FW.WALLET_ADDRESS, prefix = addr.substr(0, 5), store = Ext.getStore('Balances');
+  record = store.add({id:prefix + '-' + asset, type:type, prefix:prefix, asset:asset, asset_longname:asset_longname, display_name:asset_longname != '' ? asset_longname : asset, quantity:quantity, estimated_value:estimated_value});
+  record[0].setDirty();
+}, updateETHAddressBalance:function(address, type, asset, asset_longname, quantity, estimated_value) {
+  var me = this, addr = address ? address : FW.ETHWALLET_ADDRESS, prefix = addr.substr(0, 5), store = Ext.getStore('ETHBalances');
   record = store.add({id:prefix + '-' + asset, type:type, prefix:prefix, asset:asset, asset_longname:asset_longname, display_name:asset_longname != '' ? asset_longname : asset, quantity:quantity, estimated_value:estimated_value});
   record[0].setDirty();
 }, promptWalletPassphrase:function(callback) {
@@ -29697,8 +29930,8 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
         privkey = new bc.PrivateKey.fromWIF(val);
         pubkey = privkey.toPublicKey();
         address = pubkey.toAddress(net).toString();
-      } catch (e$20) {
-        console.log('error : ', e$20);
+      } catch (e$21) {
+        console.log('error : ', e$21);
       }
       if (address) {
         if (typeof callback === 'function') {
@@ -29749,7 +29982,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     var dec = '';
     try {
       dec = CryptoJS.AES.decrypt(p, String(code)).toString(CryptoJS.enc.Utf8);
-    } catch (e$21) {
+    } catch (e$22) {
     }
     if (dec == code) {
       return true;
@@ -30286,7 +30519,7 @@ Ext.cmd.derive('FW.controller.Counterparty', Ext.app.Controller, {launch:functio
     if (res.responseText) {
       try {
         var o = Ext.decode(res.responseText);
-      } catch (e$22) {
+      } catch (e$23) {
         o = false;
       }
     }
@@ -32066,6 +32299,7 @@ Ext.cmd.derive('FW.view.Welcome', Ext.Container, {config:{id:'welcomeView', layo
   };
   Ext.defer(function() {
     me.main.generateWallet(phrase, cb);
+    me.main.generateETHWallet(phrase, cb);
   }, 500);
 }, existingWallet:function() {
   var me = this;
@@ -32126,7 +32360,7 @@ Ext.cmd.derive('FW.view.Scan', Ext.Panel, {config:{cls:'no-rounded-edges', modal
   var me = this, vp = Ext.Viewport;
   try {
     $('#reader').html5_qrcode_stop();
-  } catch (e$23) {
+  } catch (e$24) {
     console.log('reader error');
   }
   vp.remove(me, true);

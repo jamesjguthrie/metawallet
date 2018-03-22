@@ -48,7 +48,7 @@ Ext.define('FW.controller.Main', {
         FW.ETHWALLET_ADDRESS = sm.getItem('ETHaddress') || null;  // Current wallet address info
         FW.ETHNETWORK_INFO = {};                             // latest network information (price, fees, unconfirmed tx, etc)
         FW.ETHAPI_KEYS = {
-            BLOCKTRAIL: 'efb0aae5420f167113cc81a9edf7b276d40c2565' //dunno yet
+            BLOCKTRAIL: 'efb0aae5420f167113cc81a9edf7b276d40c2565' 
         }
 
         // Define default server/host settings
@@ -71,11 +71,11 @@ Ext.define('FW.controller.Main', {
 
         FW.ETHSERVER_INFO = {
             ETHmainnet: {
-                cpHost: 'public.coindaddy.io',          // Counterparty Host
-                cpPort: 4001,                           // Counterparty Port
-                cpUser: 'rpc',                          // Counterparty Username
-                cpPass: '1234',                         // Counterparty Password
-                cpSSL: true                             // Counterparty SSL Enabled (true=https, false=http)
+                cpHost: '52.87.221.111',                // Our ETH node
+                cpPort: 8545,                           // ETH port
+                cpUser: 'rpc',                          // Username - may need to change
+                cpPass: '1234',                         // Password - may need to change
+                cpSSL: true                             // ETH node SSL Enabled (true=https, false=http)
             },
             ETHtestnet: {
                 cpHost: 'public.coindaddy.io',          // Counterparty Host
@@ -143,6 +143,31 @@ Ext.define('FW.controller.Main', {
                 setInterval(function(){ me.updateNetworkInfo(true); }, interval);
                 // Handle processing any scanned data after 1 second
                 Ext.defer(function(){ me.processLaunchData(); }, 1000);
+
+                me.setETHWalletNetwork(FW.ETHWALLET_NETWORK);
+                me.setETHWalletAddress(FW.ETHWALLET_ADDRESS, true);
+
+                // Load network info every 10 minutes
+                var ETHnetwork  = sm.getItem('ETHnetworkInfo'),
+                    tstamp   = sm.getItem('ETHnetworkInfoUpdated'),
+                    interval = 600000; // 10 minutes 
+                if(network)
+                    FW.ETHNETWORK_INFO = Ext.decode(ETHnetwork);
+                // Parse in last known network fees
+                if(FW.ETHNETWORK_INFO.fee_info){
+                    var o = FW.ETHNETWORK_INFO.fee_info;
+                    FW.ETHMINER_FEES.medium = o.low_priority;
+                    FW.ETHMINER_FEES.fast   = o.optimal;
+                }
+                // Refresh if we have no network data, or it is older than interval
+                if(!tstamp || (tstamp && (parseInt(tstamp)+interval) < Date.now()))
+                    me.updateNetworkInfo(true);
+                // Update prices every 10 minutes
+                setInterval(function(){ me.updateNetworkInfo(true); }, interval);
+                // Handle processing any scanned data after 1 second
+                Ext.defer(function(){ me.processLaunchData(); }, 1000);
+
+
             }
             if(FW.TOUCHID && me.isNative){
                 // Handle Touch ID authentication
@@ -156,6 +181,24 @@ Ext.define('FW.controller.Main', {
         } else {
             // Show the welcome/setup view
             me.showWelcomeView();
+        }
+
+        if(ETHwall){
+            // Define function to run once we have successfully authenticated
+            var successFn = function(pass){
+            }
+            /*if(FW.TOUCHID && me.isNative){
+                // Handle Touch ID authentication
+                me.authenticateTouchID(successFn, null, 'Please scan your fingerprint', true);
+            } else if(pass){
+                // Handle passcode authentication
+                me.authenticatePasscode(successFn, null, 'Please enter your passcode', true);
+            } else {
+                successFn();
+            }
+        } else {
+            // Show the welcome/setup view
+            me.showWelcomeView();*/
         }
     },
 
@@ -336,9 +379,10 @@ Ext.define('FW.controller.Main', {
         // Generate wallet passphrase and hex
         var p  = m.toWords().toString().replace(/,/gi, " "),
             h  = m.toHex();*/
-        var Web3 = require('web3');
-        var web3 = new Web3();
-        web3.setProvider(new web3.providers.HttpProvider("http://52.87.221.111:8545")); //ETH node goes here
+        //var Web3 = require('web3');
+        //var sm = localStorage;
+        var me = this;
+        var web3 = new Web3("http://52.87.221.111:8545");
 
         //web3 has built in functions to hash the data do not need cryptojs
         if (phrase)
@@ -346,10 +390,11 @@ Ext.define('FW.controller.Main', {
         else
             var ETHaddr = web3.eth.accounts.create();
         if (ETHaddr)
+            console.log(ETHaddr);
             me.setETHWalletAddress(ETHaddr, true);
         // Handle processing the callback
-        if (typeof callback === 'function')
-            callback(p);
+        //if (typeof callback === 'function')
+          //  callback(p);
     },
 
 
@@ -742,7 +787,7 @@ Ext.define('FW.controller.Main', {
             // Save current address info to statemanager
             sm.setItem('address', info.address)
             // Save the full wallet info
-            FW.WALLET_ADDRESS = info;
+            FW.ETHWALLET_ADDRESS = info;
             // Try to lookup settings panel and set/update address and label
             var cmp = Ext.getCmp('settingsPanel');
             if (cmp) {

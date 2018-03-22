@@ -1,2 +1,2 @@
 // @tag full-page
-// @require C:\Users\Jabo\Documents\GitHub\metawallet\app.js
+// @require /Users/jabo/Documents/GitHub/metawallet/metawallet/app.js
