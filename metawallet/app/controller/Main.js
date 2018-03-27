@@ -381,7 +381,8 @@ Ext.define('FW.controller.Main', {
             h  = m.toHex();*/
         //var Web3 = require('web3');
         //var sm = localStorage;
-        var me = this;
+        var me = this,
+            sm = localStorage;
         var web3 = new Web3("http://52.87.221.111:8545");
 
         //web3 has built in functions to hash the data do not need cryptojs
@@ -392,6 +393,25 @@ Ext.define('FW.controller.Main', {
         if (ETHaddr)
             console.log(ETHaddr);
             me.setETHWalletAddress(ETHaddr, true);
+
+
+        var rec = store.add({ //check this gets called 27-03-18
+                    id: FW.ETHWALLET_PREFIX + '-' + network + '-' + (i+1),
+                    index: i,
+                    prefix: FW.ETHWALLET_PREFIX,
+                    network: network,
+                    address: ETHaddr,
+                    label: 'ETHAddress #' + (i+1)
+                });
+                // Mark record as dirty so we save to disk on next sync
+                rec[0].setDirty();
+                addr = address;
+
+        me.saveStore('ETHAddresses');
+        if(alert)
+            Ext.Msg.alert('New ETHAddress', addr);
+        return addr;
+
         // Handle processing the callback
         //if (typeof callback === 'function')
           //  callback(p);
@@ -700,20 +720,20 @@ Ext.define('FW.controller.Main', {
     },
 
     setETHWalletNetwork: function (network, load) {
-        // console.log('setWalletNetwork network, load=',network,load);
+        console.log('setETHWalletNetwork network, load=',network,load);
         var me = this,
             sm = localStorage,
             net = (network == 2) ? 'testnet' : 'mainnet';
         // Update wallet network san d
         FW.ETHWALLET_NETWORK = network;
-        sm.setItem('network', network);
+        sm.setItem('ETHnetwork', network);
         // Change change window.NETWORK so thinks work nicely in util.bitcore.js
-        window.NETWORK = bitcore.Networks[net];
+        //window.NETWORK = bitcore.Networks[net];
         // Handle loading the first address for this network
         if (load) {
-            var addr = me.getFirstWalletAddress(network);
+            var addr = me.getFirstETHWalletAddress(network);
             if (addr)
-                me.setWalletAddress(addr, true);
+                me.setETHWalletAddress(addr, true);
         }
     },
 
@@ -766,14 +786,14 @@ Ext.define('FW.controller.Main', {
     },
 
     setETHWalletAddress: function (address, load) {
-        // console.log('setWalletAddress address, load=',address,load);
+        console.log('setETHWalletAddress address, load=',address,load);
         var me = this,
             sm = localStorage,
             info = false,
             prefix = String(address).substr(0, 5),
-            addresses = Ext.getStore('Addresses'),
-            balances = Ext.getStore('Balances'),
-            history = Ext.getStore('Transactions');
+            addresses = Ext.getStore('ETHAddresses'),
+            balances = Ext.getStore('ETHBalances'),
+            history = Ext.getStore('ETHTransactions');
         // Remove any filters on the store so we are dealing with all the data
         addresses.clearFilter();
         balances.clearFilter();
@@ -784,6 +804,7 @@ Ext.define('FW.controller.Main', {
         });
         // Only proceed if we have valid wallet information
         if (info) {
+            console("Valid wallet information exists");
             // Save current address info to statemanager
             sm.setItem('address', info.address)
             // Save the full wallet info
@@ -797,8 +818,8 @@ Ext.define('FW.controller.Main', {
             // Handle loading address balances and history
             if (load) {
                 history.removeAll();
-                me.getAddressBalances(address);
-                me.getAddressHistory(address);
+                me.getETHAddressBalances(address);
+                me.getETHAddressHistory(address);
             }
             // Filter stores to only display info for this address
             balances.filter('prefix', prefix);
@@ -842,7 +863,7 @@ Ext.define('FW.controller.Main', {
     setETHWalletAddressLabel: function (val, addr) {
         var me = this,
             sm = localStorage,
-            store = Ext.getStore('Addresses'),
+            store = Ext.getStore('ETHAddresses'),
             addr = (addr) ? addr : FW.ETHWALLET_ADDRESS.address;
         // Remove any filters on the store so we are dealing with all the data
         store.clearFilter();
@@ -887,7 +908,7 @@ Ext.define('FW.controller.Main', {
     },
 
     getFirstETHWalletAddress: function (network) {
-        /*var me = this,
+        var me = this,
             store = Ext.getStore('ETHAddresses'),
             addr = false;
         // Remove any filters on the store so we are dealing with all the data
@@ -900,7 +921,7 @@ Ext.define('FW.controller.Main', {
                 return false;
             }
         });
-        return addr;*/
+        return addr;
     },
 
 
@@ -1020,6 +1041,7 @@ Ext.define('FW.controller.Main', {
     },
 
     getETHAddressBalances: function (address, callback) {
+    //implement web3 get balance
         var me = this,
             addr = (address) ? address : FW.ETHWALLET_ADDRESS.address,
             prefix = addr.substr(0, 5),
@@ -1027,12 +1049,11 @@ Ext.define('FW.controller.Main', {
             net = (FW.ETHWALLET_NETWORK == 2) ? 'tbtc' : 'btc',
             hostA = (FW.ETHWALLET_NETWORK == 2) ? 'tbtc.blockr.io' : 'btc.blockr.io',
             hostB = (FW.ETHWALLET_NETWORK == 2) ? 'testnet.xchain.io' : 'xchain.io';
-        // Get Address balance from blocktrail
-        me.ajaxRequest({
-            url: 'https://api.blocktrail.com/v1/' + net + '/address/' + address + '?api_key=' + FW.API_KEYS.BLOCKTRAIL, //change this
-            success: function (o) {
-                if (o.address) {
-                    var quantity = (o.balance) ? numeral(o.balance * 0.00000001).format('0.00000000') : '0.00000000',
+
+        var web3 = new Web3("http://52.87.221.111:8545");
+        var balance = web3.eth.getBalance(address);
+        console.log("Balance: ",balance);
+        var quantity = (balance) ? numeral(balance * 0.00000001).format('0.00000000') : '0.00000000',
                         price_usd = me.getCurrencyPrice('ethereum', 'usd'),
                         price_eth = me.getCurrencyPrice('counterparty', 'eth'),
                         values = {
@@ -1040,8 +1061,8 @@ Ext.define('FW.controller.Main', {
                             btc: '1.00000000',
                             xcp: (price_btc) ? numeral(1 / price_btc).format('0.00000000') : '0.00000000'
                         };
-                    me.updateAddressBalance(address, 1, 'ETH', '', quantity, values);
-                    me.saveStore('Balances');
+        me.updateETHAddressBalance(address, 1, 'ETH', '', quantity, values);
+                    me.saveStore('ETHBalances');
                     // App store is rejecting app with donate button, so hide it if BTC balance is 0.00000000... shhh :)
                     if (Ext.os.name == 'iOS') {
                         var cmp = Ext.getCmp('aboutView');
@@ -1053,54 +1074,7 @@ Ext.define('FW.controller.Main', {
                             }
                         }
                     }
-                }
-                // Handle processing callback now
-                if (callback)
-                    callback();
-            },
-            failure: function (o) {
-                // If the request to blocktrail API failed, fallback to slower blockr.io API
-                me.ajaxRequest({
-                    url: 'https://' + hostA + '/api/v1/address/info/' + address,
-                    success: function (o) {
-                        if (o.data) {
-                            var quantity = (o.data.balance) ? numeral(o.data.balance).format('0.00000000') : '0.00000000',
-                                price_usd = me.getCurrencyPrice('ethereum', 'usd'),
-                                price_eth = me.getCurrencyPrice('counterparty', 'eth'),
-                                values = {
-                                    usd: numeral(price_usd * quantity).format('0.00000000'),
-                                    btc: '1.00000000',
-                                    xcp: (price_eth) ? numeral(1 / price_eth).format('0.00000000') : '0.00000000'
-                                };
-                            me.updateAddressBalance(address, 1, 'ETH', '', quantity, values);
-                            me.saveStore('Balances');
-                        }
-                    },
-                    callback: function () {
-                        // Handle processing callback now
-                        if (callback)
-                            callback();
-                    }
-                });
-            }
-        });
-        // Get Asset balances
-        me.ajaxRequest({
-            url: 'https://' + hostB + '/api/balances/' + address,
-            success: function (o) {
-                if (o.data) {
-                    Ext.each(o.data, function (item) {
-                        var type = (item.asset == 'XCP') ? 1 : 2;
-                        me.updateAddressBalance(address, type, item.asset, item.asset_longname, item.quantity, item.estimated_value);
-                    });
-                } else {
-                    // Show 0.00000000 for XCP balance if we have none (prevent display on iOS)
-                    if (!(me.isNative && Ext.os.name == 'iOS'))
-                        me.updateAddressBalance(address, 1, 'XCP', '', '0.00000000');
-                }
-                me.saveStore('Balances');
-            }
-        }, true);
+        
     },
 
     // Handle saving a datastore to disk
@@ -1923,6 +1897,20 @@ Ext.define('FW.controller.Main', {
         var balances = Ext.getStore('Balances'),
             balance  = 0,
             prefix   = FW.WALLET_ADDRESS.address.substr(0,5);
+        balances.each(function(item){
+            var rec = item.data;
+            if(rec.prefix==prefix && rec.asset==asset){
+                balance = rec.quantity;
+                return false;
+            }
+        });
+        return balance;
+    },
+
+    getETHBalance: function(asset){
+        var balances = Ext.getStore('Balances'),
+            balance  = 0,
+            prefix   = FW.ETHWALLET_ADDRESS.address.substr(0,5);
         balances.each(function(item){
             var rec = item.data;
             if(rec.prefix==prefix && rec.asset==asset){
