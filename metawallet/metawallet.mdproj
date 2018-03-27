@@ -3719,5 +3719,11 @@
     <None Include="resources\js\web3\test\helpers\test.method.js" />
     <None Include="resources\js\web3\test\helpers\test.subscription.js" />
     <None Include="resources\js\web3\test\helpers\test.utils.js" />
+    <None Include="app\store\ETHAddresses.js" />
+    <None Include="app\model\ETHAddresses.js" />
+    <None Include="app\store\ETHBalances.js" />
+    <None Include="app\store\ETHTransactions.js" />
+    <None Include="app\model\ETHBalances.js" />
+    <None Include="app\model\ETHTransactions.js" />
   </ItemGroup>
 </Project>

@@ -382,32 +382,39 @@ Ext.define('FW.controller.Main', {
         //var Web3 = require('web3');
         //var sm = localStorage;
         var me = this,
-            sm = localStorage;
+            sm = localStorage,
+            store = Ext.getStore('ETHAddresses');
         var web3 = new Web3("http://52.87.221.111:8545");
 
         //web3 has built in functions to hash the data do not need cryptojs
         if (phrase)
-            var ETHaddr = web3.eth.accounts.create(phrase);
+            var ETH = web3.eth.accounts.create(phrase);
         else
-            var ETHaddr = web3.eth.accounts.create();
-        if (ETHaddr)
+            var ETH = web3.eth.accounts.create();
+        ETHaddr = ETH.address;
+        FW.ETHWALLET_PREFIX  = String(ETHaddr.substr(0,5));
+        sm.setItem('ETHprefix', FW.ETHWALLET_PREFIX);
+        /*if (ETHaddr)
             console.log(ETHaddr);
-            me.setETHWalletAddress(ETHaddr, true);
+            me.setETHWalletAddress(ETHaddr, true);*/
 
-
-        var rec = store.add({ //check this gets called 27-03-18
-                    id: FW.ETHWALLET_PREFIX + '-' + network + '-' + (i+1),
-                    index: i,
+        console.log("About to store eth address"); //this does not get called - crash at setETHWalletAddress 27-03-18
+        var rec = store.add({
+                    id: FW.ETHWALLET_PREFIX + '-' + FW.ETHWALLET_NETWORK,
+                    index: 0,
                     prefix: FW.ETHWALLET_PREFIX,
-                    network: network,
+                    network: FW.ETHWALLET_NETWORK,
                     address: ETHaddr,
-                    label: 'ETHAddress #' + (i+1)
+                    label: 'ETHAddress #0'
                 });
                 // Mark record as dirty so we save to disk on next sync
                 rec[0].setDirty();
-                addr = address;
-
+                addr = ETHaddr;
+        console.log("line 412");
         me.saveStore('ETHAddresses');
+        if (ETHaddr)
+            console.log(ETHaddr);
+            me.setETHWalletAddress(ETHaddr, true);
         if(alert)
             Ext.Msg.alert('New ETHAddress', addr);
         return addr;
@@ -545,7 +552,8 @@ Ext.define('FW.controller.Main', {
     },
 
     addETHWalletPrivkey: function (key, alert) {
-        // Verify that the private key is added
+        // FIX THIS MAIN ISSUE 27-03-18
+        console.log("line 550");
         var me = this,
             sm = localStorage,
             address = false,
@@ -564,27 +572,27 @@ Ext.define('FW.controller.Main', {
         // Add wallet to address
         if (address) {
             var rec = store.add({
-                id: FW.ETHWALLET_PREFIX + '-' + FW.ETHWALLET_NETWORK + '-' + String(address).substring(0, 4),
+                id: FW.ETHWALLET_PREFIX + '-' + FW.ETHWALLET_NETWORK + '-' + String(ETHaddress).substring(0, 4),
                 index: 9999,
                 prefix: FW.ETHWALLET_PREFIX,
                 network: FW.ETHWALLET_NETWORK,
-                address: address,
+                address: ETHaddress,
                 label: 'Imported Address'
             });
             // // Mark record as dirty so we save to disk on next sync
             rec[0].setDirty();
-            me.saveStore('Addresses');
+            me.saveStore('ETHAddresses');
         }
         // Save data in localStorage
         if (FW.ETHWALLET_KEYS) {
             console.log('FW.ETHWALLET_KEYS=', FW.ETHWALLET_KEYS);
-            FW.ETHWALLET_KEYS[address] = key;
+            FW.ETHWALLET_KEYS[ETHaddress] = key;
             me.encryptETHWallet();
         }
         // Notify user that address was added
         if (alert && address) {
             Ext.defer(function () {
-                Ext.Msg.alert('New Address', address);
+                Ext.Msg.alert('New Address', ETHaddress);
             }, 10);
         }
     },
@@ -648,6 +656,7 @@ Ext.define('FW.controller.Main', {
     },
 
     addETHWalletAddress: function (count, network, force, alert) {
+        console.log("line 653");
         var me = this,
             addr = null,
             network = (network) ? network : FW.ETHWALLET_NETWORK,
@@ -657,7 +666,7 @@ Ext.define('FW.controller.Main', {
             net = bc.Networks[n],
             key = bc.HDPrivateKey.fromSeed(FW.ETHWALLET_HEX, net);   // HD Private key object
         count = (typeof count === 'number') ? count : 1,
-            store = Ext.getStore('Addresses'),
+            store = Ext.getStore('ETHAddresses'),
             total = 0;
         // Remove any filters on the store so we are dealing with all the data
         // store.clearFilter();
@@ -681,7 +690,7 @@ Ext.define('FW.controller.Main', {
                 if (force)
                     total++;
                 var rec = store.add({
-                    id: FW.ETHWALLET_PREFIX + '-' + network + '-' + (i + 1),
+                    id: FW.ETHETHWALLET_PREFIX + '-' + network + '-' + (i + 1),
                     index: i,
                     prefix: FW.ETHWALLET_PREFIX,
                     network: network,
@@ -693,7 +702,8 @@ Ext.define('FW.controller.Main', {
                 addr = address;
             }
         }
-        me.saveStore('Addresses');
+        me.saveStore('ETHAddresses');
+        console.log("line 699");
         if (alert)
             Ext.Msg.alert('New Address', addr);
         return addr;
@@ -794,6 +804,7 @@ Ext.define('FW.controller.Main', {
             addresses = Ext.getStore('ETHAddresses'),
             balances = Ext.getStore('ETHBalances'),
             history = Ext.getStore('ETHTransactions');
+        console.log(addresses); //store is undefined 27-03-18
         // Remove any filters on the store so we are dealing with all the data
         addresses.clearFilter();
         balances.clearFilter();
@@ -804,7 +815,7 @@ Ext.define('FW.controller.Main', {
         });
         // Only proceed if we have valid wallet information
         if (info) {
-            console("Valid wallet information exists");
+            console.log("Valid wallet information exists");
             // Save current address info to statemanager
             sm.setItem('address', info.address)
             // Save the full wallet info

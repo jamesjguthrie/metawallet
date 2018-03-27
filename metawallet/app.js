@@ -39,13 +39,19 @@ Ext.application({
         'Addresses',
         'Balances',
         'Transactions',
-        'MenuTree'
+        'MenuTree',
+        'ETHAddresses',
+        'ETHBalances',
+        'ETHTransactions'
     ],
 
     stores: [
         'Addresses',
         'Balances',
-        'Transactions'
+        'Transactions',
+        'ETHAddresses',
+        'ETHBalances',
+        'ETHTransactions'
     ],
 
     views: [

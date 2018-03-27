@@ -673,12 +673,14 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.controller.Main": [],
   "FW.model.Addresses": [],
   "FW.model.Balances": [],
+  "FW.model.ETHAddresses": [],
   "FW.model.MenuTree": [],
   "FW.model.Transactions": [],
   "FW.profile.Phone": [],
   "FW.profile.Tablet": [],
   "FW.store.Addresses": [],
   "FW.store.Balances": [],
+  "FW.store.ETHAddresses": [],
   "FW.store.Transactions": [],
   "FW.ux.AccordionList": [
     "Ext.AccordionList"
@@ -1462,12 +1464,14 @@ Ext.ClassManager.addNameAliasMappings({
   "FW.controller.Main": [],
   "FW.model.Addresses": [],
   "FW.model.Balances": [],
+  "FW.model.ETHAddresses": [],
   "FW.model.MenuTree": [],
   "FW.model.Transactions": [],
   "FW.profile.Phone": [],
   "FW.profile.Tablet": [],
   "FW.store.Addresses": [],
   "FW.store.Balances": [],
+  "FW.store.ETHAddresses": [],
   "FW.store.Transactions": [],
   "FW.ux.AccordionList": [
     "widget.accordionlist"
