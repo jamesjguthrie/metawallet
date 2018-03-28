@@ -132,6 +132,8 @@ $jscomp.iteratorFromArray = function(array, transform) {
     };
     return iter.next();
   }};
+  $jscomp.initSymbol();
+  $jscomp.initSymbolIterator();
   iter[Symbol.iterator] = function() {
     return iter;
   };
@@ -212,6 +214,8 @@ $jscomp.polyfill('Array.from', function(orig) {
       return x;
     };
     var result = [];
+    $jscomp.initSymbol();
+    $jscomp.initSymbolIterator();
     var iteratorFunction = arrayLike[Symbol.iterator];
     if (typeof iteratorFunction == 'function') {
       arrayLike = iteratorFunction.call(arrayLike);
@@ -293,6 +297,8 @@ $jscomp.polyfill('Array.prototype.values', function(orig) {
   return polyfill;
 }, 'es6', 'es3');
 $jscomp.makeIterator = function(iterable) {
+  $jscomp.initSymbolIterator();
+  $jscomp.initSymbol();
   $jscomp.initSymbolIterator();
   var iteratorFunction = iterable[Symbol.iterator];
   return iteratorFunction ? iteratorFunction.call(iterable) : $jscomp.arrayIterator(iterable);
@@ -761,6 +767,8 @@ $jscomp.polyfill('Map', function(NativeMap) {
       callback.call(opt_thisArg, entry[1], entry[0], this);
     }
   };
+  $jscomp.initSymbol();
+  $jscomp.initSymbolIterator();
   PolyfillMap.prototype[Symbol.iterator] = PolyfillMap.prototype.entries;
   var maybeGetEntry = function(map, key) {
     var id = getId(key);
@@ -1500,6 +1508,8 @@ $jscomp.polyfill('Set', function(NativeSet) {
     return this.map_.values();
   };
   PolyfillSet.prototype.keys = PolyfillSet.prototype.values;
+  $jscomp.initSymbol();
+  $jscomp.initSymbolIterator();
   PolyfillSet.prototype[Symbol.iterator] = PolyfillSet.prototype.values;
   PolyfillSet.prototype.forEach = function(callback, opt_thisArg) {
     var set = this;
@@ -29254,11 +29264,15 @@ Ext.cmd.derive('FW.model.Addresses', Ext.data.Model, {config:{fields:[{name:'id'
 Ext.cmd.derive('FW.model.Balances', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'integer'}, {name:'asset', type:'string'}, {name:'asset_longname', type:'string'}, {name:'display_name', type:'string'}, {name:'quantity', type:'string'}, {name:'estimated_value', type:'object'}], idProperty:'id', proxy:{type:'localstorage', id:'Balances'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'Balances'], 0);
 Ext.cmd.derive('FW.model.Transactions', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'string'}, {name:'hash', type:'string'}, {name:'asset', type:'string'}, {name:'quantity', type:'string'}, {name:'time', type:'string'}], idProperty:'id'}}, 0, 0, 0, 0, 0, 0, [FW.model, 'Transactions'], 0);
 Ext.cmd.derive('FW.model.MenuTree', Ext.data.Model, {config:{fields:[{name:'text', type:'string'}, {name:'icon', type:'string'}]}}, 0, 0, 0, 0, 0, 0, [FW.model, 'MenuTree'], 0);
+Ext.cmd.derive('FW.model.ETHAddresses', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'index', type:'int'}, {name:'network', type:'int'}, {name:'address', type:'string'}, {name:'label', type:'label'}], idProperty:'id', proxy:{type:'localstorage', id:'ETHAddresses', idProperty:'id'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ETHAddresses'], 0);
+Ext.cmd.derive('FW.model.ETHBalances', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'integer'}, {name:'asset', type:'string'}, {name:'asset_longname', type:'string'}, {name:'display_name', type:'string'}, {name:'quantity', type:'string'}, {name:'estimated_value', type:'object'}], idProperty:'id', proxy:{type:'localstorage', id:'ETHBalances'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ETHBalances'], 0);
+Ext.cmd.derive('FW.model.ETHTransactions', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'string'}, {name:'hash', type:'string'}, {name:'asset', type:'string'}, {name:'quantity', type:'string'}, {name:'time', type:'string'}], idProperty:'id'}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ETHTransactions'], 0);
 Ext.cmd.derive('FW.store.Addresses', Ext.data.Store, {config:{model:'FW.model.Addresses', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'Addresses'}, proxy:{type:'localstorage', id:'Addresses'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'Addresses'], 0);
 Ext.cmd.derive('FW.store.Balances', Ext.data.Store, {config:{model:'FW.model.Balances', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'Balances'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'Balances'], 0);
 Ext.cmd.derive('FW.store.Transactions', Ext.data.Store, {config:{model:'FW.model.Transactions', autoLoad:true, autoSync:true}}, 0, 0, 0, 0, 0, 0, [FW.store, 'Transactions'], 0);
-Ext.cmd.derive('FW.model.ETHAddresses', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'index', type:'int'}, {name:'network', type:'int'}, {name:'address', type:'string'}, {name:'label', type:'label'}], idProperty:'id', proxy:{type:'localstorage', id:'ETHAddresses', idProperty:'id'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ETHAddresses'], 0);
 Ext.cmd.derive('FW.store.ETHAddresses', Ext.data.Store, {config:{model:'FW.model.ETHAddresses', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'ETHAddresses'}, proxy:{type:'localstorage', id:'ETHAddresses'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'ETHAddresses'], 0);
+Ext.cmd.derive('FW.store.ETHBalances', Ext.data.Store, {config:{model:'FW.model.ETHBalances', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'ETHBalances'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'ETHBalances'], 0);
+Ext.cmd.derive('FW.store.ETHTransactions', Ext.data.Store, {config:{model:'FW.model.ETHTransactions', autoLoad:true, autoSync:true}}, 0, 0, 0, 0, 0, 0, [FW.store, 'ETHTransactions'], 0);
 Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   var me = this, sm = localStorage, vp = Ext.Viewport, wall = sm.getItem('wallet'), pass = sm.getItem('passcode');
   var ETHme = this, ETHsm = localStorage, ETHvp = Ext.ETHViewport, ETHwall = sm.getItem('ETHwallet'), ETHpass = sm.getItem('ETHpasscode');
@@ -29484,7 +29498,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     callback(p);
   }
 }, generateETHWallet:function(phrase, callback) {
-  var me = this, sm = localStorage, store = Ext.getStore('ETHAdresses');
+  var me = this, sm = localStorage, store = Ext.getStore('ETHAddresses');
   var web3 = new Web3('http://52.87.221.111:8545');
   if (phrase) {
     var ETH = web3.eth.accounts.create(phrase);
@@ -29709,7 +29723,6 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
 }, setETHWalletAddress:function(address, load) {
   console.log('setETHWalletAddress address, load\x3d', address, load);
   var me = this, sm = localStorage, info = false, prefix = String(address).substr(0, 5), addresses = Ext.getStore('ETHAddresses'), balances = Ext.getStore('ETHBalances'), history = Ext.getStore('ETHTransactions');
-  console.log(addresses);
   addresses.clearFilter();
   balances.clearFilter();
   addresses.each(function(rec) {
@@ -29718,7 +29731,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     }
   });
   if (info) {
-    console('Valid wallet information exists');
+    console.log('Valid wallet information exists');
     sm.setItem('address', info.address);
     FW.ETHWALLET_ADDRESS = info;
     var cmp = Ext.getCmp('settingsPanel');
@@ -29752,6 +29765,10 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   });
   store.sync();
   var cmp = Ext.getCmp('balancesView');
+  if (cmp) {
+    cmp.list.tb.tb.setTitle(val);
+  }
+  var cmp = Ext.getCmp('ETHbalancesView');
   if (cmp) {
     cmp.list.tb.tb.setTitle(val);
   }
@@ -29878,24 +29895,129 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     }
     me.saveStore('Balances');
   }}, true);
-}, getETHAddressBalances:function(address, callback) {
-  var me = this, addr = address ? address : FW.ETHWALLET_ADDRESS.address, prefix = addr.substr(0, 5), store = Ext.getStore('Balances'), net = FW.ETHWALLET_NETWORK == 2 ? 'tbtc' : 'btc', hostA = FW.ETHWALLET_NETWORK == 2 ? 'tbtc.blockr.io' : 'btc.blockr.io', hostB = FW.ETHWALLET_NETWORK == 2 ? 'testnet.xchain.io' : 'xchain.io';
-  var web3 = new Web3('http://52.87.221.111:8545');
-  var balance = web3.eth.getBalance(address);
-  console.log('Balance: ', balance);
-  var quantity = balance ? numeral(balance * 1.0E-8).format('0.00000000') : '0.00000000', price_usd = me.getCurrencyPrice('ethereum', 'usd'), price_eth = me.getCurrencyPrice('counterparty', 'eth'), values = {usd:numeral(parseFloat(price_usd * quantity)).format('0.00000000'), btc:'1.00000000', xcp:price_btc ? numeral(1 / price_btc).format('0.00000000') : '0.00000000'};
-  me.updateETHAddressBalance(address, 1, 'ETH', '', quantity, values);
-  me.saveStore('ETHBalances');
-  if (Ext.os.name == 'iOS') {
-    var cmp = Ext.getCmp('aboutView');
-    if (cmp) {
-      if (quantity == '0.00000000') {
-        cmp.donate.hide();
-      } else {
-        cmp.donate.show();
+}, callWeb3GetBalance:function(address) {
+  function $jscomp$async$generator() {
+    var $jscomp$generator$state = 0;
+    var balance;
+    var $jscomp$generator$next$arg25;
+    var web3;
+    function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
+      while (1) {
+        switch($jscomp$generator$state) {
+          case 0:
+            web3 = new Web3('http://52.87.221.111:8545');
+            $jscomp$generator$state = 1;
+            return {value:web3.eth.getBalance(address), done:false};
+          case 1:
+            if (!($jscomp$generator$action$arg == 1)) {
+              $jscomp$generator$state = 2;
+              break;
+            }
+            $jscomp$generator$state = -1;
+            throw $jscomp$generator$throw$arg;
+          case 2:
+            $jscomp$generator$next$arg25 = $jscomp$generator$next$arg;
+            balance = $jscomp$generator$next$arg25;
+            $jscomp$generator$state = -1;
+            return {value:balance, done:true};
+            $jscomp$generator$state = -1;
+          default:
+            return {value:undefined, done:true};
+        }
       }
     }
+    var iterator = {next:function(arg) {
+      return $jscomp$generator$impl(0.0, arg, undefined);
+    }, 'throw':function(arg) {
+      return $jscomp$generator$impl(1.0, undefined, arg);
+    }, 'return':function(arg) {
+      throw Error('Not yet implemented');
+    }};
+    $jscomp.initSymbolIterator();
+    iterator[Symbol.iterator] = function() {
+      return this;
+    };
+    return iterator;
   }
+  return $jscomp.executeAsyncGenerator($jscomp$async$generator());
+}, getETHAddressBalances:function(address, callback) {
+  var $jscomp$async$this = this;
+  function $jscomp$async$generator() {
+    var $jscomp$generator$state = 0;
+    var values;
+    var price_eth;
+    var price_usd;
+    var quantity;
+    var balance;
+    var $jscomp$generator$next$arg26;
+    var hostB;
+    var hostA;
+    var net;
+    var store;
+    var prefix;
+    var addr;
+    var me;
+    function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
+      while (1) {
+        switch($jscomp$generator$state) {
+          case 0:
+            me = $jscomp$async$this;
+            addr = address ? address : FW.ETHWALLET_ADDRESS.address;
+            prefix = addr.substr(0, 5);
+            store = Ext.getStore('Balances');
+            net = FW.ETHWALLET_NETWORK == 2 ? 'tbtc' : 'btc';
+            hostA = FW.ETHWALLET_NETWORK == 2 ? 'tbtc.blockr.io' : 'btc.blockr.io';
+            hostB = FW.ETHWALLET_NETWORK == 2 ? 'testnet.xchain.io' : 'xchain.io';
+            console.log('address is: ', addr);
+            $jscomp$generator$state = 1;
+            return {value:me.callWeb3GetBalance(addr), done:false};
+          case 1:
+            if (!($jscomp$generator$action$arg == 1)) {
+              $jscomp$generator$state = 2;
+              break;
+            }
+            $jscomp$generator$state = -1;
+            throw $jscomp$generator$throw$arg;
+          case 2:
+            $jscomp$generator$next$arg26 = $jscomp$generator$next$arg;
+            balance = $jscomp$generator$next$arg26;
+            console.log('Balance is: ', balance);
+            quantity = balance ? numeral(balance * 1.0E-8).format('0.00000000') : '0.00000000';
+            price_usd = me.getCurrencyPrice('ethereum', 'usd');
+            price_eth = me.getCurrencyPrice('counterparty', 'eth');
+            values = {usd:numeral(parseFloat(price_usd * quantity)).format('0.00000000'), eth:'1.00000000', xcp:price_eth ? numeral(1 / price_eth).format('0.00000000') : '0.00000000'};
+            me.updateETHAddressBalance(address, 1, 'ETH', '', quantity, values);
+            me.saveStore('ETHBalances');
+            if (Ext.os.name == 'iOS') {
+              var cmp = Ext.getCmp('aboutView');
+              if (cmp) {
+                if (quantity == '0.00000000') {
+                  cmp.donate.hide();
+                } else {
+                  cmp.donate.show();
+                }
+              }
+            }
+            $jscomp$generator$state = -1;
+          default:
+            return {value:undefined, done:true};
+        }
+      }
+    }
+    var iterator = {next:function(arg) {
+      return $jscomp$generator$impl(0.0, arg, undefined);
+    }, 'throw':function(arg) {
+      return $jscomp$generator$impl(1.0, undefined, arg);
+    }, 'return':function(arg) {
+      throw Error('Not yet implemented');
+    }};
+    $jscomp.initSymbolIterator();
+    iterator[Symbol.iterator] = function() {
+      return this;
+    };
+    return iterator;
+  }
+  return $jscomp.executeAsyncGenerator($jscomp$async$generator());
 }, saveStore:function(id) {
   var store = Ext.getStore(id);
   if (store) {
@@ -30014,6 +30136,80 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   }
   return false;
 }, getAddressHistory:function(address, callback) {
+  var me = this;
+  me.getTransactionHistory(address, callback);
+}, getTransactionHistory:function(address, callback) {
+  var me = this, net = FW.WALLET_NETWORK == 2 ? 'tbtc' : 'btc', hostA = FW.WALLET_NETWORK == 2 ? 'tbtc.blockr.io' : 'btc.blockr.io', hostB = FW.WALLET_NETWORK == 2 ? 'testnet.xchain.io' : 'xchain.io', types = ['bets', 'broadcasts', 'burns', 'dividends', 'issuances', 'orders', 'sends', 'mempool'];
+  me.ajaxRequest({url:'https://api.blocktrail.com/v1/' + net + '/address/' + address + '/transactions?limit\x3d100\x26sort_dir\x3ddesc\x26api_key\x3d' + FW.API_KEYS.BLOCKTRAIL, success:function(o) {
+    Ext.each(o.data, function(item, idx) {
+      var time = item.block_height ? moment(item.time, ['YYYY-MM-DDTH:m:s']).unix() : null, value = numeral(item.estimated_value * 1.0E-8).format('0.00000000');
+      if (item.inputs[0].address == address) {
+        value = '-' + value;
+      }
+      me.updateTransactionHistory(address, item.hash, 'send', 'BTC', null, value, time);
+    });
+    me.saveStore('Transactions');
+    if (callback) {
+      callback();
+    }
+  }, failure:function(o) {
+    me.ajaxRequest({url:'https://' + hostA + '/api/v1/address/txs/' + address, success:function(o) {
+      if (o.data && o.data.txs) {
+        Ext.each(o.data.txs, function(item, idx) {
+          if (idx < 99) {
+            var time = moment(item.time_utc, ['YYYY-MM-DDTH:m:s']).unix();
+            me.updateTransactionHistory(address, item.tx, 'send', 'BTC', null, item.amount, time);
+          }
+        });
+        me.saveStore('Transactions');
+      }
+      if (callback) {
+        callback();
+      }
+    }, failure:function(o) {
+      if (callback) {
+        callback();
+      }
+    }});
+  }});
+  Ext.each(types, function(type) {
+    me.ajaxRequest({url:'https://' + hostB + '/api/' + type + '/' + address, success:function(o) {
+      if (o.data) {
+        if (String(type).substring(type.length - 1) == 's') {
+          type = String(type).substring(0, type.length - 1);
+        }
+        Ext.each(o.data, function(item) {
+          var asset = item.asset, quantity = item.quantity, tstamp = item.timestamp, tx_type = type;
+          if (tx_type == 'mempool') {
+            tx_type = String(item.tx_type).toLowerCase();
+            tstamp = null;
+          }
+          if (tx_type == 'bet') {
+            asset = 'XCP';
+            quantity = item.wager_quantity;
+          } else {
+            if (tx_type == 'burn') {
+              asset = 'BTC';
+              quantity = item.burned;
+            } else {
+              if (tx_type == 'order') {
+                asset = item.get_asset, quantity = item.get_quantity;
+              } else {
+                if (tx_type == 'send') {
+                  if (item.source == address) {
+                    quantity = '-' + quantity;
+                  }
+                }
+              }
+            }
+          }
+          me.updateTransactionHistory(address, item.tx_hash, tx_type, asset, item.asset_longname, quantity, tstamp);
+        });
+        me.saveStore('Transactions');
+      }
+    }});
+  });
+}, getETHAddressHistory:function(address, callback) {
   var me = this;
   me.getTransactionHistory(address, callback);
 }, getTransactionHistory:function(address, callback) {
@@ -30405,7 +30601,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   });
   return balance;
 }, getETHBalance:function(asset) {
-  var balances = Ext.getStore('Balances'), balance = 0, prefix = FW.ETHWALLET_ADDRESS.address.substr(0, 5);
+  var balances = Ext.getStore('ETHBalances'), balance = 0, prefix = FW.ETHWALLET_ADDRESS.address.substr(0, 5);
   balances.each(function(item) {
     var rec = item.data;
     if (rec.prefix == prefix && rec.asset == asset) {
@@ -30639,7 +30835,7 @@ Ext.cmd.derive('FW.view.TopToolbar', Ext.Container, {config:{layout:'fit', docke
     me.tb.setTitle(cfg.title);
   }
 }}, 0, ['fw-toptoolbar'], ['component', 'container', 'fw-toptoolbar'], {'component':true, 'container':true, 'fw-toptoolbar':true}, ['widget.fw-toptoolbar'], 0, [FW.view, 'TopToolbar'], 0);
-Ext.cmd.derive('FW.view.BalancesList', Ext.dataview.List, {config:{id:'balancesList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'Balances', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{display_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{[this.numberFormat(values)]}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
+Ext.cmd.derive('FW.view.ETHBalancesList', Ext.dataview.List, {config:{id:'balancesList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'Balances', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{display_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{[this.numberFormat(values)]}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
 {toUpper:function(val) {
   return String(val).toUpperCase();
 }, numberFormat:function(values) {
@@ -30684,7 +30880,7 @@ Ext.cmd.derive('FW.view.BalancesList', Ext.dataview.List, {config:{id:'balancesL
   });
   Ext.dataview.List.prototype.initialize.call(this);
   me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
-}}, 0, ['fw-balanceslist'], ['component', 'container', 'dataview', 'list', 'fw-balanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-balanceslist':true}, ['widget.fw-balanceslist'], 0, [FW.view, 'BalancesList'], 0);
+}}, 0, ['fw-balanceslist'], ['component', 'container', 'dataview', 'list', 'fw-balanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-balanceslist':true}, ['widget.fw-balanceslist'], 0, [FW.view, 'ETHBalancesList'], 0);
 Ext.cmd.derive('FW.view.phone.TokenInfo', Ext.Container, {config:{layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'Information', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'container', layout:'hbox', margin:'0 0 5 0', defaults:{margin:'0 0 0 0'}, items:[{xtype:'fieldset', width:65, layout:{type:'vbox', pack:'center', align:'center'}, items:[{xtype:'image', itemId:'image', src:'resources/images/wallet.png', 
 width:48, height:48}]}, {xtype:'fieldset', margin:'0 0 0 5', flex:1, items:[{labelAlign:'top', xtype:'textfield', readOnly:true, label:'Name', itemId:'asset', value:''}]}]}, {xtype:'container', layout:'hbox', itemId:'actionButtons', margin:'0 0 5 0', defaults:{xtype:'button', flex:1}, items:[{text:'Send', ui:'confirm', itemId:'send', iconCls:'fa fa-paper-plane'}, {text:'Receive', ui:'action', itemId:'receive', iconCls:'fa fa-qrcode', margin:'0 0 0 5'}]}, {xtype:'fieldset', margin:'0 0 5 0', defaults:{xtype:'textfield', 
 labelWidth:80, readOnly:true, cls:'no-label-ellipsis'}, items:[{label:'My Balance', itemId:'balance'}, {label:'Total Supply', itemId:'supply'}, {label:'USD Price', itemId:'usd'}, {label:'BTC Price', itemId:'btc'}, {label:'XCP Price', itemId:'xcp'}, {label:'Divisible', itemId:'divisible'}, {label:'Locked', itemId:'locked'}, {label:'Issuer', itemId:'issuer'}, {label:'Owner', itemId:'owner'}, {label:'Description', itemId:'description'}, {xtype:'fw-actionfield', cls:'x-last-field', label:'Website', itemId:'website', 
@@ -30818,7 +31014,7 @@ Ext.cmd.derive('FW.view.Balances', Ext.Container, {config:{id:'balancesView', la
   var me = this;
   me.main = FW.app.getController('Main');
   me.add({xclass:'FW.view.' + me.main.deviceType + '.Balances'});
-  me.list = me.down('fw-balanceslist');
+  me.list = me.down('fw-ethbalanceslist');
   me.info = me.down('fw-tokeninfo');
   me.cards = me.down('[itemId\x3dbalances]');
   Ext.Container.prototype.initialize.call(this);
@@ -32077,6 +32273,52 @@ Ext.cmd.derive('FW.view.AddressList', Ext.dataview.List, {config:{id:'addressLis
     }
   }});
 }}, 0, ['fw-addresslist'], ['component', 'container', 'dataview', 'list', 'fw-addresslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-addresslist':true}, ['widget.fw-addresslist'], 0, [FW.view, 'AddressList'], 0);
+Ext.cmd.derive('FW.view.BalancesList', Ext.dataview.List, {config:{id:'balancesList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'Balances', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{display_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{[this.numberFormat(values)]}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
+{toUpper:function(val) {
+  return String(val).toUpperCase();
+}, numberFormat:function(values) {
+  var fmt = '0,0', qty = values.quantity;
+  if (/\./.test(qty) || values.asset == 'BTC') {
+    fmt += '.00000000';
+  }
+  return numeral(qty).format(fmt);
+}, priceFormat:function(values) {
+  var txt = '';
+  if (values.estimated_value && values.estimated_value.usd != '0.00') {
+    var txt = '$' + numeral(values.estimated_value.usd).format('0,0.00');
+  }
+  return txt;
+}}), listeners:{itemtap:function(cmp, index, target, record, e, eOpts) {
+  Ext.getCmp('balancesView').showTokenInfo(record.data);
+}}, items:[{xtype:'fw-toptoolbar', title:'My Balances', refresh:true, onRefresh:function() {
+  var me = Ext.getCmp('balancesList');
+  if (me.refreshing) {
+    return;
+  }
+  me.refreshing = true;
+  me.getStore().removeAll();
+  me.setMasked({xtype:'loadmask', message:'Refreshing Balances', showAnimation:'fadeIn', indicator:true});
+  var cb = function() {
+    me.setMasked(false);
+    me.refreshing = false;
+  };
+  me.main.getAddressBalances(FW.WALLET_ADDRESS.address, cb);
+}}]}, initialize:function() {
+  var me = this;
+  me.main = FW.app.getController('Main');
+  me.tb = me.down('fw-toptoolbar');
+  if (me.main.deviceType == 'phone') {
+    me.tb.menuBtn.show();
+  }
+  me.tb.tb.setTitle(FW.WALLET_ADDRESS.label);
+  var title = me.tb.tb.element.down('.x-title');
+  title.setMaxWidth(220);
+  title.on('tap', function() {
+    me.main.showQRCodeView({text:FW.WALLET_ADDRESS.address});
+  });
+  Ext.dataview.List.prototype.initialize.call(this);
+  me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
+}}, 0, ['fw-balanceslist'], ['component', 'container', 'dataview', 'list', 'fw-balanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-balanceslist':true}, ['widget.fw-balanceslist'], 0, [FW.view, 'BalancesList'], 0);
 Ext.cmd.derive('FW.view.Passcode', Ext.Panel, {config:{fullscreen:true, id:'passcodeView', centered:true, modal:true, scroll:false, width:300, height:350, value:'', layout:{type:'vbox', pack:'center', align:'stretch'}, items:[{xtype:'toolbar', itemId:'toolbar', docked:'top', cls:'fw-panel', title:'Please enter your passcode'}, {xtype:'container', itemId:'indicator', margin:'0 5 0 5', height:44, html:'\x3cdiv class\x3d"passcode-indicator"\x3e\x3c/div\x3e'}, {flex:1, layout:{type:'vbox', align:'stretch'}, 
 itemId:'buttons', defaults:{flex:1, xtype:'container', layout:{type:'hbox', align:'stretch'}, defaults:{xtype:'button', flex:1, margin:'5 5 5 5'}}}]}, initialize:function() {
   var me = this, cfg = me.config, vp = Ext.Viewport, items = [];
@@ -32164,7 +32406,7 @@ contentItemTpl:'\x3cdiv class\x3d"fw-sidemenu"\x3e\x3cdiv class\x3d"float-left f
     o.handler();
   }
 }}, 0, ['fw-menutree'], ['component', 'container', 'accordionlist', 'fw-menutree'], {'component':true, 'container':true, 'accordionlist':true, 'fw-menutree':true}, ['widget.fw-menutree'], 0, [FW.view, 'MenuTree'], 0);
-Ext.cmd.derive('FW.view.MainMenu', Ext.Menu, {config:{layout:'fit', width:211, cls:'fw-panel fw-mainmenu', items:[{title:'FreeWallet', xtype:'toolbar', height:37, border:0, docked:'top', defaults:{ui:'plain', iconMask:true}, items:[{xtype:'spacer'}, {iconCls:'fa fa-list', handler:function() {
+Ext.cmd.derive('FW.view.MainMenu', Ext.Menu, {config:{layout:'fit', width:211, cls:'fw-panel fw-mainmenu', items:[{title:'MetaWallet', xtype:'toolbar', height:37, border:0, docked:'top', defaults:{ui:'plain', iconMask:true}, items:[{xtype:'spacer'}, {iconCls:'fa fa-list', handler:function() {
   Ext.Viewport.hideMenu('right');
 }}]}, {xtype:'fw-menutree'}], storeData:[{text:'Change Wallet Address', icon:'fa-edit', leaf:true, handler:function() {
   FW.app.getController('Main').showAddressListView();
@@ -32506,9 +32748,9 @@ Ext.cmd.derive('FW.view.Callback', Ext.Panel, {config:{id:'callbackView', cls:'n
     me.icon.hide();
   }
 }}, 0, ['fw-callback'], ['component', 'container', 'panel', 'fw-callback'], {'component':true, 'container':true, 'panel':true, 'fw-callback':true}, ['widget.fw-callback'], 0, [FW.view, 'Callback'], 0);
-Ext.application({name:'FW', controllers:['Main', 'Counterparty'], profiles:['Phone', 'Tablet'], models:['Addresses', 'Balances', 'Transactions', 'MenuTree'], stores:['Addresses', 'Balances', 'Transactions', 'ETHAddresses'], views:['Main', 'Settings', 'MessageBox', 'AddressList', 'Balances', 'BalancesList', 'TransactionsList', 'Passcode', 'About', 'History', 'TopToolbar', 'MenuTree', 'MainMenu', 'TokenInfo', 'TransactionInfo', 'Tools', 'ToolsList', 'Broadcast', 'Exchange', 'Issuance', 'Send', 'Receive', 
-'Sign', 'Welcome', 'Passphrase', 'Scan', 'QRCode', 'TransactionPriority', 'Bet', 'Dividend', 'Callback'], icon:{57:'resources/icons/wallet-icon-57.png', 72:'resources/icons/wallet-icon-72.png', 114:'resources/icons/wallet-icon-114.png', 144:'resources/icons/wallet-icon-144.png'}, isIconPrecomposed:true, startupImage:{'320x460':'resources/startup/320x460.jpg', '640x920':'resources/startup/640x920.png', '768x1004':'resources/startup/768x1004.png', '748x1024':'resources/startup/748x1024.png', '1536x2008':'resources/startup/1536x2008.png', 
-'1496x2048':'resources/startup/1496x2048.png'}, onUpdated:function() {
+Ext.application({name:'FW', controllers:['Main', 'Counterparty'], profiles:['Phone', 'Tablet'], models:['Addresses', 'Balances', 'Transactions', 'MenuTree', 'ETHAddresses', 'ETHBalances', 'ETHTransactions'], stores:['Addresses', 'Balances', 'Transactions', 'ETHAddresses', 'ETHBalances', 'ETHTransactions'], views:['Main', 'Settings', 'MessageBox', 'AddressList', 'Balances', 'BalancesList', 'ETHBalancesList', 'TransactionsList', 'Passcode', 'About', 'History', 'TopToolbar', 'MenuTree', 'MainMenu', 
+'TokenInfo', 'TransactionInfo', 'Tools', 'ToolsList', 'Broadcast', 'Exchange', 'Issuance', 'Send', 'Receive', 'Sign', 'Welcome', 'Passphrase', 'Scan', 'QRCode', 'TransactionPriority', 'Bet', 'Dividend', 'Callback'], icon:{57:'resources/icons/wallet-icon-57.png', 72:'resources/icons/wallet-icon-72.png', 114:'resources/icons/wallet-icon-114.png', 144:'resources/icons/wallet-icon-144.png'}, isIconPrecomposed:true, startupImage:{'320x460':'resources/startup/320x460.jpg', '640x920':'resources/startup/640x920.png', 
+'768x1004':'resources/startup/768x1004.png', '748x1024':'resources/startup/748x1024.png', '1536x2008':'resources/startup/1536x2008.png', '1496x2048':'resources/startup/1496x2048.png'}, onUpdated:function() {
   FW.app.getController('Main').clearAppCache();
   Ext.Msg.confirm('Application Update', 'This application has just successfully been updated to the latest version. Reload now?', function(buttonId) {
     if (buttonId === 'yes') {

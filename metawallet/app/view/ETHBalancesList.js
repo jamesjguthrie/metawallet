@@ -1,21 +1,21 @@
-/*
+﻿/*
  * BalancesList.js - View
  * 
  * Display list of balances
  */
 
-Ext.define('FW.view.BalancesList', {
+Ext.define('FW.view.ETHBalancesList', {
     extend: 'Ext.dataview.List',
-    xtype: 'fw-balanceslist',
+    xtype: 'fw-ethbalanceslist',
 
     config: {
-        id: 'balancesList',
-        cls: 'fw-panel fw-balanceslist x-list-nopadding',
+        id: 'ETHbalancesList',
+        cls: 'fw-panel fw-ethbalanceslist x-list-nopadding',
         bgCls: 'fw-background',
         infinite: true,
         striped: true,
         disableSelection: false,
-        store: 'Balances',
+        store: 'ETHBalances',
         emptyText: '',
         itemHeight: 60,
         itemTpl: new Ext.XTemplate(
@@ -38,7 +38,7 @@ Ext.define('FW.view.BalancesList', {
                 numberFormat: function(values){
                     var fmt = '0,0',
                         qty = values.quantity;
-                    if(/\./.test(qty) || values.asset=='BTC')
+                    if(/\./.test(qty) || values.asset=='ETH')
                         fmt += '.00000000';
                     return numeral(qty).format(fmt);
                 },
@@ -57,10 +57,10 @@ Ext.define('FW.view.BalancesList', {
         },
         items:[{
             xtype: 'fw-toptoolbar',
-            title: 'My Balances',
+            title: 'ETH Balances',
             refresh: true,
             onRefresh: function(){
-                var me = Ext.getCmp('balancesList');
+                var me = Ext.getCmp('ETHbalancesList');
                 if(me.refreshing)
                     return;
                 me.refreshing = true;
@@ -76,7 +76,7 @@ Ext.define('FW.view.BalancesList', {
                     me.setMasked(false);
                     me.refreshing = false;
                 };
-                me.main.getAddressBalances(FW.WALLET_ADDRESS.address, cb);
+                me.main.getAddressBalances(FW.ETHWALLET_ADDRESS.address, cb);
             }
         }]
     },
@@ -90,10 +90,10 @@ Ext.define('FW.view.BalancesList', {
         if(me.main.deviceType=='phone')
             me.tb.menuBtn.show();
         // Display address label in titlebar, wrap at 220 pixels, display address on tap
-        me.tb.tb.setTitle(FW.WALLET_ADDRESS.label);
+        me.tb.tb.setTitle(FW.ETHWALLET_ADDRESS.label);
         var title = me.tb.tb.element.down('.x-title');
         title.setMaxWidth(220);
-        title.on('tap',function(){ me.main.showQRCodeView({ text: FW.WALLET_ADDRESS.address }); });
+        title.on('tap',function(){ me.main.showQRCodeView({ text: FW.ETHWALLET_ADDRESS.address }); });
         // Call parent function
         me.callParent();
         // Handle sorting currencies by type and name

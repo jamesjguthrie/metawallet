@@ -11,6 +11,9 @@ Ext.define('FW.view.phone.Balances', {
         layout: 'card',
         items: [{
             xtype: 'fw-balanceslist'
+        },
+        {
+            xtype: 'fw-ethbalanceslist'
         },{
             xtype: 'fw-tokeninfo'
         }]

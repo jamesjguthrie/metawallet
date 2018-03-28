@@ -27,8 +27,9 @@ Ext.define('FW.view.Balances', {
         me.add({ xclass:'FW.view.' + me.main.deviceType + '.Balances' });
         // Setup some aliases to the various components
         me.list  = me.down('fw-balanceslist');
-        me.info  = me.down('fw-tokeninfo');
-        me.cards = me.down('[itemId=balances]');
+        me.list  = me.down('fw-ethbalanceslist');
+        //me.info  = me.down('fw-tokeninfo');
+        //me.cards = me.down('[itemId=balances]');
         // Call parent function
         me.callParent();
     },

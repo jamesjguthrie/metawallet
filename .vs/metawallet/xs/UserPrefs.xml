@@ -1,11 +1,16 @@
 ﻿<Properties StartupConfiguration="{508430AB-CFD1-41AD-92B8-06EA8B8CE810}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="metawallet/app.js">
+  <MonoDevelop.Ide.Workbench ActiveDocument="metawallet/app/view/tablet/Balances.js">
     <Files>
-      <File FileName="metawallet/app/controller/Main.js" Line="386" Column="41" />
+      <File FileName="metawallet/app/controller/Main.js" Line="872" Column="5" />
       <File FileName="metawallet/app.json" Line="115" Column="24" />
       <File FileName="metawallet/resources/js/web3/dist/web3.js" Line="1" Column="1" />
-      <File FileName="metawallet/app.js" Line="43" Column="24" />
+      <File FileName="metawallet/app.js" Line="64" Column="27" />
       <File FileName="metawallet/resources/js/web3/README.md" Line="1" Column="1" />
+      <File FileName="metawallet/app/view/Balances.js" Line="29" Column="28" />
+      <File FileName="metawallet/app/view/BalancesList.js" Line="18" Column="17" />
+      <File FileName="metawallet/app/view/ETHBalancesList.js" Line="22" Column="30" />
+      <File FileName="metawallet/app/view/phone/Balances.js" Line="13" Column="27" />
+      <File FileName="metawallet/app/view/tablet/Balances.js" Line="13" Column="27" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" />

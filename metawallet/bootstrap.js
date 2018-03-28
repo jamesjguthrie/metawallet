@@ -674,6 +674,8 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.model.Addresses": [],
   "FW.model.Balances": [],
   "FW.model.ETHAddresses": [],
+  "FW.model.ETHBalances": [],
+  "FW.model.ETHTransactions": [],
   "FW.model.MenuTree": [],
   "FW.model.Transactions": [],
   "FW.profile.Phone": [],
@@ -681,6 +683,8 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.store.Addresses": [],
   "FW.store.Balances": [],
   "FW.store.ETHAddresses": [],
+  "FW.store.ETHBalances": [],
+  "FW.store.ETHTransactions": [],
   "FW.store.Transactions": [],
   "FW.ux.AccordionList": [
     "Ext.AccordionList"
@@ -694,6 +698,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.view.Broadcast": [],
   "FW.view.Callback": [],
   "FW.view.Dividend": [],
+  "FW.view.ETHBalancesList": [],
   "FW.view.Exchange": [],
   "FW.view.History": [],
   "FW.view.Issuance": [],
@@ -1465,6 +1470,8 @@ Ext.ClassManager.addNameAliasMappings({
   "FW.model.Addresses": [],
   "FW.model.Balances": [],
   "FW.model.ETHAddresses": [],
+  "FW.model.ETHBalances": [],
+  "FW.model.ETHTransactions": [],
   "FW.model.MenuTree": [],
   "FW.model.Transactions": [],
   "FW.profile.Phone": [],
@@ -1472,6 +1479,8 @@ Ext.ClassManager.addNameAliasMappings({
   "FW.store.Addresses": [],
   "FW.store.Balances": [],
   "FW.store.ETHAddresses": [],
+  "FW.store.ETHBalances": [],
+  "FW.store.ETHTransactions": [],
   "FW.store.Transactions": [],
   "FW.ux.AccordionList": [
     "widget.accordionlist"
@@ -1493,6 +1502,9 @@ Ext.ClassManager.addNameAliasMappings({
     "widget.fw-callback"
   ],
   "FW.view.Dividend": [],
+  "FW.view.ETHBalancesList": [
+    "widget.fw-ethbalanceslist"
+  ],
   "FW.view.Exchange": [],
   "FW.view.History": [],
   "FW.view.Issuance": [],

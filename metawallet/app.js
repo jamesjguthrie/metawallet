@@ -61,6 +61,7 @@ Ext.application({
         'AddressList',
         'Balances',
         'BalancesList',
+        'ETHBalancesList',
         'TransactionsList',
         'Passcode',
         'About',

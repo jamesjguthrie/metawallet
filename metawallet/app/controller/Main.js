@@ -804,7 +804,6 @@ Ext.define('FW.controller.Main', {
             addresses = Ext.getStore('ETHAddresses'),
             balances = Ext.getStore('ETHBalances'),
             history = Ext.getStore('ETHTransactions');
-        console.log(addresses); //store is undefined 27-03-18
         // Remove any filters on the store so we are dealing with all the data
         addresses.clearFilter();
         balances.clearFilter();
@@ -865,7 +864,7 @@ Ext.define('FW.controller.Main', {
         // Update the label above the address balances list
         var cmp = Ext.getCmp('balancesView');
         if(cmp)
-            cmp.list.tb.tb.setTitle(val);
+            //cmp.list.tb.tb.setTitle(val);
         var cmp = Ext.getCmp('transactionsList');
         if(cmp)
             cmp.tb.tb.setTitle(val);
@@ -1050,8 +1049,14 @@ Ext.define('FW.controller.Main', {
             }
         }, true);            
     },
+   
+    callWeb3GetBalance: async function(address) {
+        var web3 = new Web3("http://52.87.221.111:8545");
+        var balance = await(web3.eth.getBalance(address)); ///this runs async and might be a problem. check later. 27-03-18
+        return balance;
+    },
 
-    getETHAddressBalances: function (address, callback) {
+    getETHAddressBalances: async function (address, callback) {
     //implement web3 get balance
         var me = this,
             addr = (address) ? address : FW.ETHWALLET_ADDRESS.address,
@@ -1060,32 +1065,30 @@ Ext.define('FW.controller.Main', {
             net = (FW.ETHWALLET_NETWORK == 2) ? 'tbtc' : 'btc',
             hostA = (FW.ETHWALLET_NETWORK == 2) ? 'tbtc.blockr.io' : 'btc.blockr.io',
             hostB = (FW.ETHWALLET_NETWORK == 2) ? 'testnet.xchain.io' : 'xchain.io';
-
-        var web3 = new Web3("http://52.87.221.111:8545");
-        var balance = web3.eth.getBalance(address);
-        console.log("Balance: ",balance);
-        var quantity = (balance) ? numeral(balance * 0.00000001).format('0.00000000') : '0.00000000',
+        console.log("address is: ", addr);
+        var balance = await(me.callWeb3GetBalance(addr));
+        console.log("Balance is: ",balance);
+                        var quantity = (balance) ? numeral(balance * 0.00000001).format('0.00000000') : '0.00000000',
                         price_usd = me.getCurrencyPrice('ethereum', 'usd'),
                         price_eth = me.getCurrencyPrice('counterparty', 'eth'),
                         values = {
                             usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
-                            btc: '1.00000000',
-                            xcp: (price_btc) ? numeral(1 / price_btc).format('0.00000000') : '0.00000000'
+                            eth: '1.00000000',
+                            xcp: (price_eth) ? numeral(1 / price_eth).format('0.00000000') : '0.00000000'
                         };
-        me.updateETHAddressBalance(address, 1, 'ETH', '', quantity, values);
-                    me.saveStore('ETHBalances');
-                    // App store is rejecting app with donate button, so hide it if BTC balance is 0.00000000... shhh :)
-                    if (Ext.os.name == 'iOS') {
-                        var cmp = Ext.getCmp('aboutView');
-                        if (cmp) {
-                            if (quantity == '0.00000000') {
-                                cmp.donate.hide();
-                            } else {
+                        me.updateETHAddressBalance(address, 1, 'ETH', '', quantity, values);
+                        me.saveStore('ETHBalances');
+                        // App store is rejecting app with donate button, so hide it if ETH balance is 0.00000000... shhh :)
+                        if (Ext.os.name == 'iOS') {
+                            var cmp = Ext.getCmp('aboutView');
+                            if (cmp) {
+                                if (quantity == '0.00000000') {
+                                    cmp.donate.hide();
+                                } else {
                                 cmp.donate.show();
+                                }
                             }
                         }
-                    }
-        
     },
 
     // Handle saving a datastore to disk
@@ -1305,6 +1308,108 @@ Ext.define('FW.controller.Main', {
 
     // Handle getting address history information
     getAddressHistory: function(address, callback){
+        var me = this;
+        // Define callback function to call after getting BTC transaction history
+        // var cb = function(){ me.getCounterpartyTransactionHistory(address, callback); }
+        // Handle getting Bitcoin transaction data
+        me.getTransactionHistory(address, callback);
+    },
+
+    // Handle getting Bitcoin transaction history
+    getTransactionHistory: function(address, callback){
+        var me    = this,
+            net   = (FW.WALLET_NETWORK==2) ? 'tbtc' : 'btc',
+            hostA = (FW.WALLET_NETWORK==2) ? 'tbtc.blockr.io' : 'btc.blockr.io',
+            hostB = (FW.WALLET_NETWORK==2) ? 'testnet.xchain.io' : 'xchain.io',
+            types = ['bets','broadcasts','burns','dividends','issuances','orders','sends','mempool'];
+        // Get BTC transaction history from blocktrail
+        me.ajaxRequest({
+            url: 'https://api.blocktrail.com/v1/' + net + '/address/' + address + '/transactions?limit=100&sort_dir=desc&api_key=' + FW.API_KEYS.BLOCKTRAIL,
+            success: function(o){
+                Ext.each(o.data, function(item,idx){
+                    var time  = (item.block_height) ? moment(item.time,["YYYY-MM-DDTH:m:s"]).unix() : null,
+                        value = numeral((item.estimated_value) * 0.00000001).format('0.00000000')
+                    if(item.inputs[0].address==address)
+                        value = '-' + value;
+                    me.updateTransactionHistory(address, item.hash, 'send', 'BTC', null, value , time);
+                });
+                me.saveStore('Transactions');
+                // Handle processing callback now
+                if(callback)
+                    callback();
+            },
+            failure: function(o){
+                // If the request to blocktrail API failed, fallback to slower blockr.io API
+                me.ajaxRequest({
+                    url: 'https://' + hostA + '/api/v1/address/txs/' + address,
+                    success: function(o){
+                        if(o.data && o.data.txs){
+                            Ext.each(o.data.txs, function(item,idx){
+                                // Only pay attention to the last 100 transactions
+                                if(idx<99){
+                                    var time = moment(item.time_utc,["YYYY-MM-DDTH:m:s"]).unix();
+                                    me.updateTransactionHistory(address, item.tx, 'send', 'BTC', null, item.amount, time);
+                                }
+                            });
+                            me.saveStore('Transactions');
+                        }
+                        // Handle processing callback now
+                        if(callback)
+                            callback();
+                    },
+                    failure: function(o){
+                        // Handle processing callback now
+                        if(callback)
+                            callback();
+
+                    }
+                });
+
+            }
+        });        
+        // Loop through transaction types and get latest transactions
+        Ext.each(types, function(type){
+            me.ajaxRequest({
+                url: 'https://' + hostB + '/api/' + type + '/' + address,
+                success: function(o){
+                    if(o.data){
+                        // Strip trailing s off type to make it singular
+                        if(String(type).substring(type.length-1)=='s')
+                            type = String(type).substring(0,type.length-1);
+                        // Loop through data and add to transaction list
+                        Ext.each(o.data, function(item){
+                            var asset    = item.asset,
+                                quantity = item.quantity,
+                                tstamp   = item.timestamp,
+                                tx_type  = type;
+                            // Set type from mempool data, and reset timestamp, so things show as pending
+                            if(tx_type=='mempool'){
+                                tx_type = String(item.tx_type).toLowerCase();
+                                tstamp  = null;
+                            }
+                            if(tx_type=='bet'){
+                                asset    = 'XCP';
+                                quantity = item.wager_quantity;
+                            } else if(tx_type=='burn'){
+                                asset    = 'BTC';
+                                quantity = item.burned;
+                            } else if(tx_type=='order'){
+                                asset    = item.get_asset,
+                                quantity = item.get_quantity;
+                            } else if(tx_type=='send'){
+                                if(item.source==address)
+                                    quantity = '-' + quantity;
+                            }
+                            me.updateTransactionHistory(address, item.tx_hash, tx_type, asset, item.asset_longname, quantity, tstamp);
+                        });
+                        me.saveStore('Transactions');
+                    }
+                }
+            });
+        });        
+    },
+
+    getETHAddressHistory: function(address, callback){
         var me = this;
         // Define callback function to call after getting BTC transaction history
         // var cb = function(){ me.getCounterpartyTransactionHistory(address, callback); }
@@ -1919,7 +2024,7 @@ Ext.define('FW.controller.Main', {
     },
 
     getETHBalance: function(asset){
-        var balances = Ext.getStore('Balances'),
+        var balances = Ext.getStore('ETHBalances'),
             balance  = 0,
             prefix   = FW.ETHWALLET_ADDRESS.address.substr(0,5);
         balances.each(function(item){
