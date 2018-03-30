@@ -26,8 +26,8 @@ Ext.define('FW.view.Balances', {
         // Add view based on device type
         me.add({ xclass:'FW.view.' + me.main.deviceType + '.Balances' });
         // Setup some aliases to the various components
-        me.list  = me.down('fw-balanceslist');
-        me.list  = me.down('fw-ethbalanceslist');
+        me.cards  = me.down('fw-balanceslist');
+        me.cards  = me.down('fw-ethbalanceslist');
         //me.info  = me.down('fw-tokeninfo');
         //me.cards = me.down('[itemId=balances]');
         // Call parent function

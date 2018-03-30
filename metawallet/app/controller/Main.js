@@ -78,8 +78,8 @@ Ext.define('FW.controller.Main', {
                 cpSSL: true                             // ETH node SSL Enabled (true=https, false=http)
             },
             ETHtestnet: {
-                cpHost: 'public.coindaddy.io',          // Counterparty Host
-                cpPort: 14001,                          // Counterparty Port
+                cpHost: '52.87.221.111',          // Counterparty Host
+                cpPort: 8545,                          // Counterparty Port
                 cpUser: 'rpc',                          // Counterparty Username
                 cpPass: '1234',                         // Counterparty Password
                 cpSSL: true                             // Counterparty SSL Enabled (true=https, false=http)
@@ -2096,6 +2096,16 @@ Ext.define('FW.controller.Main', {
         },true);
 
 
+    },
+
+    broadcastETHTransaction: function(network, tx, callback){
+        var me  = this;
+        var web3 = new Web3("http://52.87.221.111:8545");
+        web3.eth.sendTransaction({data: tx}, function(err, transactionHash) {
+            if (!err)
+                console.log(transactionHash);
+                callback(transactionHash);
+        });
     },
 
     // Handle updating misc network info (currency, fee, network info)

@@ -10,7 +10,7 @@ Ext.define('FW.view.ETHBalancesList', {
 
     config: {
         id: 'ETHbalancesList',
-        cls: 'fw-panel fw-ethbalanceslist x-list-nopadding',
+        cls: 'fw-panel fw-balanceslist x-list-nopadding',
         bgCls: 'fw-background',
         infinite: true,
         striped: true,
