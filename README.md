@@ -6,10 +6,12 @@ MetaWallet communicates with AWS-based nodes. At this time, 2nd April '18, there
 ### Bitcoin node
 
 52.87.221.111:8544
+Authenticated by --rpcuser and --rpcpass
 
 ### Ethereum node
 
 52.87.221.111:8545
+Currently no auth as geth does not support --rpcuser
 
 ##	Build Instructions
 
@@ -23,3 +25,7 @@ MetaWallet communicates with AWS-based nodes. At this time, 2nd April '18, there
 
 4)	Launch local server:
 	sencha web start - or use Visual Studio shortcut under 'Project' menu
+
+##	To do
+
+Implement Node interaction authentication layer
