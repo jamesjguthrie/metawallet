@@ -699,6 +699,8 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.view.Callback": [],
   "FW.view.Dividend": [],
   "FW.view.ETHBalancesList": [],
+  "FW.view.ETHSend": [],
+  "FW.view.ETHTools": [],
   "FW.view.Exchange": [],
   "FW.view.History": [],
   "FW.view.Issuance": [],
@@ -1505,6 +1507,8 @@ Ext.ClassManager.addNameAliasMappings({
   "FW.view.ETHBalancesList": [
     "widget.fw-ethbalanceslist"
   ],
+  "FW.view.ETHSend": [],
+  "FW.view.ETHTools": [],
   "FW.view.Exchange": [],
   "FW.view.History": [],
   "FW.view.Issuance": [],

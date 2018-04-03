@@ -54,35 +54,35 @@ Ext.define('FW.controller.Main', {
         // Define default server/host settings
         FW.SERVER_INFO    = {
             mainnet: {
-                cpHost: 'public.coindaddy.io',          // Counterparty Host
-                cpPort: 4001,                           // Counterparty Port
-                cpUser: 'rpc',                          // Counterparty Username
-                cpPass: '1234',                         // Counterparty Password
-                cpSSL: true                             // Counterparty SSL Enabled (true=https, false=http)
+                cpHost: '52.87.221.111',          // BTC Host
+                cpPort: 8544,                           // BTC Port
+                cpUser: 'metawallet',                   // BTC Username
+                cpPass: 'pass',                         // BTC Password
+                cpSSL: true                             // BTC SSL Enabled (true=https, false=http)
             },
             testnet: {
-                cpHost: 'public.coindaddy.io',          // Counterparty Host
-                cpPort: 14001,                          // Counterparty Port
-                cpUser: 'rpc',                          // Counterparty Username
-                cpPass: '1234',                         // Counterparty Password
-                cpSSL: true                             // Counterparty SSL Enabled (true=https, false=http)
+                cpHost: '52.87.221.111',          // BTC Host
+                cpPort: 8544,                          // BTC Port
+                cpUser: 'rpc',                          // BTC Username
+                cpPass: '1234',                         // BTC Password
+                cpSSL: true                             // BTC SSL Enabled (true=https, false=http)
             }                           
         };
 
         FW.ETHSERVER_INFO = {
             ETHmainnet: {
-                cpHost: '52.87.221.111',                // Our ETH node
+                cpHost: '52.87.221.111',                // ETH Host
                 cpPort: 8545,                           // ETH port
-                cpUser: 'rpc',                          // Username - may need to change
-                cpPass: '1234',                         // Password - may need to change
+                cpUser: 'rpc',                          // Username - not currently used Geth doesnt support
+                cpPass: '1234',                         // Password - as above
                 cpSSL: true                             // ETH node SSL Enabled (true=https, false=http)
             },
             ETHtestnet: {
-                cpHost: '52.87.221.111',          // Counterparty Host
-                cpPort: 8545,                          // Counterparty Port
-                cpUser: 'rpc',                          // Counterparty Username
-                cpPass: '1234',                         // Counterparty Password
-                cpSSL: true                             // Counterparty SSL Enabled (true=https, false=http)
+                cpHost: '52.87.221.111',                // ETH Host
+                cpPort: 8545,                           // ETH port
+                cpUser: 'rpc',                          // Username - not currently used Geth doesnt support
+                cpPass: '1234',                         // Password - as above
+                cpSSL: true                             // ETH node SSL Enabled (true=https, false=http)
             }
         };
 
@@ -344,6 +344,7 @@ Ext.define('FW.controller.Main', {
         // Generate wallet passphrase and hex
         var p  = m.toWords().toString().replace(/,/gi, " "),
             h  = m.toHex();
+        console.log("BTC key ",h);
         // Save the wallet hex so we can use when adding the wallet addresses
         FW.WALLET_HEX = h.toString();
         // Generate ARC4-based PRNG that is autoseeded using the
@@ -369,36 +370,24 @@ Ext.define('FW.controller.Main', {
     },
 
     generateETHWallet: function (phrase, callback) {
-        /*var me = this,
-            sm = localStorage,
-            m = new Mnemonic(128);
-        // If passphrase was specified, use it
-        if (phrase)
-            web3.eth.accounts.create(phrase);
-        // Generate wallet passphrase and hex
-        // Generate wallet passphrase and hex
-        var p  = m.toWords().toString().replace(/,/gi, " "),
-            h  = m.toHex();*/
-        //var Web3 = require('web3');
-        //var sm = localStorage;
+        
         var me = this,
             sm = localStorage,
             store = Ext.getStore('ETHAddresses');
+
         var web3 = new Web3("http://52.87.221.111:8545");
 
-        //web3 has built in functions to hash the data do not need cryptojs
-        if (phrase)
-            var ETH = web3.eth.accounts.create(phrase);
-        else
-            var ETH = web3.eth.accounts.create();
-        ETHaddr = ETH.address;
-        FW.ETHWALLET_PREFIX  = String(ETHaddr.substr(0,5));
+        var ETH = web3.eth.accounts.create();
+        var ETHprivkey = ETH.privateKey;
+        console.log("ETHprivkey ",ETHprivkey);
+        var ETHaddr = ETH.address;
+        FW.ETHWALLET_PREFIX  = String(ETHprivkey.substr(0,5));
         sm.setItem('ETHprefix', FW.ETHWALLET_PREFIX);
         /*if (ETHaddr)
             console.log(ETHaddr);
             me.setETHWalletAddress(ETHaddr, true);*/
 
-        console.log("About to store eth address"); //this does not get called - crash at setETHWalletAddress 27-03-18
+        console.log("About to store eth address");
         var rec = store.add({
                     id: FW.ETHWALLET_PREFIX + '-' + FW.ETHWALLET_NETWORK,
                     index: 0,
@@ -552,23 +541,13 @@ Ext.define('FW.controller.Main', {
     },
 
     addETHWalletPrivkey: function (key, alert) {
-        // FIX THIS MAIN ISSUE 27-03-18
         console.log("line 550");
         var me = this,
             sm = localStorage,
             address = false,
-            bc = bitcore, //use web3 implement here 20/03/2018
             store = Ext.getStore('ETHAddresses'),
             n = (FW.ETHWALLET_NETWORK == 2) ? 'testnet' : 'mainnet',
-            force = (force) ? true : false,
-            net = bc.Networks[n];
-        try {
-            privkey = new bc.PrivateKey.fromWIF(key);
-            pubkey = privkey.toPublicKey();
-            address = pubkey.toAddress(net).toString();
-        } catch (e) {
-            console.log('error : ', e);
-        }
+            force = (force) ? true : false;
         // Add wallet to address
         if (address) {
             var rec = store.add({
@@ -2193,6 +2172,16 @@ Ext.define('FW.controller.Main', {
                 me.cbError(msg, cb);
             }
         });
+    },
+
+    ETHSend: function(destination, amount, gas, privateKey, callback){
+        var transactionObject = {'to': destination,
+                                'value': amount,
+                                'gas': gas
+        }
+        var web3 = new Web3("http://52.87.221.111:8545");
+        var signedtx = web3.eth.accounts.signTransaction(transactionObject, privateKey);
+        web3.sendSignedTransaction(signedtx);
     },
 
 

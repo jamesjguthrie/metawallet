@@ -1,7 +1,7 @@
 ﻿<Properties StartupConfiguration="{508430AB-CFD1-41AD-92B8-06EA8B8CE810}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="metawallet/app/store/Addresses.js">
+  <MonoDevelop.Ide.Workbench ActiveDocument="metawallet/app/view/tablet/Balances.js">
     <Files>
-      <File FileName="metawallet/app/controller/Main.js" Line="2168" Column="11" />
+      <File FileName="metawallet/app/controller/Main.js" Line="2177" Column="12" />
       <File FileName="metawallet/app.json" Line="115" Column="24" />
       <File FileName="metawallet/resources/js/web3/dist/web3.js" Line="1" Column="1" />
       <File FileName="metawallet/app.js" Line="64" Column="27" />
@@ -12,7 +12,10 @@
       <File FileName="metawallet/app/view/tablet/Balances.js" Line="18" Column="22" />
       <File FileName="metawallet/app/view/About.js" Line="65" Column="1" />
       <File FileName="metawallet/app/model/Addresses.js" Line="23" Column="1" />
-      <File FileName="metawallet/app/store/Addresses.js" Line="1" Column="1" />
+      <File FileName="metawallet/app/store/Addresses.js" Line="21" Column="10" />
+      <File FileName="metawallet/app/view/Send.js" Line="395" Column="27" />
+      <File FileName="metawallet/app/view/ETHSend.js" Line="396" Column="24" />
+      <File FileName="metawallet/app/view/ETHTools.js" Line="7" Column="2" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" />
@@ -20,6 +23,7 @@
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <AuthorInfo Name="Jabo" Email="james@guthrie.scot" Copyright="" Company="" Trademark="" />
   <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.metawallet PreferredExecutionTarget="MonoDevelop.Default" />
 </Properties>

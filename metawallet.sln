@@ -11,4 +11,19 @@ Global
 		{508430AB-CFD1-41AD-92B8-06EA8B8CE810}.Default|Any CPU.ActiveCfg = Default|Any CPU
 		{508430AB-CFD1-41AD-92B8-06EA8B8CE810}.Default|Any CPU.Build.0 = Default|Any CPU
 	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.TextStylePolicy = $1
+		$1.inheritsSet = null
+		$1.scope = application/javascript
+		$0.TextStylePolicy = $2
+		$2.inheritsSet = null
+		$2.scope = text/x-json
+		$0.JSONFormattingPolicy = $3
+		$3.AutoStructureCompletion = True
+		$3.BracePositions = SemiExpanded
+		$3.FormatOnPaste = True
+		$3.scope = text/x-json
+		description = MetaWallet for McAfee Crypto Team
+	EndGlobalSection
 EndGlobal
