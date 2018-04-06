@@ -56,11 +56,18 @@ Ext.define('FW.view.MainMenu', {
                 FW.app.getController('Main').generalQRCodeScan();
             }
         },{
-            text: 'Send',
+            text: 'BTC Send',
             icon: 'fa-paper-plane',
             leaf: true,
             handler: function(){
                 FW.app.getController('Main').showTool('send',{ reset: true });
+            }
+        },{
+            text: 'ETH Send',
+            icon: 'fa-paper-plane',
+            leaf: true,
+            handler: function(){
+                FW.app.getController('Main').showTool('ETHsend',{ reset: true });
             }
         },{
             text: 'Receive',

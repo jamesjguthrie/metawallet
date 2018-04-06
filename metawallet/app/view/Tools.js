@@ -17,6 +17,7 @@ Ext.define('FW.view.Tools', {
         'FW.view.Issuance',
         'FW.view.OTCMarket',
         'FW.view.Send',
+        'FW.view.ETHSend',
         'FW.view.Sign'
     ],
 
@@ -62,6 +63,7 @@ Ext.define('FW.view.Tools', {
 
     // Define some quick aliases for showing the different views
     showSendTool:       function(cfg){ this.showView('sendView','FW.view.Send',cfg);  },
+    showETHSendTool:    function(cfg){ this.showView('ETHsendView','FW.view.ETHSend',cfg);  },
     showIssueTool:      function(cfg){ this.showView('issuanceView','FW.view.Issuance',cfg);  },
     showBroadcastTool:  function(cfg){ this.showView('broadcastView','FW.view.Broadcast',cfg);  },
     showExchangeTool:   function(cfg){ this.showView('exchangeView','FW.view.Exchange',cfg);  },

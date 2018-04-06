@@ -77,6 +77,7 @@ Ext.application({
         'Exchange',
         'Issuance',
         'Send',
+        'ETHSend',
         'Receive',
         'Sign',
         'Welcome',

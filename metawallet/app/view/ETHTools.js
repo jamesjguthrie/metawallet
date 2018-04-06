@@ -22,7 +22,7 @@ Ext.define('FW.view.ETHTools', {
     ],
 
     config: {
-        id: 'toolsView',
+        id: 'ETHtoolsView',
         layout: 'card',
         items:[]
     },
@@ -32,7 +32,7 @@ Ext.define('FW.view.ETHTools', {
         // Setup alias to main controller
         me.main  = FW.app.getController('Main');
         // Add view based on device type
-        me.add({ xclass:'FW.view.' + me.main.deviceType + '.Tools' });
+        me.add({ xclass:'FW.view.' + me.main.deviceType + '.ETHTools' });
         // Setup some aliases to the various components
         me.list  = me.down('fw-toolslist');
         me.cards = me.down('[itemId=tools]');
@@ -62,7 +62,7 @@ Ext.define('FW.view.ETHTools', {
     },
 
     // Define some quick aliases for showing the different views
-    showSendTool:       function(cfg){ this.showView('sendView','FW.view.ETHSend',cfg);  },
+    showETHSendTool:        function(cfg){ this.showView('ETHsendView','FW.view.ETHSend',cfg);  },
     showIssueTool:      function(cfg){ this.showView('issuanceView','FW.view.Issuance',cfg);  },
     showBroadcastTool:  function(cfg){ this.showView('broadcastView','FW.view.Broadcast',cfg);  },
     showExchangeTool:   function(cfg){ this.showView('exchangeView','FW.view.Exchange',cfg);  },

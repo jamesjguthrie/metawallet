@@ -9,13 +9,13 @@ Ext.define('FW.view.ETHSend', {
     extend: 'Ext.form.Panel',
 
     config: {
-        id: 'sendView',
+        id: 'ETHsendView',
         layout: 'vbox',
         scrollable: 'vertical',
         cls: 'fw-panel',
         items:[{
             xtype: 'fw-toptoolbar',
-            title: 'Send',
+            title: 'ETH Send',
             menu: true
         },{
             xtype: 'container',
@@ -40,13 +40,13 @@ Ext.define('FW.view.ETHSend', {
                     items:[{
                         xtype: 'image',
                         itemId: 'image',
-                        src: 'resources/images/icons/btc.png',
+                        src: 'resources/images/icons/eth.png',
                         width: 48,
                         height: 48,
                         listeners: {
                             // When user taps the currency icon, treat as if they had tapped the currency field
                             tap: function(cmp, value){
-                                var me = Ext.getCmp('sendView');
+                                var me = Ext.getCmp('ETHsendView');
                                 me.asset.showPicker(cmp);
                             }
                         }
@@ -64,7 +64,7 @@ Ext.define('FW.view.ETHSend', {
                         store: 'Balances',
                         displayField: 'display_name',
                         valueField: 'asset',
-                        value: 'BTC',
+                        value: 'ETH',
                         defaultTabletPickerConfig: {
                             cls: 'fw-currency-picker',
                             itemTpl: new Ext.XTemplate(
@@ -104,8 +104,8 @@ Ext.define('FW.view.ETHSend', {
                         listeners: {
                             // When currency changes, update currency image and balance
                             change: function(cmp, value){
-                                var me   = Ext.getCmp('sendView'),
-                                    step = (value=='BTC') ? 0.01 : 1;
+                                var me   = Ext.getCmp('ETHsendView'),
+                                    step = (value=='ETH') ? 0.01 : 1;
                                 me.amount.setValue(0);
                                 me.amount.setStepValue(step);
                                 me.updateImage(value);
@@ -130,7 +130,7 @@ Ext.define('FW.view.ETHSend', {
                     name: 'destination',
                     iconCls: 'fa fa-qrcode',
                     handler: function(){
-                        var view = Ext.getCmp('sendView');
+                        var view = Ext.getCmp('ETHsendView');
                         FW.app.getController('Main').scanQRCode(view);
                     }
                 },{
@@ -152,7 +152,7 @@ Ext.define('FW.view.ETHSend', {
                         change: function(cmp, newVal, oldVal){
                             // console.log('change old,new=',oldVal,newVal);
                             if(newVal!=oldVal){
-                                var me  = Ext.getCmp('sendView'),
+                                var me  = Ext.getCmp('ETHsendView'),
                                     cur = me.asset.getValue();
                                 if(newVal=='')
                                     newVal = 0;
@@ -182,11 +182,11 @@ Ext.define('FW.view.ETHSend', {
                         // Handle detecting amount changes and updating the price
                         change: function(cmp, newVal, oldVal){
                             if(newVal!=oldVal){
-                                var me  = Ext.getCmp('sendView'),
+                                var me  = Ext.getCmp('ETHsendView'),
                                     cur = me.asset.getValue();
                                 // Handle updating price
                                 if(!me.price.isDisabled() && me.tokenInfo && me.tokenInfo.estimated_value.btc!='0.00000000'){
-                                    var price_usd = me.main.getCurrencyPrice('bitcoin','usd');
+                                    var price_usd = me.main.getCurrencyPrice('ethereum','usd');
                                     // Calculate price via ((asset_btc_price * quantity) * current_btc_price)
                                     // We do this because it is more accurate than using the asset USD value
                                     var price = (me.tokenInfo.estimated_value.btc *  numeral(newVal).value()) * price_usd;
@@ -208,7 +208,7 @@ Ext.define('FW.view.ETHSend', {
                 iconCls: 'fa fa-send',
                 ui: 'confirm',
                 handler: function(btn){
-                    Ext.getCmp('sendView').validate();
+                    Ext.getCmp('ETHsendView').validate();
                 }
             }]
         }]
@@ -255,7 +255,7 @@ Ext.define('FW.view.ETHSend', {
             me.priority.reset();
         }
         // Set asset and update asset field value
-        var asset = (cfg.asset) ? cfg.asset : 'BTC';
+        var asset = (cfg.asset) ? cfg.asset : 'ETH';
         me.asset.setValue(asset);
         // Get aset value and update image and balance (do this so asset and icon always match)
         var val = me.asset.getValue();
@@ -269,15 +269,16 @@ Ext.define('FW.view.ETHSend', {
     // Handle getting information on a specific token
     getTokenInfo: function(asset){
         var me = this;
-        if(asset=='BTC'){
-            var price_usd = me.main.getCurrencyPrice('bitcoin','usd'),
-                price_btc = me.main.getCurrencyPrice('counterparty','btc');
+        price_eth = 1;
+        if(asset=='ETH'){
+            var price_usd = me.main.getCurrencyPrice('ethereum','usd'),
+                price_btc = me.main.getCurrencyPrice('counterparty','eth');
             me.tokenInfo = {
-                asset: 'BTC',
+                asset: 'ETH',
                 estimated_value : {
-                    btc: 1.00000000,
+                    ETH: 1.00000000,
                     usd: price_usd,
-                    xcp: (price_btc) ? numeral(1 / price_btc).format('0.00000000') : '0.00000000'
+                    xcp: (price_eth) ? numeral(1 / price_eth).format('0.00000000') : '0.00000000'
                 }
             };
             me.price.enable();
@@ -303,8 +304,8 @@ Ext.define('FW.view.ETHSend', {
             src = 'resources/images/wallet.png';
         if(asset)
             src = 'https://xchain.io/icon/' + asset.toUpperCase() + '.png';
-        if(asset=='BTC')
-            src = 'resources/images/icons/btc.png';
+        if(asset=='ETH')
+            src = 'resources/images/icons/eth.png';
         me.image.setSrc(src);
     },
 
@@ -312,8 +313,8 @@ Ext.define('FW.view.ETHSend', {
     // Handle looking up asset balance and updating field
     updateBalance: function(asset){
         var me      = this,
-            store   = Ext.getStore('Balances'),
-            prefix  = FW.WALLET_ADDRESS.address.substr(0,5);
+            store   = Ext.getStore('ETHBalances'),
+            prefix  = FW.ETHWALLET_ADDRESS.address.substr(0,5);
             balance = 0,
             values  = false,
             format  = '0,0';
@@ -345,7 +346,7 @@ Ext.define('FW.view.ETHSend', {
 
 
     // Handle validating the send data and sending the send
-    validate: function(){
+    validate: function(){ //probably change these for gwei
         var me      = this,
             vals    = me.getValues(),
             dest    = vals.destination,
@@ -393,7 +394,7 @@ Ext.define('FW.view.ETHSend', {
             };
             // Convert amount to satoshis
             amt_sat = (/\./.test(vals.available)) ? amt_sat : String(vals.amount).replace(/\,/g,'');
-            me.main.ETHSend(FW.WALLET_NETWORK, FW.WALLET_ADDRESS.address, vals.destination, vals.asset, amt_sat, fee_sat, cb);
+            me.main.ETHSend(vals.destination, amt_sat, fee_sat, cb);
         }
         // Confirm action with user
         var asset = (me.tokenInfo.asset_longname && me.tokenInfo.asset_longname!='') ? me.tokenInfo.asset_longname : me.tokenInfo.asset;

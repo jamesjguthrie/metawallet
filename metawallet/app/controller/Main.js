@@ -328,6 +328,8 @@ Ext.define('FW.controller.Main', {
             tools.showReceiveTool(cfg);
         if(tool=='send')
             tools.showSendTool(cfg);
+        if(tool=='ETHsend')
+            tools.showETHSendTool(cfg);
         if(tool=='sign')
             tools.showSignTool(cfg);
 
@@ -375,10 +377,10 @@ Ext.define('FW.controller.Main', {
             sm = localStorage,
             store = Ext.getStore('ETHAddresses');
 
-        var web3 = new Web3("http://52.87.221.111:8545");
+        web3 = new Web3("http://52.87.221.111:8545");
 
         var ETH = web3.eth.accounts.create();
-        var ETHprivkey = ETH.privateKey;
+        ETHprivkey = ETH.privateKey; //basically global variable, probably very insecure, will our security implementations make it ok?
         console.log("ETHprivkey ",ETHprivkey);
         var ETHaddr = ETH.address;
         FW.ETHWALLET_PREFIX  = String(ETHprivkey.substr(0,5));
@@ -1030,9 +1032,9 @@ Ext.define('FW.controller.Main', {
     },
    
     callWeb3GetBalance: async function(address) {
-        var web3 = new Web3("http://52.87.221.111:8545");
-        var balance = await(web3.eth.getBalance(address)); ///this runs async and might be a problem. check later. 27-03-18
-        return balance;
+        //var web3 = new Web3("http://52.87.221.111:8545");
+        var balance = await(web3.eth.getBalance(address));
+        return web3.utils.fromWei(balance,'ether');
     },
 
     getETHAddressBalances: async function (address, callback) {
@@ -1045,29 +1047,41 @@ Ext.define('FW.controller.Main', {
             hostA = (FW.ETHWALLET_NETWORK == 2) ? 'tbtc.blockr.io' : 'btc.blockr.io',
             hostB = (FW.ETHWALLET_NETWORK == 2) ? 'testnet.xchain.io' : 'xchain.io';
         console.log("address is: ", addr);
-        var balance = await(me.callWeb3GetBalance(addr));
-        console.log("Balance is: ",balance);
-                        var quantity = (balance) ? numeral(balance * 0.00000001).format('0.00000000') : '0.00000000',
-                        price_usd = me.getCurrencyPrice('ethereum', 'usd'),
-                        price_eth = me.getCurrencyPrice('counterparty', 'eth'),
-                        values = {
-                            usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
-                            eth: '1.00000000',
-                            xcp: (price_eth) ? numeral(1 / price_eth).format('0.00000000') : '0.00000000'
-                        };
-                        me.updateETHAddressBalance(address, 1, 'ETH', '', quantity, values);
-                        me.saveStore('ETHBalances');
-                        // App store is rejecting app with donate button, so hide it if ETH balance is 0.00000000... shhh :)
-                        if (Ext.os.name == 'iOS') {
-                            var cmp = Ext.getCmp('aboutView');
-                            if (cmp) {
-                                if (quantity == '0.00000000') {
-                                    cmp.donate.hide();
-                                } else {
-                                cmp.donate.show();
-                                }
-                            }
-                        }
+        ETHbalance = await(me.callWeb3GetBalance(addr));
+        console.log("Balance is: ",ETHbalance);
+        await(fetch('https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD', {
+        //modes go here
+        }).then(function(response) {
+            //console.log(response);
+            return response.json();
+        }).then(function(data){
+            //console.log(data);
+            price_usd = data.USD;
+            console.log(price_usd);
+        }).catch(function() {
+            console.log("Check price does not work");
+        }));
+        //price_usd = me.getCurrencyPrice('ethereum', 'usd'),
+        //price_eth = me.getCurrencyPrice('counterparty', 'eth'),
+        values = {
+            usd: numeral(parseFloat(price_usd * ETHbalance)).format('0.00')  
+        };
+        me.updateETHAddressBalance(address, 1, 'ETH', '', ETHbalance, values);
+        me.saveStore('ETHBalances');
+        // App store is rejecting app with donate button, so hide it if ETH balance is 0.00000000... shhh :)
+        if (Ext.os.name == 'iOS') {
+            var cmp = Ext.getCmp('aboutView');
+            if (cmp) {
+                if (balance == '0.00000000') {
+                    cmp.donate.hide();
+                } else {
+                    cmp.donate.show();
+                }
+            }
+        }
+        // Handle processing callback now
+        if(callback)
+            callback();
     },
 
     // Handle saving a datastore to disk
@@ -2079,7 +2093,7 @@ Ext.define('FW.controller.Main', {
 
     broadcastETHTransaction: function(network, tx, callback){
         var me  = this;
-        var web3 = new Web3("http://52.87.221.111:8545");
+        //var web3 = new Web3("http://52.87.221.111:8545");
         web3.eth.sendTransaction({data: tx}, function(err, transactionHash) {
             if (!err)
                 console.log(transactionHash);
@@ -2174,13 +2188,13 @@ Ext.define('FW.controller.Main', {
         });
     },
 
-    ETHSend: function(destination, amount, gas, privateKey, callback){
+    ETHSend: function(destination, amount, gas, callback){
         var transactionObject = {'to': destination,
                                 'value': amount,
                                 'gas': gas
         }
-        var web3 = new Web3("http://52.87.221.111:8545");
-        var signedtx = web3.eth.accounts.signTransaction(transactionObject, privateKey);
+        //var web3 = new Web3("http://52.87.221.111:8545");
+        var signedtx = web3.eth.accounts.signTransaction(transactionObject, ETHprivkey);
         web3.sendSignedTransaction(signedtx);
     },
 

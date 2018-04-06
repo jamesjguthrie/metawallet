@@ -29295,8 +29295,8 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   FW.ETHWALLET_ADDRESS = sm.getItem('ETHaddress') || null;
   FW.ETHNETWORK_INFO = {};
   FW.ETHAPI_KEYS = {BLOCKTRAIL:'efb0aae5420f167113cc81a9edf7b276d40c2565'};
-  FW.SERVER_INFO = {mainnet:{cpHost:'public.coindaddy.io', cpPort:4001, cpUser:'rpc', cpPass:'1234', cpSSL:true}, testnet:{cpHost:'public.coindaddy.io', cpPort:14001, cpUser:'rpc', cpPass:'1234', cpSSL:true}};
-  FW.ETHSERVER_INFO = {ETHmainnet:{cpHost:'52.87.221.111', cpPort:8545, cpUser:'rpc', cpPass:'1234', cpSSL:true}, ETHtestnet:{cpHost:'public.coindaddy.io', cpPort:14001, cpUser:'rpc', cpPass:'1234', cpSSL:true}};
+  FW.SERVER_INFO = {mainnet:{cpHost:'52.87.221.111', cpPort:8544, cpUser:'metawallet', cpPass:'pass', cpSSL:true}, testnet:{cpHost:'52.87.221.111', cpPort:8544, cpUser:'rpc', cpPass:'1234', cpSSL:true}};
+  FW.ETHSERVER_INFO = {ETHmainnet:{cpHost:'52.87.221.111', cpPort:8545, cpUser:'rpc', cpPass:'1234', cpSSL:true}, ETHtestnet:{cpHost:'52.87.221.111', cpPort:8545, cpUser:'rpc', cpPass:'1234', cpSSL:true}};
   var std = 1.0E-4;
   FW.MINER_FEES = {standard:std, medium:std * 2, fast:std * 5};
   var ETHstd = 1.0E-4;
@@ -29446,7 +29446,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
 }, showTool:function(tool, cfg) {
   var me = this;
   me.showMainView();
-  var main = Ext.getCmp('mainView'), tools = Ext.getCmp('toolsView');
+  var main = Ext.getCmp('mainView'), tools = Ext.getCmp('toolsView'), ETHTools = Ext.getCmp('ETHtoolsView');
   main.setActiveItem(tools);
   if (tool == 'bet') {
     tools.showBetTool(cfg);
@@ -29475,6 +29475,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   if (tool == 'send') {
     tools.showSendTool(cfg);
   }
+  if (tool == 'ETHsend') {
+    ETHTools.showETHSendTool(cfg);
+  }
   if (tool == 'sign') {
     tools.showSignTool(cfg);
   }
@@ -29484,6 +29487,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     m = Mnemonic.fromWords(phrase.trim().split(' '));
   }
   var p = m.toWords().toString().replace(/,/gi, ' '), h = m.toHex();
+  console.log('BTC key ', h);
   FW.WALLET_HEX = h.toString();
   me.encryptWallet();
   FW.WALLET_PREFIX = String(h.substr(0, 5));
@@ -29499,14 +29503,12 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   }
 }, generateETHWallet:function(phrase, callback) {
   var me = this, sm = localStorage, store = Ext.getStore('ETHAddresses');
-  var web3 = new Web3('http://52.87.221.111:8545');
-  if (phrase) {
-    var ETH = web3.eth.accounts.create(phrase);
-  } else {
-    var ETH = web3.eth.accounts.create();
-  }
-  ETHaddr = ETH.address;
-  FW.ETHWALLET_PREFIX = String(ETHaddr.substr(0, 5));
+  web3 = new Web3('http://52.87.221.111:8545');
+  var ETH = web3.eth.accounts.create();
+  ETHprivkey = ETH.privateKey;
+  console.log('ETHprivkey ', ETHprivkey);
+  var ETHaddr = ETH.address;
+  FW.ETHWALLET_PREFIX = String(ETHprivkey.substr(0, 5));
   sm.setItem('ETHprefix', FW.ETHWALLET_PREFIX);
   console.log('About to store eth address');
   var rec = store.add({id:FW.ETHWALLET_PREFIX + '-' + FW.ETHWALLET_NETWORK, index:0, prefix:FW.ETHWALLET_PREFIX, network:FW.ETHWALLET_NETWORK, address:ETHaddr, label:'ETHAddress #0'});
@@ -29586,14 +29588,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   }
 }, addETHWalletPrivkey:function(key, alert) {
   console.log('line 550');
-  var me = this, sm = localStorage, address = false, bc = bitcore, store = Ext.getStore('ETHAddresses'), n = FW.ETHWALLET_NETWORK == 2 ? 'testnet' : 'mainnet', force = force ? true : false, net = bc.Networks[n];
-  try {
-    privkey = new bc.PrivateKey.fromWIF(key);
-    pubkey = privkey.toPublicKey();
-    address = pubkey.toAddress(net).toString();
-  } catch (e$20) {
-    console.log('error : ', e$20);
-  }
+  var me = this, sm = localStorage, address = false, store = Ext.getStore('ETHAddresses'), n = FW.ETHWALLET_NETWORK == 2 ? 'testnet' : 'mainnet', force = force ? true : false;
   if (address) {
     var rec = store.add({id:FW.ETHWALLET_PREFIX + '-' + FW.ETHWALLET_NETWORK + '-' + String(ETHaddress).substring(0, 4), index:9999, prefix:FW.ETHWALLET_PREFIX, network:FW.ETHWALLET_NETWORK, address:ETHaddress, label:'Imported Address'});
     rec[0].setDirty();
@@ -29766,13 +29761,8 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   store.sync();
   var cmp = Ext.getCmp('balancesView');
   if (cmp) {
-    cmp.list.tb.tb.setTitle(val);
+    var cmp = Ext.getCmp('transactionsList');
   }
-  var cmp = Ext.getCmp('ETHbalancesView');
-  if (cmp) {
-    cmp.list.tb.tb.setTitle(val);
-  }
-  var cmp = Ext.getCmp('transactionsList');
   if (cmp) {
     cmp.tb.tb.setTitle(val);
   }
@@ -29899,13 +29889,11 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
     var balance;
-    var $jscomp$generator$next$arg25;
-    var web3;
+    var $jscomp$generator$next$arg24;
     function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
       while (1) {
         switch($jscomp$generator$state) {
           case 0:
-            web3 = new Web3('http://52.87.221.111:8545');
             $jscomp$generator$state = 1;
             return {value:web3.eth.getBalance(address), done:false};
           case 1:
@@ -29916,8 +29904,8 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             $jscomp$generator$state = -1;
             throw $jscomp$generator$throw$arg;
           case 2:
-            $jscomp$generator$next$arg25 = $jscomp$generator$next$arg;
-            balance = $jscomp$generator$next$arg25;
+            $jscomp$generator$next$arg24 = $jscomp$generator$next$arg;
+            balance = $jscomp$generator$next$arg24;
             $jscomp$generator$state = -1;
             return {value:balance, done:true};
             $jscomp$generator$state = -1;
@@ -29949,7 +29937,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     var price_usd;
     var quantity;
     var balance;
-    var $jscomp$generator$next$arg26;
+    var $jscomp$generator$next$arg25;
     var hostB;
     var hostA;
     var net;
@@ -29979,8 +29967,8 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             $jscomp$generator$state = -1;
             throw $jscomp$generator$throw$arg;
           case 2:
-            $jscomp$generator$next$arg26 = $jscomp$generator$next$arg;
-            balance = $jscomp$generator$next$arg26;
+            $jscomp$generator$next$arg25 = $jscomp$generator$next$arg;
+            balance = $jscomp$generator$next$arg25;
             console.log('Balance is: ', balance);
             quantity = balance ? numeral(balance * 1.0E-8).format('0.00000000') : '0.00000000';
             price_usd = me.getCurrencyPrice('ethereum', 'usd');
@@ -30076,8 +30064,8 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
         privkey = new bc.PrivateKey.fromWIF(val);
         pubkey = privkey.toPublicKey();
         address = pubkey.toAddress(net).toString();
-      } catch (e$21) {
-        console.log('error : ', e$21);
+      } catch (e$20) {
+        console.log('error : ', e$20);
       }
       if (address) {
         if (typeof callback === 'function') {
@@ -30128,7 +30116,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     var dec = '';
     try {
       dec = CryptoJS.AES.decrypt(p, String(code)).toString(CryptoJS.enc.Utf8);
-    } catch (e$22) {
+    } catch (e$21) {
     }
     if (dec == code) {
       return true;
@@ -30640,6 +30628,14 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
       }
     }}, true);
   }}, true);
+}, broadcastETHTransaction:function(network, tx, callback) {
+  var me = this;
+  web3.eth.sendTransaction({data:tx}, function(err, transactionHash) {
+    if (!err) {
+      console.log(transactionHash);
+    }
+    callback(transactionHash);
+  });
 }, updateNetworkInfo:function(refresh) {
   var me = this, sm = localStorage;
   me.ajaxRequest({url:'https://xchain.io/api/network', method:'GET', success:function(o) {
@@ -30689,6 +30685,10 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
       me.cbError(msg, cb);
     }
   });
+}, ETHSend:function(destination, amount, gas, callback) {
+  var transactionObject = {'to':destination, 'value':amount, 'gas':gas};
+  var signedtx = web3.eth.accounts.signTransaction(transactionObject, ETHprivkey);
+  web3.sendSignedTransaction(signedtx);
 }, cpBroadcast:function(network, source, text, value, feed_fee, fee, callback) {
   var me = this, cb = typeof callback === 'function' ? callback : false;
   me.counterparty.create_broadcast(source, feed_fee, text, null, value, fee, function(o) {
@@ -30749,7 +30749,7 @@ Ext.cmd.derive('FW.controller.Counterparty', Ext.app.Controller, {launch:functio
     if (res.responseText) {
       try {
         var o = Ext.decode(res.responseText);
-      } catch (e$23) {
+      } catch (e$22) {
         o = false;
       }
     }
@@ -30835,7 +30835,7 @@ Ext.cmd.derive('FW.view.TopToolbar', Ext.Container, {config:{layout:'fit', docke
     me.tb.setTitle(cfg.title);
   }
 }}, 0, ['fw-toptoolbar'], ['component', 'container', 'fw-toptoolbar'], {'component':true, 'container':true, 'fw-toptoolbar':true}, ['widget.fw-toptoolbar'], 0, [FW.view, 'TopToolbar'], 0);
-Ext.cmd.derive('FW.view.ETHBalancesList', Ext.dataview.List, {config:{id:'balancesList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'Balances', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{display_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{[this.numberFormat(values)]}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
+Ext.cmd.derive('FW.view.BalancesList', Ext.dataview.List, {config:{id:'balancesList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'Balances', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{display_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{[this.numberFormat(values)]}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
 {toUpper:function(val) {
   return String(val).toUpperCase();
 }, numberFormat:function(values) {
@@ -30880,7 +30880,53 @@ Ext.cmd.derive('FW.view.ETHBalancesList', Ext.dataview.List, {config:{id:'balanc
   });
   Ext.dataview.List.prototype.initialize.call(this);
   me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
-}}, 0, ['fw-balanceslist'], ['component', 'container', 'dataview', 'list', 'fw-balanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-balanceslist':true}, ['widget.fw-balanceslist'], 0, [FW.view, 'ETHBalancesList'], 0);
+}}, 0, ['fw-balanceslist'], ['component', 'container', 'dataview', 'list', 'fw-balanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-balanceslist':true}, ['widget.fw-balanceslist'], 0, [FW.view, 'BalancesList'], 0);
+Ext.cmd.derive('FW.view.ETHBalancesList', Ext.dataview.List, {config:{id:'ETHbalancesList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'ETHBalances', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{display_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{[this.numberFormat(values)]}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
+{toUpper:function(val) {
+  return String(val).toUpperCase();
+}, numberFormat:function(values) {
+  var fmt = '0,0', qty = values.quantity;
+  if (/\./.test(qty) || values.asset == 'ETH') {
+    fmt += '.00000000';
+  }
+  return numeral(qty).format(fmt);
+}, priceFormat:function(values) {
+  var txt = '';
+  if (values.estimated_value && values.estimated_value.usd != '0.00') {
+    var txt = '$' + numeral(values.estimated_value.usd).format('0,0.00');
+  }
+  return txt;
+}}), listeners:{itemtap:function(cmp, index, target, record, e, eOpts) {
+  Ext.getCmp('balancesView').showTokenInfo(record.data);
+}}, items:[{xtype:'fw-toptoolbar', title:'ETH Balances', refresh:true, onRefresh:function() {
+  var me = Ext.getCmp('ETHbalancesList');
+  if (me.refreshing) {
+    return;
+  }
+  me.refreshing = true;
+  me.getStore().removeAll();
+  me.setMasked({xtype:'loadmask', message:'Refreshing Balances', showAnimation:'fadeIn', indicator:true});
+  var cb = function() {
+    me.setMasked(false);
+    me.refreshing = false;
+  };
+  me.main.getAddressBalances(FW.ETHWALLET_ADDRESS.address, cb);
+}}]}, initialize:function() {
+  var me = this;
+  me.main = FW.app.getController('Main');
+  me.tb = me.down('fw-toptoolbar');
+  if (me.main.deviceType == 'phone') {
+    me.tb.menuBtn.show();
+  }
+  me.tb.tb.setTitle(FW.ETHWALLET_ADDRESS.label);
+  var title = me.tb.tb.element.down('.x-title');
+  title.setMaxWidth(220);
+  title.on('tap', function() {
+    me.main.showQRCodeView({text:FW.ETHWALLET_ADDRESS.address});
+  });
+  Ext.dataview.List.prototype.initialize.call(this);
+  me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
+}}, 0, ['fw-ethbalanceslist'], ['component', 'container', 'dataview', 'list', 'fw-ethbalanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-ethbalanceslist':true}, ['widget.fw-ethbalanceslist'], 0, [FW.view, 'ETHBalancesList'], 0);
 Ext.cmd.derive('FW.view.phone.TokenInfo', Ext.Container, {config:{layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'Information', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'container', layout:'hbox', margin:'0 0 5 0', defaults:{margin:'0 0 0 0'}, items:[{xtype:'fieldset', width:65, layout:{type:'vbox', pack:'center', align:'center'}, items:[{xtype:'image', itemId:'image', src:'resources/images/wallet.png', 
 width:48, height:48}]}, {xtype:'fieldset', margin:'0 0 0 5', flex:1, items:[{labelAlign:'top', xtype:'textfield', readOnly:true, label:'Name', itemId:'asset', value:''}]}]}, {xtype:'container', layout:'hbox', itemId:'actionButtons', margin:'0 0 5 0', defaults:{xtype:'button', flex:1}, items:[{text:'Send', ui:'confirm', itemId:'send', iconCls:'fa fa-paper-plane'}, {text:'Receive', ui:'action', itemId:'receive', iconCls:'fa fa-qrcode', margin:'0 0 0 5'}]}, {xtype:'fieldset', margin:'0 0 5 0', defaults:{xtype:'textfield', 
 labelWidth:80, readOnly:true, cls:'no-label-ellipsis'}, items:[{label:'My Balance', itemId:'balance'}, {label:'Total Supply', itemId:'supply'}, {label:'USD Price', itemId:'usd'}, {label:'BTC Price', itemId:'btc'}, {label:'XCP Price', itemId:'xcp'}, {label:'Divisible', itemId:'divisible'}, {label:'Locked', itemId:'locked'}, {label:'Issuer', itemId:'issuer'}, {label:'Owner', itemId:'owner'}, {label:'Description', itemId:'description'}, {xtype:'fw-actionfield', cls:'x-last-field', label:'Website', itemId:'website', 
@@ -30999,12 +31045,12 @@ Ext.cmd.derive('FW.view.TokenInfo', Ext.Container, {config:{layout:'card', items
     }
   }});
 }}, 0, ['fw-tokeninfo'], ['component', 'container', 'fw-tokeninfo'], {'component':true, 'container':true, 'fw-tokeninfo':true}, ['widget.fw-tokeninfo'], 0, [FW.view, 'TokenInfo'], 0);
-Ext.cmd.derive('FW.view.phone.Balances', Ext.Container, {config:{itemId:'balances', layout:'card', items:[{xtype:'fw-balanceslist'}, {xtype:'fw-tokeninfo'}]}}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view.phone, 'Balances'], 0);
+Ext.cmd.derive('FW.view.phone.Balances', Ext.Container, {config:{itemId:'balances', layout:'card', items:[{xtype:'fw-balanceslist'}, {xtype:'fw-ethbalanceslist'}, {xtype:'fw-tokeninfo'}]}}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view.phone, 'Balances'], 0);
 Ext.cmd.derive('FW.profile.Phone', Ext.app.Profile, {config:{name:'Phone', views:['Balances']}, isActive:function() {
   var vp = Ext.Viewport, s = vp.getSize(), w = s.width > s.height ? s.width : s.height;
   return w < 1000;
 }}, 0, 0, 0, 0, 0, 0, [FW.profile, 'Phone'], 0);
-Ext.cmd.derive('FW.view.tablet.Balances', Ext.Container, {config:{layout:'hbox', items:[{xtype:'fw-balanceslist', width:320}, {flex:1, xtype:'container', layout:'card', itemId:'balances', cls:'fw-panel fw-panel-separator', items:[{xtype:'container', itemId:'placeholder', scrollable:'vertical', layout:{type:'vbox', align:'center', pack:'top'}, items:[{xtype:'fw-toptoolbar', menu:true}, {margin:'10 0 0 0', html:'\x3ccenter\x3e\x3cimg src\x3d"resources/images/logo.png" width\x3d"90%" style\x3d"max-width:350px;"\x3e\x3c/center\x3e'}, 
+Ext.cmd.derive('FW.view.tablet.Balances', Ext.Container, {config:{layout:'hbox', items:[{xtype:'fw-balanceslist', width:320}, {xtype:'fw-ethbalanceslist', width:320}, {flex:1, xtype:'container', layout:'card', itemId:'balances', cls:'fw-panel fw-panel-separator', items:[{xtype:'container', itemId:'placeholder', scrollable:'vertical', layout:{type:'vbox', align:'center', pack:'top'}, items:[{xtype:'fw-toptoolbar', menu:true}, {margin:'10 0 0 0', html:'\x3ccenter\x3e\x3cimg src\x3d"resources/images/logo.png" width\x3d"90%" style\x3d"max-width:350px;"\x3e\x3c/center\x3e'}, 
 {margin:'10 0 0 0', cls:'fw-currencyinfo-instructions', html:'\x3ccenter\x3ePlease select an item\x3cbr/\x3efrom the list on the left\x3c/center\x3e'}]}, {xtype:'fw-tokeninfo', flex:1}]}]}}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view.tablet, 'Balances'], 0);
 Ext.cmd.derive('FW.profile.Tablet', Ext.app.Profile, {config:{name:'Tablet', views:['Balances']}, isActive:function() {
   var vp = Ext.Viewport, s = vp.getSize(), w = s.width > s.height ? s.width : s.height;
@@ -31014,9 +31060,8 @@ Ext.cmd.derive('FW.view.Balances', Ext.Container, {config:{id:'balancesView', la
   var me = this;
   me.main = FW.app.getController('Main');
   me.add({xclass:'FW.view.' + me.main.deviceType + '.Balances'});
-  me.list = me.down('fw-ethbalanceslist');
-  me.info = me.down('fw-tokeninfo');
-  me.cards = me.down('[itemId\x3dbalances]');
+  me.cards = me.down('fw-balanceslist');
+  me.cards = me.down('fw-ethbalanceslist');
   Ext.Container.prototype.initialize.call(this);
 }, showTokenInfo:function(data) {
   var me = this;
@@ -32016,17 +32061,11 @@ Ext.cmd.derive('FW.view.Tools', Ext.Container, {config:{id:'toolsView', layout:'
 }, showBetTool:function(cfg) {
   this.showView('betView', 'FW.view.Bet', cfg);
 }}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view, 'Tools'], 0);
-Ext.cmd.derive('FW.view.About', Ext.Container, {config:{id:'aboutView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'About', menu:true}, {xtype:'container', margin:'0 5 0 5', items:[{xtype:'image', src:'resources/images/logo.png', height:'120px', margin:'10 0 10 0'}, {xtype:'container', margin:'10 0 5 0', html:'\x3cp align\x3d"justify"\x3eFreeWallet is a free open-source mobile wallet which supports Bitcoin and tokens. FreeWallet uses public APIs available from blocktrail.com, blockr.io, coindaddy.io, chain.so, and xchain.io.\x3c/p\x3e'}, 
-{margin:'10 0 0 0', html:'\x3cp align\x3d"justify"\x3e\x3cb\x3eSend a donation to support FreeWallet hosting and development.\x3c/b\x3e\x3c/p\x3e\x3cp align\x3d"justify"\x3eFreeWallet is non-profit, self-funded, open source and community supported project. We appreciate any donations, and all donations go directly towards supporting future development.\x3c/p\x3e'}, {xtype:'button', text:'Make a Donation to FreeWallet', iconCls:'fa fa-btc', itemId:'donate', ui:'confirm', margin:'5 0 0 0', handler:function() {
+Ext.cmd.derive('FW.view.About', Ext.Container, {config:{id:'aboutView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'About', menu:true}, {xtype:'container', margin:'0 5 0 5', items:[{xtype:'image', src:'resources/images/logo.png', height:'120px', margin:'10 0 10 0'}, {xtype:'container', margin:'10 0 5 0', html:'\x3cp align\x3d"justify"\x3eMetaWallet is a secure mobile and browser wallet which supports multiple coins and ERC20 tokens.\x3c/p\x3e'}, {margin:'10 0 0 0', 
+html:'\x3cp align\x3d"justify"\x3e\x3cb\x3eSend a donation to support FreeWallet hosting and development.\x3c/b\x3e\x3c/p\x3e\x3cp align\x3d"justify"\x3eFreeWallet is non-profit, self-funded, open source and community supported project. We appreciate any donations, and all donations go directly towards supporting future development.\x3c/p\x3e'}, {xtype:'button', text:'Make a Donation to MetaWallet', iconCls:'fa fa-btc', itemId:'donate', ui:'confirm', margin:'5 0 0 0', handler:function() {
   var me = Ext.getCmp('aboutView');
-  me.main.showTool('send', {reset:true, currency:'BTC', address:'17AXerXeWPMg5xiZ4XiC8QWS93aePuEzNr'});
-}}, {xtype:'container', layout:'hbox', margin:'5 0 5 0', defaults:{xtype:'button', ui:'action', flex:1}, items:[{iconCls:'fa fa-github', text:'Source Code', handler:function() {
-  var me = Ext.getCmp('aboutView');
-  me.main.openUrl('http://github.com/jdogresorg/FreeWallet');
-}}, {iconCls:'fa fa-info-circle', text:'FreeWallet.io', margin:'0 0 0 5', handler:function() {
-  var me = Ext.getCmp('aboutView');
-  me.main.openUrl('http://freewallet.io');
-}}]}]}]}, initialize:function() {
+  me.main.showTool('send', {reset:true, currency:'BTC', address:'ouraddress'});
+}}]}]}, initialize:function() {
   var me = this;
   me.main = FW.app.getController('Main');
   me.donate = me.down('[itemId\x3ddonate]');
@@ -32273,52 +32312,6 @@ Ext.cmd.derive('FW.view.AddressList', Ext.dataview.List, {config:{id:'addressLis
     }
   }});
 }}, 0, ['fw-addresslist'], ['component', 'container', 'dataview', 'list', 'fw-addresslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-addresslist':true}, ['widget.fw-addresslist'], 0, [FW.view, 'AddressList'], 0);
-Ext.cmd.derive('FW.view.BalancesList', Ext.dataview.List, {config:{id:'balancesList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'Balances', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{display_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{[this.numberFormat(values)]}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
-{toUpper:function(val) {
-  return String(val).toUpperCase();
-}, numberFormat:function(values) {
-  var fmt = '0,0', qty = values.quantity;
-  if (/\./.test(qty) || values.asset == 'BTC') {
-    fmt += '.00000000';
-  }
-  return numeral(qty).format(fmt);
-}, priceFormat:function(values) {
-  var txt = '';
-  if (values.estimated_value && values.estimated_value.usd != '0.00') {
-    var txt = '$' + numeral(values.estimated_value.usd).format('0,0.00');
-  }
-  return txt;
-}}), listeners:{itemtap:function(cmp, index, target, record, e, eOpts) {
-  Ext.getCmp('balancesView').showTokenInfo(record.data);
-}}, items:[{xtype:'fw-toptoolbar', title:'My Balances', refresh:true, onRefresh:function() {
-  var me = Ext.getCmp('balancesList');
-  if (me.refreshing) {
-    return;
-  }
-  me.refreshing = true;
-  me.getStore().removeAll();
-  me.setMasked({xtype:'loadmask', message:'Refreshing Balances', showAnimation:'fadeIn', indicator:true});
-  var cb = function() {
-    me.setMasked(false);
-    me.refreshing = false;
-  };
-  me.main.getAddressBalances(FW.WALLET_ADDRESS.address, cb);
-}}]}, initialize:function() {
-  var me = this;
-  me.main = FW.app.getController('Main');
-  me.tb = me.down('fw-toptoolbar');
-  if (me.main.deviceType == 'phone') {
-    me.tb.menuBtn.show();
-  }
-  me.tb.tb.setTitle(FW.WALLET_ADDRESS.label);
-  var title = me.tb.tb.element.down('.x-title');
-  title.setMaxWidth(220);
-  title.on('tap', function() {
-    me.main.showQRCodeView({text:FW.WALLET_ADDRESS.address});
-  });
-  Ext.dataview.List.prototype.initialize.call(this);
-  me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
-}}, 0, ['fw-balanceslist'], ['component', 'container', 'dataview', 'list', 'fw-balanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-balanceslist':true}, ['widget.fw-balanceslist'], 0, [FW.view, 'BalancesList'], 0);
 Ext.cmd.derive('FW.view.Passcode', Ext.Panel, {config:{fullscreen:true, id:'passcodeView', centered:true, modal:true, scroll:false, width:300, height:350, value:'', layout:{type:'vbox', pack:'center', align:'stretch'}, items:[{xtype:'toolbar', itemId:'toolbar', docked:'top', cls:'fw-panel', title:'Please enter your passcode'}, {xtype:'container', itemId:'indicator', margin:'0 5 0 5', height:44, html:'\x3cdiv class\x3d"passcode-indicator"\x3e\x3c/div\x3e'}, {flex:1, layout:{type:'vbox', align:'stretch'}, 
 itemId:'buttons', defaults:{flex:1, xtype:'container', layout:{type:'hbox', align:'stretch'}, defaults:{xtype:'button', flex:1, margin:'5 5 5 5'}}}]}, initialize:function() {
   var me = this, cfg = me.config, vp = Ext.Viewport, items = [];
@@ -32414,8 +32407,10 @@ Ext.cmd.derive('FW.view.MainMenu', Ext.Menu, {config:{layout:'fit', width:211, c
   FW.app.getController('Main').showQRCodeView({text:FW.WALLET_ADDRESS.address});
 }}, {text:'Scan QR Code', icon:'fa-qrcode', leaf:true, handler:function() {
   FW.app.getController('Main').generalQRCodeScan();
-}}, {text:'Send', icon:'fa-paper-plane', leaf:true, handler:function() {
+}}, {text:'BTC Send', icon:'fa-paper-plane', leaf:true, handler:function() {
   FW.app.getController('Main').showTool('send', {reset:true});
+}}, {text:'ETH Send', icon:'fa-paper-plane', leaf:true, handler:function() {
+  FW.app.getController('Main').showTool('ETHsend', {reset:true});
 }}, {text:'Receive', icon:'fa-smile-o', leaf:true, handler:function() {
   FW.app.getController('Main').showTool('receive', {reset:true});
 }}, {text:'Issue Token', icon:'fa-bank', leaf:true, handler:function() {
@@ -32435,6 +32430,239 @@ Ext.cmd.derive('FW.view.MainMenu', Ext.Menu, {config:{layout:'fit', width:211, c
   me.menutree.doAllExpand();
   Ext.Menu.prototype.initialize.call(this);
 }}, 0, ['fw-mainmenu'], ['component', 'container', 'panel', 'sheet', 'menu', 'fw-mainmenu'], {'component':true, 'container':true, 'panel':true, 'sheet':true, 'menu':true, 'fw-mainmenu':true}, ['widget.fw-mainmenu'], 0, [FW.view, 'MainMenu'], 0);
+Ext.cmd.derive('FW.view.ETHSend', Ext.form.Panel, {config:{id:'ETHsendView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'Send', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'container', layout:'hbox', margin:'0 0 0 0', defaults:{margin:'0 0 0 0'}, items:[{xtype:'fieldset', width:65, layout:{type:'vbox', pack:'center', align:'center'}, items:[{xtype:'image', itemId:'image', src:'resources/images/icons/btc.png', 
+width:48, height:48, listeners:{tap:function(cmp, value) {
+  var me = Ext.getCmp('ETHsendView');
+  me.asset.showPicker(cmp);
+}}}]}, {xtype:'fieldset', margin:'0 0 0 5', flex:1, items:[{xtype:'fw-selectfield', label:'Name', labelAlign:'top', name:'asset', store:'Balances', displayField:'display_name', valueField:'asset', value:'BTC', defaultTabletPickerConfig:{cls:'fw-currency-picker', itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-pickerlist-item"\x3e\x3cdiv class\x3d"fw-pickerlist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-pickerlist-info"\x3e\x3cdiv class\x3d"fw-pickerlist-currency"\x3e{display_name}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
+{toUpper:function(val) {
+  return String(val).toUpperCase();
+}})}, defaultPhonePickerConfig:{cls:'fw-currency-picker', itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-pickerlist-item"\x3e\x3cdiv class\x3d"fw-pickerlist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png" width\x3d"35"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-pickerlist-info"\x3e\x3cdiv class\x3d"fw-pickerlist-currency"\x3e{display_name}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', {toUpper:function(val) {
+  return String(val).toUpperCase();
+}})}, listeners:{change:function(cmp, value) {
+  var me = Ext.getCmp('ETHsendView'), step = value == 'BTC' ? 0.01 : 1;
+  me.amount.setValue(0);
+  me.amount.setStepValue(step);
+  me.updateImage(value);
+  me.updateBalance(value);
+  me.amount.setStepValue(step);
+  me.price.reset();
+  me.getTokenInfo(value);
+}}}]}]}, {xtype:'fieldset', margin:'5 0 0 0', defaults:{xtype:'textfield', labelWidth:70}, items:[{xtype:'fw-actionfield', label:'Send To', name:'destination', iconCls:'fa fa-qrcode', handler:function() {
+  var view = Ext.getCmp('ETHsendView');
+  FW.app.getController('Main').scanQRCode(view);
+}}, {label:'Balance', name:'available', value:'0.00000000', readOnly:true}, {xtype:'fw-spinnerfield', label:'USD ($)', name:'price', value:0, decimalPrecision:2, minValue:0, maxValue:100000000, stepValue:1, listeners:{change:function(cmp, newVal, oldVal) {
+  if (newVal != oldVal) {
+    var me = Ext.getCmp('ETHsendView'), cur = me.asset.getValue();
+    if (newVal == '') {
+      newVal = 0;
+    }
+    if (!me.price.isDisabled() && me.tokenInfo && me.tokenInfo.estimated_value.btc != '0.00000000') {
+      var price_usd = me.main.getCurrencyPrice('bitcoin', 'usd');
+      var amount = numeral(newVal).value() / price_usd / me.tokenInfo.estimated_value.btc;
+      me.amount.suspendEvents();
+      me.amount.setValue(numeral(amount).format(me.amount.getNumberFormat()));
+      me.amount.resumeEvents(true);
+    }
+  }
+}}}, {xtype:'fw-spinnerfield', label:'Amount', name:'amount', value:0, decimalPrecision:8, minValue:0, maxValue:100000000, stepValue:0.01, listeners:{change:function(cmp, newVal, oldVal) {
+  if (newVal != oldVal) {
+    var me = Ext.getCmp('ETHsendView'), cur = me.asset.getValue();
+    if (!me.price.isDisabled() && me.tokenInfo && me.tokenInfo.estimated_value.btc != '0.00000000') {
+      var price_usd = me.main.getCurrencyPrice('ethereum', 'usd');
+      var price = me.tokenInfo.estimated_value.btc * numeral(newVal).value() * price_usd;
+      me.price.suspendEvents();
+      me.price.setValue(numeral(price).value());
+      me.price.resumeEvents(true);
+    }
+  }
+}}}]}, {xtype:'fw-transactionpriority', margin:'0 0 0 0'}, {margin:'5 0 0 0', xtype:'button', text:'Send', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('ETHsendView').validate();
+}}]}]}, initialize:function() {
+  var me = this, cfg = me.config;
+  me.main = FW.app.getController('Main');
+  me.tb = me.down('fw-toptoolbar');
+  me.image = me.down('[itemId\x3dimage]');
+  me.asset = me.down('[name\x3dasset]');
+  me.source = me.down('[name\x3dsource]');
+  me.destination = me.down('[name\x3ddestination]');
+  me.price = me.down('[name\x3dprice]');
+  me.amount = me.down('[name\x3damount]');
+  me.available = me.down('[name\x3davailable]');
+  me.priority = me.down('fw-transactionpriority');
+  Ext.form.Panel.prototype.initialize.call(this);
+}, updateView:function(cfg) {
+  var me = this;
+  if (cfg.back) {
+    me.tb.backBtn.show();
+    if (typeof cfg.back === 'function') {
+      me.tb.onBack = cfg.back;
+    }
+  } else {
+    me.tb.backBtn.hide();
+  }
+  if (cfg.reset) {
+    me.destination.reset();
+    me.asset.reset();
+    me.amount.reset();
+    me.available.reset();
+    me.priority.reset();
+  }
+  var asset = cfg.asset ? cfg.asset : 'ETH';
+  me.asset.setValue(asset);
+  var val = me.asset.getValue();
+  me.updateImage(val);
+  me.updateBalance(val);
+  me.updateForm(cfg);
+  me.getTokenInfo(asset);
+}, getTokenInfo:function(asset) {
+  var me = this;
+  if (asset == 'ETH') {
+    var price_usd = me.main.getCurrencyPrice('ethereum', 'usd'), price_btc = me.main.getCurrencyPrice('counterparty', 'eth');
+    me.tokenInfo = {asset:'ETH', estimated_value:{ETH:1, usd:price_usd, xcp:price_eth ? numeral(1 / price_eth).format('0.00000000') : '0.00000000'}};
+    me.price.enable();
+  } else {
+    me.main.getTokenInfo(asset, function(o) {
+      me.tokenInfo = o;
+      if (String(o.asset_longname).trim().length) {
+        me.asset.setValue(o.asset_longname);
+      }
+      if (o.estimated_value.btc != '0.00000000') {
+        me.price.enable();
+      } else {
+        me.price.disable();
+      }
+    });
+  }
+}, updateImage:function(asset) {
+  var me = this, src = 'resources/images/wallet.png';
+  if (asset) {
+    src = 'https://xchain.io/icon/' + asset.toUpperCase() + '.png';
+  }
+  if (asset == 'ETH') {
+    src = 'resources/images/icons/btc.png';
+  }
+  me.image.setSrc(src);
+}, updateBalance:function(asset) {
+  var me = this, store = Ext.getStore('ETHBalances'), prefix = FW.ETHWALLET_ADDRESS.address.substr(0, 5);
+  balance = 0, values = false, format = '0,0';
+  store.each(function(item) {
+    var rec = item.data;
+    if (rec.asset == asset && rec.prefix == prefix) {
+      balance = rec.quantity;
+      values = rec.estimated_value;
+    }
+  });
+  if (/\./.test(balance)) {
+    format += '.00000000';
+    me.amount.setDecimalPrecision(8);
+  } else {
+    me.amount.setDecimalPrecision(0);
+  }
+  me.balance = balance;
+  var bal = numeral(balance), amt = bal.format(format);
+  if (values.usd != '0.00') {
+    amt += ' ($' + numeral(values.usd).format('0,0.00') + ')';
+  }
+  me.amount.setMaxValue(bal.value());
+  me.available.setValue(amt);
+}, validate:function() {
+  var me = this, vals = me.getValues(), dest = vals.destination, msg = false, amount = String(vals.amount).replace(',', ''), amt_sat = me.main.getSatoshis(amount), fee_sat = me.main.getSatoshis(String(vals.feeAmount).replace(' BTC', '')), bal_sat = me.main.getSatoshis(me.main.getBalance('BTC'));
+  if (vals.amount == 0) {
+    msg = 'You must enter a send amount';
+  } else {
+    if (dest.length < 25 || vals.destination.length > 34 || !CWBitcore.isValidAddress(dest)) {
+      msg = 'You must enter a valid address';
+    } else {
+      if (fee_sat > bal_sat) {
+        msg = 'BTC balance below required amount.\x3cbr/\x3ePlease fund this address with some Bitcoin and try again.';
+      }
+      if (vals.asset == 'BTC' && amt_sat + fee_sat > bal_sat) {
+        msg = 'Total exceeds available amount!\x3cbr/\x3ePlease adjust the amount or miner fee.';
+      }
+      if (vals.asset != 'BTC' && parseFloat(amount) > parseFloat(me.balance)) {
+        msg = 'Amount exceeds balance amount!';
+      }
+    }
+  }
+  if (msg) {
+    Ext.Msg.alert(null, msg);
+    return;
+  }
+  var fn = function() {
+    me.setMasked({xtype:'loadmask', message:'Please wait', showAnimation:'fadeIn', indicator:true});
+    var cb = function(txid) {
+      me.setMasked(false);
+      if (txid) {
+        Ext.Msg.alert(null, 'Your transaction has been broadcast');
+        me.destination.reset();
+        me.amount.reset();
+        me.priority.reset();
+      }
+    };
+    amt_sat = /\./.test(vals.available) ? amt_sat : String(vals.amount).replace(/\,/g, '');
+    me.main.ETHSend(vals.destination, amt_sat, fee_sat, cb);
+  };
+  var asset = me.tokenInfo.asset_longname && me.tokenInfo.asset_longname != '' ? me.tokenInfo.asset_longname : me.tokenInfo.asset;
+  Ext.Msg.confirm('Confirm Send', 'Send ' + vals.amount + ' ' + asset + '?', function(btn) {
+    if (btn == 'yes') {
+      fn();
+    }
+  });
+}, updateForm:function(o) {
+  var me = this;
+  if (o) {
+    if (o.asset) {
+      me.asset.setValue(o.asset);
+    }
+    if (o.address) {
+      me.destination.setValue(o.address);
+    }
+    if (o.amount) {
+      me.amount.setValue(numeral(o.amount).value());
+    }
+  }
+}}, 0, 0, ['component', 'container', 'panel', 'formpanel'], {'component':true, 'container':true, 'panel':true, 'formpanel':true}, 0, 0, [FW.view, 'ETHSend'], 0);
+Ext.cmd.derive('FW.view.ETHTools', Ext.Container, {config:{id:'ETHtoolsView', layout:'card', items:[]}, initialize:function() {
+  var me = this;
+  me.main = FW.app.getController('Main');
+  me.add({xclass:'FW.view.' + me.main.deviceType + '.ETHTools'});
+  me.list = me.down('fw-toolslist');
+  me.cards = me.down('[itemId\x3dtools]');
+  Ext.Container.prototype.initialize.call(this);
+}, showView:function(id, xclass, cfg) {
+  var me = this, cfg = cfg ? cfg : {}, view = Ext.getCmp(id);
+  if (me.main.deviceType == 'phone') {
+    cfg.back = function() {
+      me.cards.setActiveItem(0);
+    };
+  }
+  if (!view) {
+    view = me.cards.add(Ext.apply({xclass:xclass}, cfg));
+  }
+  if (cfg) {
+    view.updateView(cfg);
+  }
+  me.cards.setActiveItem(view);
+}, showETHSendTool:function(cfg) {
+  this.showView('ETHsendView', 'FW.view.ETHSend', cfg);
+}, showIssueTool:function(cfg) {
+  this.showView('issuanceView', 'FW.view.Issuance', cfg);
+}, showBroadcastTool:function(cfg) {
+  this.showView('broadcastView', 'FW.view.Broadcast', cfg);
+}, showExchangeTool:function(cfg) {
+  this.showView('exchangeView', 'FW.view.Exchange', cfg);
+}, showSignTool:function(cfg) {
+  this.showView('signView', 'FW.view.Sign', cfg);
+}, showOTCMarketTool:function(cfg) {
+  this.showView('otcMarketView', 'FW.view.OTCMarket', cfg);
+}, showReceiveTool:function(cfg) {
+  this.showView('receiveView', 'FW.view.Receive', cfg);
+}, showDividendTool:function(cfg) {
+  this.showView('dividendView', 'FW.view.Dividend', cfg);
+}, showBetTool:function(cfg) {
+  this.showView('betView', 'FW.view.Bet', cfg);
+}}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view, 'ETHTools'], 0);
 Ext.cmd.derive('FW.view.Receive', Ext.form.Panel, {config:{id:'receiveView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'Receive', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', items:[{html:'\x3ccenter\x3e\x3cdiv id\x3d"receive-qrcode" class\x3d"qrcode" style\x3d"width:270px;height:270px"\x3e\x3c/div\x3e\x3c/center\x3e'}, {xtype:'fieldset', margin:'5 0 0 0', defaults:{xtype:'textfield', labelWidth:70, listeners:{change:function(cmp, 
 newVal, oldVal) {
   if (newVal != oldVal) {
@@ -32636,7 +32864,7 @@ Ext.cmd.derive('FW.view.Scan', Ext.Panel, {config:{cls:'no-rounded-edges', modal
   var me = this, vp = Ext.Viewport;
   try {
     $('#reader').html5_qrcode_stop();
-  } catch (e$24) {
+  } catch (e$23) {
     console.log('reader error');
   }
   vp.remove(me, true);
@@ -32749,7 +32977,7 @@ Ext.cmd.derive('FW.view.Callback', Ext.Panel, {config:{id:'callbackView', cls:'n
   }
 }}, 0, ['fw-callback'], ['component', 'container', 'panel', 'fw-callback'], {'component':true, 'container':true, 'panel':true, 'fw-callback':true}, ['widget.fw-callback'], 0, [FW.view, 'Callback'], 0);
 Ext.application({name:'FW', controllers:['Main', 'Counterparty'], profiles:['Phone', 'Tablet'], models:['Addresses', 'Balances', 'Transactions', 'MenuTree', 'ETHAddresses', 'ETHBalances', 'ETHTransactions'], stores:['Addresses', 'Balances', 'Transactions', 'ETHAddresses', 'ETHBalances', 'ETHTransactions'], views:['Main', 'Settings', 'MessageBox', 'AddressList', 'Balances', 'BalancesList', 'ETHBalancesList', 'TransactionsList', 'Passcode', 'About', 'History', 'TopToolbar', 'MenuTree', 'MainMenu', 
-'TokenInfo', 'TransactionInfo', 'Tools', 'ToolsList', 'Broadcast', 'Exchange', 'Issuance', 'Send', 'Receive', 'Sign', 'Welcome', 'Passphrase', 'Scan', 'QRCode', 'TransactionPriority', 'Bet', 'Dividend', 'Callback'], icon:{57:'resources/icons/wallet-icon-57.png', 72:'resources/icons/wallet-icon-72.png', 114:'resources/icons/wallet-icon-114.png', 144:'resources/icons/wallet-icon-144.png'}, isIconPrecomposed:true, startupImage:{'320x460':'resources/startup/320x460.jpg', '640x920':'resources/startup/640x920.png', 
+'TokenInfo', 'TransactionInfo', 'Tools', 'ETHTools', 'ToolsList', 'Broadcast', 'Exchange', 'Issuance', 'Send', 'ETHSend', 'Receive', 'Sign', 'Welcome', 'Passphrase', 'Scan', 'QRCode', 'TransactionPriority', 'Bet', 'Dividend', 'Callback'], icon:{57:'resources/icons/wallet-icon-57.png', 72:'resources/icons/wallet-icon-72.png', 114:'resources/icons/wallet-icon-114.png', 144:'resources/icons/wallet-icon-144.png'}, isIconPrecomposed:true, startupImage:{'320x460':'resources/startup/320x460.jpg', '640x920':'resources/startup/640x920.png', 
 '768x1004':'resources/startup/768x1004.png', '748x1024':'resources/startup/748x1024.png', '1536x2008':'resources/startup/1536x2008.png', '1496x2048':'resources/startup/1496x2048.png'}, onUpdated:function() {
   FW.app.getController('Main').clearAppCache();
   Ext.Msg.confirm('Application Update', 'This application has just successfully been updated to the latest version. Reload now?', function(buttonId) {

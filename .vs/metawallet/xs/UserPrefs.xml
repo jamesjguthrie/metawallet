@@ -1,21 +1,17 @@
-﻿<Properties StartupConfiguration="{508430AB-CFD1-41AD-92B8-06EA8B8CE810}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="metawallet/app/view/tablet/Balances.js">
+﻿<Properties StartupConfiguration="{508430AB-CFD1-41AD-92B8-06EA8B8CE810}|Default" VersionControlDisabled="True">
+  <MonoDevelop.Ide.Workbench ActiveDocument="metawallet/app/view/ETHBalancesList.js">
     <Files>
-      <File FileName="metawallet/app/controller/Main.js" Line="2177" Column="12" />
-      <File FileName="metawallet/app.json" Line="115" Column="24" />
+      <File FileName="metawallet/app/controller/Main.js" Line="990" Column="89" />
       <File FileName="metawallet/resources/js/web3/dist/web3.js" Line="1" Column="1" />
-      <File FileName="metawallet/app.js" Line="64" Column="27" />
-      <File FileName="metawallet/app/view/Balances.js" Line="31" Column="46" />
-      <File FileName="metawallet/app/view/BalancesList.js" Line="11" Column="14" />
-      <File FileName="metawallet/app/view/ETHBalancesList.js" Line="84" Column="28" />
-      <File FileName="metawallet/app/view/phone/Balances.js" Line="12" Column="18" />
-      <File FileName="metawallet/app/view/tablet/Balances.js" Line="18" Column="22" />
+      <File FileName="metawallet/app.js" Line="74" Column="17" />
       <File FileName="metawallet/app/view/About.js" Line="65" Column="1" />
-      <File FileName="metawallet/app/model/Addresses.js" Line="23" Column="1" />
-      <File FileName="metawallet/app/store/Addresses.js" Line="21" Column="10" />
-      <File FileName="metawallet/app/view/Send.js" Line="395" Column="27" />
-      <File FileName="metawallet/app/view/ETHSend.js" Line="396" Column="24" />
-      <File FileName="metawallet/app/view/ETHTools.js" Line="7" Column="2" />
+      <File FileName="metawallet/app/view/Send.js" Line="66" Column="36" />
+      <File FileName="metawallet/app/view/ETHSend.js" Line="18" Column="25" />
+      <File FileName="metawallet/app/view/MainMenu.js" Line="60" Column="36" />
+      <File FileName="metawallet/app/view/Tools.js" Line="20" Column="27" />
+      <File FileName="metawallet/app/view/ToolsList.js" Line="1" Column="1" />
+      <File FileName="metawallet/app.json" Line="220" Column="30" />
+      <File FileName="metawallet/app/view/ETHBalancesList.js" Line="61" Column="20" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" />

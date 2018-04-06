@@ -76,7 +76,7 @@ Ext.define('FW.view.ETHBalancesList', {
                     me.setMasked(false);
                     me.refreshing = false;
                 };
-                me.main.getAddressBalances(FW.ETHWALLET_ADDRESS.address, cb);
+                me.main.getETHAddressBalances(FW.ETHWALLET_ADDRESS.address, cb);
             }
         }]
     },
