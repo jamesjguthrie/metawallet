@@ -2188,14 +2188,40 @@ Ext.define('FW.controller.Main', {
         });
     },
 
+    callETHSign: async function(transactionObject, ETHprivkey) {
+       
+        return await(web3.eth.accounts.signTransaction(transactionObject, ETHprivkey));
+    },
+
+    callETHSendSigned: async function(signedTx) {
+        return await(web3.eth.sendSignedTransaction(signedTx));
+    },
+
     ETHSend: function(destination, amount, gas, callback){
-        var transactionObject = {'to': destination,
-                                'value': amount,
-                                'gas': gas
+        var transactionObject = {from: FW.ETHWALLET_ADDRESS.address,
+                                to: destination,
+                                value: amount.toString(16),
+                                gasPrice: '0x9502F9000', //calculate this
+                                gasLimit: '0x3',         //and this
+                                nonce:  '0x00',
+                                chainId: 1
         }
+        console.log(transactionObject);
         //var web3 = new Web3("http://52.87.221.111:8545");
-        var signedtx = web3.eth.accounts.signTransaction(transactionObject, ETHprivkey);
-        web3.sendSignedTransaction(signedtx);
+        //var Tx = require('ethereumjs-tx');
+        var tx = new ethereumjs.Tx(transactionObject);
+        tx.sign(new ethereumjs.Buffer.Buffer(ETHprivkey.substr(2),'hex'));
+        var serializedTx = tx.serialize();
+        var txid = web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', console.log);
+        //var signed = web3.eth.accounts.signTransaction(transactionObject, ETHprivkey);
+        //var tx = new ethereumjs.Tx(signed);
+        //var serializedTx = tx.serialize();
+        //console.log(signed);
+        //console.log(signed.rawTransaction);
+        //web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
+        var cb = (typeof callback === 'function') ? callback : false; 
+        if (cb)
+            cb(txid);
     },
 
 

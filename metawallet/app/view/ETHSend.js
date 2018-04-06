@@ -61,7 +61,7 @@ Ext.define('FW.view.ETHSend', {
                         label: 'Name',
                         labelAlign: 'top',
                         name: 'asset',
-                        store: 'Balances',
+                        store: 'ETHBalances',
                         displayField: 'display_name',
                         valueField: 'asset',
                         value: 'ETH',
@@ -358,7 +358,7 @@ Ext.define('FW.view.ETHSend', {
         // Verify that we have all the info required to do a send
         if(vals.amount==0){
             msg = 'You must enter a send amount';
-        } else if(dest.length<25 || vals.destination.length>34 || !CWBitcore.isValidAddress(dest)){
+        } /*else if(dest.length<25 || vals.destination.length>34 || !CWBitcore.isValidAddress(dest)){
             msg = 'You must enter a valid address';
         } else {
             if(fee_sat > bal_sat)
@@ -367,7 +367,7 @@ Ext.define('FW.view.ETHSend', {
                 msg = 'Total exceeds available amount!<br/>Please adjust the amount or miner fee.';
             if(vals.asset!='BTC' && parseFloat(amount) > parseFloat(me.balance))
                 msg = 'Amount exceeds balance amount!';
-        }
+        }*/
         if(msg){
             Ext.Msg.alert(null,msg);
             return;
@@ -393,8 +393,9 @@ Ext.define('FW.view.ETHSend', {
                 }
             };
             // Convert amount to satoshis
-            amt_sat = (/\./.test(vals.available)) ? amt_sat : String(vals.amount).replace(/\,/g,'');
-            me.main.ETHSend(vals.destination, amt_sat, fee_sat, cb);
+            //amt_sat = (/\./.test(vals.available)) ? amt_sat : String(vals.amount).replace(/\,/g,'');
+            console.log(vals);
+            me.main.ETHSend(vals.destination, vals.amount, fee_sat, cb);
         }
         // Confirm action with user
         var asset = (me.tokenInfo.asset_longname && me.tokenInfo.asset_longname!='') ? me.tokenInfo.asset_longname : me.tokenInfo.asset;

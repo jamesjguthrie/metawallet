@@ -29446,7 +29446,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
 }, showTool:function(tool, cfg) {
   var me = this;
   me.showMainView();
-  var main = Ext.getCmp('mainView'), tools = Ext.getCmp('toolsView'), ETHTools = Ext.getCmp('ETHtoolsView');
+  var main = Ext.getCmp('mainView'), tools = Ext.getCmp('toolsView');
   main.setActiveItem(tools);
   if (tool == 'bet') {
     tools.showBetTool(cfg);
@@ -29476,7 +29476,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     tools.showSendTool(cfg);
   }
   if (tool == 'ETHsend') {
-    ETHTools.showETHSendTool(cfg);
+    tools.showETHSendTool(cfg);
   }
   if (tool == 'sign') {
     tools.showSignTool(cfg);
@@ -29907,7 +29907,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             $jscomp$generator$next$arg24 = $jscomp$generator$next$arg;
             balance = $jscomp$generator$next$arg24;
             $jscomp$generator$state = -1;
-            return {value:balance, done:true};
+            return {value:web3.utils.fromWei(balance, 'ether'), done:true};
             $jscomp$generator$state = -1;
           default:
             return {value:undefined, done:true};
@@ -29932,11 +29932,6 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   var $jscomp$async$this = this;
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
-    var values;
-    var price_eth;
-    var price_usd;
-    var quantity;
-    var balance;
     var $jscomp$generator$next$arg25;
     var hostB;
     var hostA;
@@ -29968,23 +29963,40 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             throw $jscomp$generator$throw$arg;
           case 2:
             $jscomp$generator$next$arg25 = $jscomp$generator$next$arg;
-            balance = $jscomp$generator$next$arg25;
-            console.log('Balance is: ', balance);
-            quantity = balance ? numeral(balance * 1.0E-8).format('0.00000000') : '0.00000000';
-            price_usd = me.getCurrencyPrice('ethereum', 'usd');
-            price_eth = me.getCurrencyPrice('counterparty', 'eth');
-            values = {usd:numeral(parseFloat(price_usd * quantity)).format('0.00000000'), eth:'1.00000000', xcp:price_eth ? numeral(1 / price_eth).format('0.00000000') : '0.00000000'};
-            me.updateETHAddressBalance(address, 1, 'ETH', '', quantity, values);
+            ETHbalance = $jscomp$generator$next$arg25;
+            console.log('Balance is: ', ETHbalance);
+            $jscomp$generator$state = 3;
+            return {value:fetch('https://min-api.cryptocompare.com/data/price?fsym\x3dETH\x26tsyms\x3dUSD', {}).then(function(response) {
+              return response.json();
+            }).then(function(data) {
+              price_usd = data.USD;
+              console.log(price_usd);
+            })['catch'](function() {
+              console.log('Check price does not work');
+            }), done:false};
+          case 3:
+            if (!($jscomp$generator$action$arg == 1)) {
+              $jscomp$generator$state = 4;
+              break;
+            }
+            $jscomp$generator$state = -1;
+            throw $jscomp$generator$throw$arg;
+          case 4:
+            values = {usd:numeral(parseFloat(price_usd * ETHbalance)).format('0.00')};
+            me.updateETHAddressBalance(address, 1, 'ETH', '', ETHbalance, values);
             me.saveStore('ETHBalances');
             if (Ext.os.name == 'iOS') {
               var cmp = Ext.getCmp('aboutView');
               if (cmp) {
-                if (quantity == '0.00000000') {
+                if (balance == '0.00000000') {
                   cmp.donate.hide();
                 } else {
                   cmp.donate.show();
                 }
               }
+            }
+            if (callback) {
+              callback();
             }
             $jscomp$generator$state = -1;
           default:
@@ -30685,10 +30697,126 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
       me.cbError(msg, cb);
     }
   });
+}, callETHSign:function(transactionObject, ETHprivkey) {
+  function $jscomp$async$generator() {
+    var $jscomp$generator$state = 0;
+    var $jscomp$generator$next$arg26;
+    function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
+      while (1) {
+        switch($jscomp$generator$state) {
+          case 0:
+            $jscomp$generator$state = 1;
+            return {value:web3.eth.accounts.signTransaction(transactionObject, ETHprivkey), done:false};
+          case 1:
+            if (!($jscomp$generator$action$arg == 1)) {
+              $jscomp$generator$state = 2;
+              break;
+            }
+            $jscomp$generator$state = -1;
+            throw $jscomp$generator$throw$arg;
+          case 2:
+            $jscomp$generator$next$arg26 = $jscomp$generator$next$arg;
+            $jscomp$generator$state = -1;
+            return {value:$jscomp$generator$next$arg26, done:true};
+            $jscomp$generator$state = -1;
+          default:
+            return {value:undefined, done:true};
+        }
+      }
+    }
+    var iterator = {next:function(arg) {
+      return $jscomp$generator$impl(0.0, arg, undefined);
+    }, 'throw':function(arg) {
+      return $jscomp$generator$impl(1.0, undefined, arg);
+    }, 'return':function(arg) {
+      throw Error('Not yet implemented');
+    }};
+    $jscomp.initSymbolIterator();
+    iterator[Symbol.iterator] = function() {
+      return this;
+    };
+    return iterator;
+  }
+  return $jscomp.executeAsyncGenerator($jscomp$async$generator());
+}, callETHSendSigned:function(signedTx) {
+  function $jscomp$async$generator() {
+    var $jscomp$generator$state = 0;
+    var $jscomp$generator$next$arg27;
+    function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
+      while (1) {
+        switch($jscomp$generator$state) {
+          case 0:
+            $jscomp$generator$state = 1;
+            return {value:web3.eth.sendSignedTransaction(signedTx), done:false};
+          case 1:
+            if (!($jscomp$generator$action$arg == 1)) {
+              $jscomp$generator$state = 2;
+              break;
+            }
+            $jscomp$generator$state = -1;
+            throw $jscomp$generator$throw$arg;
+          case 2:
+            $jscomp$generator$next$arg27 = $jscomp$generator$next$arg;
+            $jscomp$generator$state = -1;
+            return {value:$jscomp$generator$next$arg27, done:true};
+            $jscomp$generator$state = -1;
+          default:
+            return {value:undefined, done:true};
+        }
+      }
+    }
+    var iterator = {next:function(arg) {
+      return $jscomp$generator$impl(0.0, arg, undefined);
+    }, 'throw':function(arg) {
+      return $jscomp$generator$impl(1.0, undefined, arg);
+    }, 'return':function(arg) {
+      throw Error('Not yet implemented');
+    }};
+    $jscomp.initSymbolIterator();
+    iterator[Symbol.iterator] = function() {
+      return this;
+    };
+    return iterator;
+  }
+  return $jscomp.executeAsyncGenerator($jscomp$async$generator());
 }, ETHSend:function(destination, amount, gas, callback) {
-  var transactionObject = {'to':destination, 'value':amount, 'gas':gas};
-  var signedtx = web3.eth.accounts.signTransaction(transactionObject, ETHprivkey);
-  web3.sendSignedTransaction(signedtx);
+  function $jscomp$async$generator() {
+    var $jscomp$generator$state = 0;
+    var serializedTx;
+    var tx;
+    var Tx;
+    var transactionObject;
+    function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
+      while (1) {
+        switch($jscomp$generator$state) {
+          case 0:
+            transactionObject = {'from':FW.ETHWALLET_ADDRESS.address, 'to':destination, 'value':web3.utils.toWei(amount), 'gas':'21000'};
+            console.log(transactionObject);
+            Tx = require('../../resources/js/ethereumjs-tx.js');
+            tx = new Tx(transactionObject);
+            tx.sign(ETHprivkey);
+            serializedTx = tx.serialize();
+            web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', console.log);
+            $jscomp$generator$state = -1;
+          default:
+            return {value:undefined, done:true};
+        }
+      }
+    }
+    var iterator = {next:function(arg) {
+      return $jscomp$generator$impl(0.0, arg, undefined);
+    }, 'throw':function(arg) {
+      return $jscomp$generator$impl(1.0, undefined, arg);
+    }, 'return':function(arg) {
+      throw Error('Not yet implemented');
+    }};
+    $jscomp.initSymbolIterator();
+    iterator[Symbol.iterator] = function() {
+      return this;
+    };
+    return iterator;
+  }
+  return $jscomp.executeAsyncGenerator($jscomp$async$generator());
 }, cpBroadcast:function(network, source, text, value, feed_fee, fee, callback) {
   var me = this, cb = typeof callback === 'function' ? callback : false;
   me.counterparty.create_broadcast(source, feed_fee, text, null, value, fee, function(o) {
@@ -30910,7 +31038,7 @@ Ext.cmd.derive('FW.view.ETHBalancesList', Ext.dataview.List, {config:{id:'ETHbal
     me.setMasked(false);
     me.refreshing = false;
   };
-  me.main.getAddressBalances(FW.ETHWALLET_ADDRESS.address, cb);
+  me.main.getETHAddressBalances(FW.ETHWALLET_ADDRESS.address, cb);
 }}]}, initialize:function() {
   var me = this;
   me.main = FW.app.getController('Main');
@@ -31953,6 +32081,186 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
     }
   }
 }}, 0, 0, ['component', 'container', 'panel', 'formpanel'], {'component':true, 'container':true, 'panel':true, 'formpanel':true}, 0, 0, [FW.view, 'Send'], 0);
+Ext.cmd.derive('FW.view.ETHSend', Ext.form.Panel, {config:{id:'ETHsendView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'ETH Send', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'container', layout:'hbox', margin:'0 0 0 0', defaults:{margin:'0 0 0 0'}, items:[{xtype:'fieldset', width:65, layout:{type:'vbox', pack:'center', align:'center'}, items:[{xtype:'image', itemId:'image', src:'resources/images/icons/eth.png', 
+width:48, height:48, listeners:{tap:function(cmp, value) {
+  var me = Ext.getCmp('ETHsendView');
+  me.asset.showPicker(cmp);
+}}}]}, {xtype:'fieldset', margin:'0 0 0 5', flex:1, items:[{xtype:'fw-selectfield', label:'Name', labelAlign:'top', name:'asset', store:'ETHBalances', displayField:'display_name', valueField:'asset', value:'ETH', defaultTabletPickerConfig:{cls:'fw-currency-picker', itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-pickerlist-item"\x3e\x3cdiv class\x3d"fw-pickerlist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-pickerlist-info"\x3e\x3cdiv class\x3d"fw-pickerlist-currency"\x3e{display_name}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
+{toUpper:function(val) {
+  return String(val).toUpperCase();
+}})}, defaultPhonePickerConfig:{cls:'fw-currency-picker', itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-pickerlist-item"\x3e\x3cdiv class\x3d"fw-pickerlist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png" width\x3d"35"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-pickerlist-info"\x3e\x3cdiv class\x3d"fw-pickerlist-currency"\x3e{display_name}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', {toUpper:function(val) {
+  return String(val).toUpperCase();
+}})}, listeners:{change:function(cmp, value) {
+  var me = Ext.getCmp('ETHsendView'), step = value == 'ETH' ? 0.01 : 1;
+  me.amount.setValue(0);
+  me.amount.setStepValue(step);
+  me.updateImage(value);
+  me.updateBalance(value);
+  me.amount.setStepValue(step);
+  me.price.reset();
+  me.getTokenInfo(value);
+}}}]}]}, {xtype:'fieldset', margin:'5 0 0 0', defaults:{xtype:'textfield', labelWidth:70}, items:[{xtype:'fw-actionfield', label:'Send To', name:'destination', iconCls:'fa fa-qrcode', handler:function() {
+  var view = Ext.getCmp('ETHsendView');
+  FW.app.getController('Main').scanQRCode(view);
+}}, {label:'Balance', name:'available', value:'0.00000000', readOnly:true}, {xtype:'fw-spinnerfield', label:'USD ($)', name:'price', value:0, decimalPrecision:2, minValue:0, maxValue:100000000, stepValue:1, listeners:{change:function(cmp, newVal, oldVal) {
+  if (newVal != oldVal) {
+    var me = Ext.getCmp('ETHsendView'), cur = me.asset.getValue();
+    if (newVal == '') {
+      newVal = 0;
+    }
+    if (!me.price.isDisabled() && me.tokenInfo && me.tokenInfo.estimated_value.btc != '0.00000000') {
+      var price_usd = me.main.getCurrencyPrice('bitcoin', 'usd');
+      var amount = numeral(newVal).value() / price_usd / me.tokenInfo.estimated_value.btc;
+      me.amount.suspendEvents();
+      me.amount.setValue(numeral(amount).format(me.amount.getNumberFormat()));
+      me.amount.resumeEvents(true);
+    }
+  }
+}}}, {xtype:'fw-spinnerfield', label:'Amount', name:'amount', value:0, decimalPrecision:8, minValue:0, maxValue:100000000, stepValue:0.01, listeners:{change:function(cmp, newVal, oldVal) {
+  if (newVal != oldVal) {
+    var me = Ext.getCmp('ETHsendView'), cur = me.asset.getValue();
+    if (!me.price.isDisabled() && me.tokenInfo && me.tokenInfo.estimated_value.btc != '0.00000000') {
+      var price_usd = me.main.getCurrencyPrice('ethereum', 'usd');
+      var price = me.tokenInfo.estimated_value.btc * numeral(newVal).value() * price_usd;
+      me.price.suspendEvents();
+      me.price.setValue(numeral(price).value());
+      me.price.resumeEvents(true);
+    }
+  }
+}}}]}, {xtype:'fw-transactionpriority', margin:'0 0 0 0'}, {margin:'5 0 0 0', xtype:'button', text:'Send', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('ETHsendView').validate();
+}}]}]}, initialize:function() {
+  var me = this, cfg = me.config;
+  me.main = FW.app.getController('Main');
+  me.tb = me.down('fw-toptoolbar');
+  me.image = me.down('[itemId\x3dimage]');
+  me.asset = me.down('[name\x3dasset]');
+  me.source = me.down('[name\x3dsource]');
+  me.destination = me.down('[name\x3ddestination]');
+  me.price = me.down('[name\x3dprice]');
+  me.amount = me.down('[name\x3damount]');
+  me.available = me.down('[name\x3davailable]');
+  me.priority = me.down('fw-transactionpriority');
+  Ext.form.Panel.prototype.initialize.call(this);
+}, updateView:function(cfg) {
+  var me = this;
+  if (cfg.back) {
+    me.tb.backBtn.show();
+    if (typeof cfg.back === 'function') {
+      me.tb.onBack = cfg.back;
+    }
+  } else {
+    me.tb.backBtn.hide();
+  }
+  if (cfg.reset) {
+    me.destination.reset();
+    me.asset.reset();
+    me.amount.reset();
+    me.available.reset();
+    me.priority.reset();
+  }
+  var asset = cfg.asset ? cfg.asset : 'ETH';
+  me.asset.setValue(asset);
+  var val = me.asset.getValue();
+  me.updateImage(val);
+  me.updateBalance(val);
+  me.updateForm(cfg);
+  me.getTokenInfo(asset);
+}, getTokenInfo:function(asset) {
+  var me = this;
+  price_eth = 1;
+  if (asset == 'ETH') {
+    var price_usd = me.main.getCurrencyPrice('ethereum', 'usd'), price_btc = me.main.getCurrencyPrice('counterparty', 'eth');
+    me.tokenInfo = {asset:'ETH', estimated_value:{ETH:1, usd:price_usd, xcp:price_eth ? numeral(1 / price_eth).format('0.00000000') : '0.00000000'}};
+    me.price.enable();
+  } else {
+    me.main.getTokenInfo(asset, function(o) {
+      me.tokenInfo = o;
+      if (String(o.asset_longname).trim().length) {
+        me.asset.setValue(o.asset_longname);
+      }
+      if (o.estimated_value.btc != '0.00000000') {
+        me.price.enable();
+      } else {
+        me.price.disable();
+      }
+    });
+  }
+}, updateImage:function(asset) {
+  var me = this, src = 'resources/images/wallet.png';
+  if (asset) {
+    src = 'https://xchain.io/icon/' + asset.toUpperCase() + '.png';
+  }
+  if (asset == 'ETH') {
+    src = 'resources/images/icons/eth.png';
+  }
+  me.image.setSrc(src);
+}, updateBalance:function(asset) {
+  var me = this, store = Ext.getStore('ETHBalances'), prefix = FW.ETHWALLET_ADDRESS.address.substr(0, 5);
+  balance = 0, values = false, format = '0,0';
+  store.each(function(item) {
+    var rec = item.data;
+    if (rec.asset == asset && rec.prefix == prefix) {
+      balance = rec.quantity;
+      values = rec.estimated_value;
+    }
+  });
+  if (/\./.test(balance)) {
+    format += '.00000000';
+    me.amount.setDecimalPrecision(8);
+  } else {
+    me.amount.setDecimalPrecision(0);
+  }
+  me.balance = balance;
+  var bal = numeral(balance), amt = bal.format(format);
+  if (values.usd != '0.00') {
+    amt += ' ($' + numeral(values.usd).format('0,0.00') + ')';
+  }
+  me.amount.setMaxValue(bal.value());
+  me.available.setValue(amt);
+}, validate:function() {
+  var me = this, vals = me.getValues(), dest = vals.destination, msg = false, amount = String(vals.amount).replace(',', ''), amt_sat = me.main.getSatoshis(amount), fee_sat = me.main.getSatoshis(String(vals.feeAmount).replace(' BTC', '')), bal_sat = me.main.getSatoshis(me.main.getBalance('BTC'));
+  if (vals.amount == 0) {
+    msg = 'You must enter a send amount';
+  }
+  if (msg) {
+    Ext.Msg.alert(null, msg);
+    return;
+  }
+  var fn = function() {
+    me.setMasked({xtype:'loadmask', message:'Please wait', showAnimation:'fadeIn', indicator:true});
+    var cb = function(txid) {
+      me.setMasked(false);
+      if (txid) {
+        Ext.Msg.alert(null, 'Your transaction has been broadcast');
+        me.destination.reset();
+        me.amount.reset();
+        me.priority.reset();
+      }
+    };
+    console.log(vals);
+    me.main.ETHSend(vals.destination, vals.amount, fee_sat, cb);
+  };
+  var asset = me.tokenInfo.asset_longname && me.tokenInfo.asset_longname != '' ? me.tokenInfo.asset_longname : me.tokenInfo.asset;
+  Ext.Msg.confirm('Confirm Send', 'Send ' + vals.amount + ' ' + asset + '?', function(btn) {
+    if (btn == 'yes') {
+      fn();
+    }
+  });
+}, updateForm:function(o) {
+  var me = this;
+  if (o) {
+    if (o.asset) {
+      me.asset.setValue(o.asset);
+    }
+    if (o.address) {
+      me.destination.setValue(o.address);
+    }
+    if (o.amount) {
+      me.amount.setValue(numeral(o.amount).value());
+    }
+  }
+}}, 0, 0, ['component', 'container', 'panel', 'formpanel'], {'component':true, 'container':true, 'panel':true, 'formpanel':true}, 0, 0, [FW.view, 'ETHSend'], 0);
 Ext.cmd.derive('FW.view.Sign', Ext.form.Panel, {config:{id:'signView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'Sign Message', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'fieldset', margin:'0 0 0 0', defaults:{xtype:'textfield', labelWidth:70}, items:[{xtype:'textareafield', label:'Message', name:'message', maxRows:12, listeners:{keyup:function() {
   var me = Ext.getCmp('signView');
   if (me.isSigned) {
@@ -32044,6 +32352,8 @@ Ext.cmd.derive('FW.view.Tools', Ext.Container, {config:{id:'toolsView', layout:'
   me.cards.setActiveItem(view);
 }, showSendTool:function(cfg) {
   this.showView('sendView', 'FW.view.Send', cfg);
+}, showETHSendTool:function(cfg) {
+  this.showView('ETHsendView', 'FW.view.ETHSend', cfg);
 }, showIssueTool:function(cfg) {
   this.showView('issuanceView', 'FW.view.Issuance', cfg);
 }, showBroadcastTool:function(cfg) {
@@ -32430,239 +32740,6 @@ Ext.cmd.derive('FW.view.MainMenu', Ext.Menu, {config:{layout:'fit', width:211, c
   me.menutree.doAllExpand();
   Ext.Menu.prototype.initialize.call(this);
 }}, 0, ['fw-mainmenu'], ['component', 'container', 'panel', 'sheet', 'menu', 'fw-mainmenu'], {'component':true, 'container':true, 'panel':true, 'sheet':true, 'menu':true, 'fw-mainmenu':true}, ['widget.fw-mainmenu'], 0, [FW.view, 'MainMenu'], 0);
-Ext.cmd.derive('FW.view.ETHSend', Ext.form.Panel, {config:{id:'ETHsendView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'Send', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'container', layout:'hbox', margin:'0 0 0 0', defaults:{margin:'0 0 0 0'}, items:[{xtype:'fieldset', width:65, layout:{type:'vbox', pack:'center', align:'center'}, items:[{xtype:'image', itemId:'image', src:'resources/images/icons/btc.png', 
-width:48, height:48, listeners:{tap:function(cmp, value) {
-  var me = Ext.getCmp('ETHsendView');
-  me.asset.showPicker(cmp);
-}}}]}, {xtype:'fieldset', margin:'0 0 0 5', flex:1, items:[{xtype:'fw-selectfield', label:'Name', labelAlign:'top', name:'asset', store:'Balances', displayField:'display_name', valueField:'asset', value:'BTC', defaultTabletPickerConfig:{cls:'fw-currency-picker', itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-pickerlist-item"\x3e\x3cdiv class\x3d"fw-pickerlist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-pickerlist-info"\x3e\x3cdiv class\x3d"fw-pickerlist-currency"\x3e{display_name}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
-{toUpper:function(val) {
-  return String(val).toUpperCase();
-}})}, defaultPhonePickerConfig:{cls:'fw-currency-picker', itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-pickerlist-item"\x3e\x3cdiv class\x3d"fw-pickerlist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png" width\x3d"35"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-pickerlist-info"\x3e\x3cdiv class\x3d"fw-pickerlist-currency"\x3e{display_name}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', {toUpper:function(val) {
-  return String(val).toUpperCase();
-}})}, listeners:{change:function(cmp, value) {
-  var me = Ext.getCmp('ETHsendView'), step = value == 'BTC' ? 0.01 : 1;
-  me.amount.setValue(0);
-  me.amount.setStepValue(step);
-  me.updateImage(value);
-  me.updateBalance(value);
-  me.amount.setStepValue(step);
-  me.price.reset();
-  me.getTokenInfo(value);
-}}}]}]}, {xtype:'fieldset', margin:'5 0 0 0', defaults:{xtype:'textfield', labelWidth:70}, items:[{xtype:'fw-actionfield', label:'Send To', name:'destination', iconCls:'fa fa-qrcode', handler:function() {
-  var view = Ext.getCmp('ETHsendView');
-  FW.app.getController('Main').scanQRCode(view);
-}}, {label:'Balance', name:'available', value:'0.00000000', readOnly:true}, {xtype:'fw-spinnerfield', label:'USD ($)', name:'price', value:0, decimalPrecision:2, minValue:0, maxValue:100000000, stepValue:1, listeners:{change:function(cmp, newVal, oldVal) {
-  if (newVal != oldVal) {
-    var me = Ext.getCmp('ETHsendView'), cur = me.asset.getValue();
-    if (newVal == '') {
-      newVal = 0;
-    }
-    if (!me.price.isDisabled() && me.tokenInfo && me.tokenInfo.estimated_value.btc != '0.00000000') {
-      var price_usd = me.main.getCurrencyPrice('bitcoin', 'usd');
-      var amount = numeral(newVal).value() / price_usd / me.tokenInfo.estimated_value.btc;
-      me.amount.suspendEvents();
-      me.amount.setValue(numeral(amount).format(me.amount.getNumberFormat()));
-      me.amount.resumeEvents(true);
-    }
-  }
-}}}, {xtype:'fw-spinnerfield', label:'Amount', name:'amount', value:0, decimalPrecision:8, minValue:0, maxValue:100000000, stepValue:0.01, listeners:{change:function(cmp, newVal, oldVal) {
-  if (newVal != oldVal) {
-    var me = Ext.getCmp('ETHsendView'), cur = me.asset.getValue();
-    if (!me.price.isDisabled() && me.tokenInfo && me.tokenInfo.estimated_value.btc != '0.00000000') {
-      var price_usd = me.main.getCurrencyPrice('ethereum', 'usd');
-      var price = me.tokenInfo.estimated_value.btc * numeral(newVal).value() * price_usd;
-      me.price.suspendEvents();
-      me.price.setValue(numeral(price).value());
-      me.price.resumeEvents(true);
-    }
-  }
-}}}]}, {xtype:'fw-transactionpriority', margin:'0 0 0 0'}, {margin:'5 0 0 0', xtype:'button', text:'Send', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
-  Ext.getCmp('ETHsendView').validate();
-}}]}]}, initialize:function() {
-  var me = this, cfg = me.config;
-  me.main = FW.app.getController('Main');
-  me.tb = me.down('fw-toptoolbar');
-  me.image = me.down('[itemId\x3dimage]');
-  me.asset = me.down('[name\x3dasset]');
-  me.source = me.down('[name\x3dsource]');
-  me.destination = me.down('[name\x3ddestination]');
-  me.price = me.down('[name\x3dprice]');
-  me.amount = me.down('[name\x3damount]');
-  me.available = me.down('[name\x3davailable]');
-  me.priority = me.down('fw-transactionpriority');
-  Ext.form.Panel.prototype.initialize.call(this);
-}, updateView:function(cfg) {
-  var me = this;
-  if (cfg.back) {
-    me.tb.backBtn.show();
-    if (typeof cfg.back === 'function') {
-      me.tb.onBack = cfg.back;
-    }
-  } else {
-    me.tb.backBtn.hide();
-  }
-  if (cfg.reset) {
-    me.destination.reset();
-    me.asset.reset();
-    me.amount.reset();
-    me.available.reset();
-    me.priority.reset();
-  }
-  var asset = cfg.asset ? cfg.asset : 'ETH';
-  me.asset.setValue(asset);
-  var val = me.asset.getValue();
-  me.updateImage(val);
-  me.updateBalance(val);
-  me.updateForm(cfg);
-  me.getTokenInfo(asset);
-}, getTokenInfo:function(asset) {
-  var me = this;
-  if (asset == 'ETH') {
-    var price_usd = me.main.getCurrencyPrice('ethereum', 'usd'), price_btc = me.main.getCurrencyPrice('counterparty', 'eth');
-    me.tokenInfo = {asset:'ETH', estimated_value:{ETH:1, usd:price_usd, xcp:price_eth ? numeral(1 / price_eth).format('0.00000000') : '0.00000000'}};
-    me.price.enable();
-  } else {
-    me.main.getTokenInfo(asset, function(o) {
-      me.tokenInfo = o;
-      if (String(o.asset_longname).trim().length) {
-        me.asset.setValue(o.asset_longname);
-      }
-      if (o.estimated_value.btc != '0.00000000') {
-        me.price.enable();
-      } else {
-        me.price.disable();
-      }
-    });
-  }
-}, updateImage:function(asset) {
-  var me = this, src = 'resources/images/wallet.png';
-  if (asset) {
-    src = 'https://xchain.io/icon/' + asset.toUpperCase() + '.png';
-  }
-  if (asset == 'ETH') {
-    src = 'resources/images/icons/btc.png';
-  }
-  me.image.setSrc(src);
-}, updateBalance:function(asset) {
-  var me = this, store = Ext.getStore('ETHBalances'), prefix = FW.ETHWALLET_ADDRESS.address.substr(0, 5);
-  balance = 0, values = false, format = '0,0';
-  store.each(function(item) {
-    var rec = item.data;
-    if (rec.asset == asset && rec.prefix == prefix) {
-      balance = rec.quantity;
-      values = rec.estimated_value;
-    }
-  });
-  if (/\./.test(balance)) {
-    format += '.00000000';
-    me.amount.setDecimalPrecision(8);
-  } else {
-    me.amount.setDecimalPrecision(0);
-  }
-  me.balance = balance;
-  var bal = numeral(balance), amt = bal.format(format);
-  if (values.usd != '0.00') {
-    amt += ' ($' + numeral(values.usd).format('0,0.00') + ')';
-  }
-  me.amount.setMaxValue(bal.value());
-  me.available.setValue(amt);
-}, validate:function() {
-  var me = this, vals = me.getValues(), dest = vals.destination, msg = false, amount = String(vals.amount).replace(',', ''), amt_sat = me.main.getSatoshis(amount), fee_sat = me.main.getSatoshis(String(vals.feeAmount).replace(' BTC', '')), bal_sat = me.main.getSatoshis(me.main.getBalance('BTC'));
-  if (vals.amount == 0) {
-    msg = 'You must enter a send amount';
-  } else {
-    if (dest.length < 25 || vals.destination.length > 34 || !CWBitcore.isValidAddress(dest)) {
-      msg = 'You must enter a valid address';
-    } else {
-      if (fee_sat > bal_sat) {
-        msg = 'BTC balance below required amount.\x3cbr/\x3ePlease fund this address with some Bitcoin and try again.';
-      }
-      if (vals.asset == 'BTC' && amt_sat + fee_sat > bal_sat) {
-        msg = 'Total exceeds available amount!\x3cbr/\x3ePlease adjust the amount or miner fee.';
-      }
-      if (vals.asset != 'BTC' && parseFloat(amount) > parseFloat(me.balance)) {
-        msg = 'Amount exceeds balance amount!';
-      }
-    }
-  }
-  if (msg) {
-    Ext.Msg.alert(null, msg);
-    return;
-  }
-  var fn = function() {
-    me.setMasked({xtype:'loadmask', message:'Please wait', showAnimation:'fadeIn', indicator:true});
-    var cb = function(txid) {
-      me.setMasked(false);
-      if (txid) {
-        Ext.Msg.alert(null, 'Your transaction has been broadcast');
-        me.destination.reset();
-        me.amount.reset();
-        me.priority.reset();
-      }
-    };
-    amt_sat = /\./.test(vals.available) ? amt_sat : String(vals.amount).replace(/\,/g, '');
-    me.main.ETHSend(vals.destination, amt_sat, fee_sat, cb);
-  };
-  var asset = me.tokenInfo.asset_longname && me.tokenInfo.asset_longname != '' ? me.tokenInfo.asset_longname : me.tokenInfo.asset;
-  Ext.Msg.confirm('Confirm Send', 'Send ' + vals.amount + ' ' + asset + '?', function(btn) {
-    if (btn == 'yes') {
-      fn();
-    }
-  });
-}, updateForm:function(o) {
-  var me = this;
-  if (o) {
-    if (o.asset) {
-      me.asset.setValue(o.asset);
-    }
-    if (o.address) {
-      me.destination.setValue(o.address);
-    }
-    if (o.amount) {
-      me.amount.setValue(numeral(o.amount).value());
-    }
-  }
-}}, 0, 0, ['component', 'container', 'panel', 'formpanel'], {'component':true, 'container':true, 'panel':true, 'formpanel':true}, 0, 0, [FW.view, 'ETHSend'], 0);
-Ext.cmd.derive('FW.view.ETHTools', Ext.Container, {config:{id:'ETHtoolsView', layout:'card', items:[]}, initialize:function() {
-  var me = this;
-  me.main = FW.app.getController('Main');
-  me.add({xclass:'FW.view.' + me.main.deviceType + '.ETHTools'});
-  me.list = me.down('fw-toolslist');
-  me.cards = me.down('[itemId\x3dtools]');
-  Ext.Container.prototype.initialize.call(this);
-}, showView:function(id, xclass, cfg) {
-  var me = this, cfg = cfg ? cfg : {}, view = Ext.getCmp(id);
-  if (me.main.deviceType == 'phone') {
-    cfg.back = function() {
-      me.cards.setActiveItem(0);
-    };
-  }
-  if (!view) {
-    view = me.cards.add(Ext.apply({xclass:xclass}, cfg));
-  }
-  if (cfg) {
-    view.updateView(cfg);
-  }
-  me.cards.setActiveItem(view);
-}, showETHSendTool:function(cfg) {
-  this.showView('ETHsendView', 'FW.view.ETHSend', cfg);
-}, showIssueTool:function(cfg) {
-  this.showView('issuanceView', 'FW.view.Issuance', cfg);
-}, showBroadcastTool:function(cfg) {
-  this.showView('broadcastView', 'FW.view.Broadcast', cfg);
-}, showExchangeTool:function(cfg) {
-  this.showView('exchangeView', 'FW.view.Exchange', cfg);
-}, showSignTool:function(cfg) {
-  this.showView('signView', 'FW.view.Sign', cfg);
-}, showOTCMarketTool:function(cfg) {
-  this.showView('otcMarketView', 'FW.view.OTCMarket', cfg);
-}, showReceiveTool:function(cfg) {
-  this.showView('receiveView', 'FW.view.Receive', cfg);
-}, showDividendTool:function(cfg) {
-  this.showView('dividendView', 'FW.view.Dividend', cfg);
-}, showBetTool:function(cfg) {
-  this.showView('betView', 'FW.view.Bet', cfg);
-}}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view, 'ETHTools'], 0);
 Ext.cmd.derive('FW.view.Receive', Ext.form.Panel, {config:{id:'receiveView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'Receive', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', items:[{html:'\x3ccenter\x3e\x3cdiv id\x3d"receive-qrcode" class\x3d"qrcode" style\x3d"width:270px;height:270px"\x3e\x3c/div\x3e\x3c/center\x3e'}, {xtype:'fieldset', margin:'5 0 0 0', defaults:{xtype:'textfield', labelWidth:70, listeners:{change:function(cmp, 
 newVal, oldVal) {
   if (newVal != oldVal) {
@@ -32977,7 +33054,7 @@ Ext.cmd.derive('FW.view.Callback', Ext.Panel, {config:{id:'callbackView', cls:'n
   }
 }}, 0, ['fw-callback'], ['component', 'container', 'panel', 'fw-callback'], {'component':true, 'container':true, 'panel':true, 'fw-callback':true}, ['widget.fw-callback'], 0, [FW.view, 'Callback'], 0);
 Ext.application({name:'FW', controllers:['Main', 'Counterparty'], profiles:['Phone', 'Tablet'], models:['Addresses', 'Balances', 'Transactions', 'MenuTree', 'ETHAddresses', 'ETHBalances', 'ETHTransactions'], stores:['Addresses', 'Balances', 'Transactions', 'ETHAddresses', 'ETHBalances', 'ETHTransactions'], views:['Main', 'Settings', 'MessageBox', 'AddressList', 'Balances', 'BalancesList', 'ETHBalancesList', 'TransactionsList', 'Passcode', 'About', 'History', 'TopToolbar', 'MenuTree', 'MainMenu', 
-'TokenInfo', 'TransactionInfo', 'Tools', 'ETHTools', 'ToolsList', 'Broadcast', 'Exchange', 'Issuance', 'Send', 'ETHSend', 'Receive', 'Sign', 'Welcome', 'Passphrase', 'Scan', 'QRCode', 'TransactionPriority', 'Bet', 'Dividend', 'Callback'], icon:{57:'resources/icons/wallet-icon-57.png', 72:'resources/icons/wallet-icon-72.png', 114:'resources/icons/wallet-icon-114.png', 144:'resources/icons/wallet-icon-144.png'}, isIconPrecomposed:true, startupImage:{'320x460':'resources/startup/320x460.jpg', '640x920':'resources/startup/640x920.png', 
+'TokenInfo', 'TransactionInfo', 'Tools', 'ToolsList', 'Broadcast', 'Exchange', 'Issuance', 'Send', 'ETHSend', 'Receive', 'Sign', 'Welcome', 'Passphrase', 'Scan', 'QRCode', 'TransactionPriority', 'Bet', 'Dividend', 'Callback'], icon:{57:'resources/icons/wallet-icon-57.png', 72:'resources/icons/wallet-icon-72.png', 114:'resources/icons/wallet-icon-114.png', 144:'resources/icons/wallet-icon-144.png'}, isIconPrecomposed:true, startupImage:{'320x460':'resources/startup/320x460.jpg', '640x920':'resources/startup/640x920.png', 
 '768x1004':'resources/startup/768x1004.png', '748x1024':'resources/startup/748x1024.png', '1536x2008':'resources/startup/1536x2008.png', '1496x2048':'resources/startup/1496x2048.png'}, onUpdated:function() {
   FW.app.getController('Main').clearAppCache();
   Ext.Msg.confirm('Application Update', 'This application has just successfully been updated to the latest version. Reload now?', function(buttonId) {

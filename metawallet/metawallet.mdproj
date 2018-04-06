@@ -3727,5 +3727,6 @@
     <None Include="app\model\ETHTransactions.js" />
     <None Include="app\view\ETHBalancesList.js" />
     <None Include="app\view\ETHSend.js" />
+    <None Include="resources\js\ethereumjs-tx.js" />
   </ItemGroup>
 </Project>
