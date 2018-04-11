@@ -1,0 +1,6 @@
+projectKey=metawallet1
+serverUrl=http://localhost:9000
+serverVersion=7.0.0.36138
+dashboardUrl=http://localhost:9000/dashboard/index/metawallet1
+ceTaskId=AWKtFJ4tX5hYCoA0vFhF
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AWKtFJ4tX5hYCoA0vFhF
