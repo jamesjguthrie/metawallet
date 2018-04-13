@@ -356,7 +356,7 @@ Ext.define('FW.view.Send', {
         // Verify that we have all the info required to do a send
         if(vals.amount==0){
             msg = 'You must enter a send amount';
-        } else if(dest.length<25 || vals.destination.length>34 || !CWBitcore.isValidAddress(dest)){
+        } /*else if(dest.length<25 || vals.destination.length>34 || !CWBitcore.isValidAddress(dest)){
             msg = 'You must enter a valid address';
         } else {
             if(fee_sat > bal_sat)
@@ -365,7 +365,7 @@ Ext.define('FW.view.Send', {
                 msg = 'Total exceeds available amount!<br/>Please adjust the amount or miner fee.';
             if(vals.asset!='BTC' && parseFloat(amount) > parseFloat(me.balance))
                 msg = 'Amount exceeds balance amount!';
-        }
+        }*/
         if(msg){
             Ext.Msg.alert(null,msg);
             return;

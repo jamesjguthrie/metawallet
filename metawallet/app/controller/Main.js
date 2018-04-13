@@ -38,34 +38,30 @@ Ext.define('FW.controller.Main', {
         FW.WALLET_ADDRESS = sm.getItem('address') || null;  // Current wallet address info
         FW.TOUCHID        = sm.getItem('touchid') || false; // TouchID Authentication enabled (iOS 8+)
         FW.NETWORK_INFO   = {};                             // latest network information (price, fees, unconfirmed tx, etc)
-        FW.API_KEYS       = {
-            BLOCKTRAIL: 'efb0aae5420f167113cc81a9edf7b276d40c2565'
-        }
+        FW.API_KEYS       = {};
         FW.ETHWALLET_HEX = null;                           // HD wallet Hex key
         FW.ETHWALLET_KEYS = {};                             // Object containing of address/private keys
         FW.ETHWALLET_NETWORK = sm.getItem('ETHnetwork') || 1;     // (1=Mainnet, 2=Testnet)
         FW.ETHWALLET_PREFIX = sm.getItem('ETHprefix') || null;  // 4-char wallet hex prefix (used to quickly find addresses associated with this wallet in datastore)
         FW.ETHWALLET_ADDRESS = sm.getItem('ETHaddress') || null;  // Current wallet address info
         FW.ETHNETWORK_INFO = {};                             // latest network information (price, fees, unconfirmed tx, etc)
-        FW.ETHAPI_KEYS = {
-            BLOCKTRAIL: 'efb0aae5420f167113cc81a9edf7b276d40c2565' 
-        }
+        FW.ETHAPI_KEYS = {};
 
         // Define default server/host settings
         FW.SERVER_INFO    = {
             mainnet: {
                 cpHost: '52.87.221.111',          // BTC Host
-                cpPort: 8544,                           // BTC Port
+                cpPort: 3001,                           // BTC Port
                 cpUser: 'metawallet',                   // BTC Username
                 cpPass: 'pass',                         // BTC Password
-                cpSSL: true                             // BTC SSL Enabled (true=https, false=http)
+                cpSSL: false                             // BTC SSL Enabled (true=https, false=http)
             },
             testnet: {
                 cpHost: '52.87.221.111',          // BTC Host
-                cpPort: 8544,                          // BTC Port
-                cpUser: 'rpc',                          // BTC Username
-                cpPass: '1234',                         // BTC Password
-                cpSSL: true                             // BTC SSL Enabled (true=https, false=http)
+                cpPort: 3001,                          // BTC Port
+                cpUser: 'metawallet',                          // BTC Username
+                cpPass: 'pass',                         // BTC Password
+                cpSSL: false                            // BTC SSL Enabled (true=https, false=http)
             }                           
         };
 
@@ -86,7 +82,8 @@ Ext.define('FW.controller.Main', {
             }
         };
 
-        // Define default miners fees (pull dynamic fee data from blocktrail.com API)
+        // Define miner fees
+        //check requirement for this 13-april
         var std = 0.0001
         FW.MINER_FEES = {
             standard: std,
@@ -94,7 +91,7 @@ Ext.define('FW.controller.Main', {
             fast: std * 5
         };
 
-        var ETHstd = 0.0001 //dunno yet
+        var ETHstd = 0.0001 //check requirement for this 13-april
         FW.ETHMINER_FEES = {
             standard: std,
             medium: std * 2,
@@ -952,24 +949,27 @@ Ext.define('FW.controller.Main', {
             addr   = (address) ? address : FW.WALLET_ADDRESS.address,
             prefix = addr.substr(0,5),
             store  = Ext.getStore('Balances'),
-            net    = (FW.WALLET_NETWORK==2) ? 'tbtc' : 'btc',
-            hostA  = (FW.WALLET_NETWORK==2) ? 'tbtc.blockr.io' : 'btc.blockr.io',
-            hostB  = (FW.WALLET_NETWORK==2) ? 'testnet.xchain.io' : 'xchain.io';
-        // Get Address balance from blocktrail
-        me.ajaxRequest({
-            url: 'https://api.blocktrail.com/v1/' + net + '/address/' + address + '?api_key=' + FW.API_KEYS.BLOCKTRAIL,
+            net    = (FW.WALLET_NETWORK==2) ? '52.87.221.111' : '52.87.221.111',
+            hostA  = (FW.WALLET_NETWORK==2) ? '52.87.221.111' : '52.87.221.111',
+            hostB  = (FW.WALLET_NETWORK==2) ? '52.87.221.111' : '52.87.221.111';
+        // Get Address balance from Insight API
+        me.ajaxRequest({ //recoded now test 13-april
+            url: 'http://52.87.221.111:3001/insight-api/addr/' + address,
+            headers: {
+                    
+                },
             success: function(o){
-                if(o.address){
+                if(o.addrStr){
                     var quantity  = (o.balance) ? numeral(o.balance * 0.00000001).format('0.00000000') : '0.00000000',
                         price_usd = me.getCurrencyPrice('bitcoin','usd'),
-                        price_btc = me.getCurrencyPrice('counterparty','btc'),
                         values    = { 
                             usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
                             btc: '1.00000000',
-                            xcp: (price_btc) ? numeral(1 / price_btc).format('0.00000000') : '0.00000000'
-                        };
+                            };
                     me.updateAddressBalance(address, 1, 'BTC','', quantity, values);
-                    me.saveStore('Balances');
+                    console.log("BTC Address ",address);
+                    console.log("Balance ",quantity);
+                    me.saveStore('Balances'); //change this to BTCBalances
                     // App store is rejecting app with donate button, so hide it if BTC balance is 0.00000000... shhh :)
                     if(Ext.os.name=='iOS'){
                         var cmp = Ext.getCmp('aboutView');
@@ -987,48 +987,10 @@ Ext.define('FW.controller.Main', {
                     callback();
             },
             failure: function(o){
-                // If the request to blocktrail API failed, fallback to slower blockr.io API
-                me.ajaxRequest({
-                    url: 'https://' + hostA + '/api/v1/address/info/' + address,
-                    success: function(o){
-                        if(o.data){
-                            var quantity  = (o.data.balance) ? numeral(o.data.balance).format('0.00000000') : '0.00000000',
-                                price_usd = me.getCurrencyPrice('bitcoin','usd'),
-                                price_btc = me.getCurrencyPrice('counterparty','btc'),
-                                values    = { 
-                                    usd: numeral(price_usd * quantity).format('0.00000000'),
-                                    btc: '1.00000000',
-                                    xcp: (price_btc) ? numeral(1 / price_btc).format('0.00000000') : '0.00000000'
-                                };
-                            me.updateAddressBalance(address, 1, 'BTC','', quantity, values);
-                            me.saveStore('Balances');
-                        }
-                    },
-                    callback: function(){
-                        // Handle processing callback now
-                        if(callback)
-                            callback();
-                    }
-                });
+                console.log("Insight API call fail at getAddressBalance");
             }
         });
-        // Get Asset balances
-        me.ajaxRequest({
-            url: 'https://' + hostB + '/api/balances/' + address,
-            success: function(o){
-                if(o.data){
-                    Ext.each(o.data, function(item){
-                        var type = (item.asset=='XCP') ? 1 : 2;
-                        me.updateAddressBalance(address, type, item.asset, item.asset_longname, item.quantity, item.estimated_value);
-                    });
-                } else {
-                    // Show 0.00000000 for XCP balance if we have none (prevent display on iOS)
-                    if(!(me.isNative && Ext.os.name=='iOS'))
-                        me.updateAddressBalance(address, 1, 'XCP', '', '0.00000000');
-                }
-                me.saveStore('Balances');
-            }
-        }, true);            
+            
     },
    
     callWeb3GetBalance: async function(address) {
@@ -1043,12 +1005,10 @@ Ext.define('FW.controller.Main', {
             addr = (address) ? address : FW.ETHWALLET_ADDRESS.address,
             prefix = addr.substr(0, 5),
             store = Ext.getStore('Balances'),
-            net = (FW.ETHWALLET_NETWORK == 2) ? 'tbtc' : 'btc',
-            hostA = (FW.ETHWALLET_NETWORK == 2) ? 'tbtc.blockr.io' : 'btc.blockr.io',
-            hostB = (FW.ETHWALLET_NETWORK == 2) ? 'testnet.xchain.io' : 'xchain.io';
+            net = (FW.ETHWALLET_NETWORK == 2) ? 'eth' : 'eth'
         console.log("address is: ", addr);
         ETHbalance = await(me.callWeb3GetBalance(addr));
-        console.log("Balance is: ",ETHbalance);
+        console.log("ETH Balance is: ",ETHbalance);
         await(fetch('https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD', {
         //modes go here
         }).then(function(response) {
@@ -1311,15 +1271,18 @@ Ext.define('FW.controller.Main', {
     // Handle getting Bitcoin transaction history
     getTransactionHistory: function(address, callback){
         var me    = this,
-            net   = (FW.WALLET_NETWORK==2) ? 'tbtc' : 'btc',
-            hostA = (FW.WALLET_NETWORK==2) ? 'tbtc.blockr.io' : 'btc.blockr.io',
-            hostB = (FW.WALLET_NETWORK==2) ? 'testnet.xchain.io' : 'xchain.io',
+            net   = (FW.WALLET_NETWORK==2) ? '52.87.221.111' : '52.87.221.111',
+            hostA = (FW.WALLET_NETWORK==2) ? '52.87.221.111' : '52.87.221.111',
+            hostB = (FW.WALLET_NETWORK==2) ? '52.87.221.111' : '52.87.221.111',
             types = ['bets','broadcasts','burns','dividends','issuances','orders','sends','mempool'];
-        // Get BTC transaction history from blocktrail
-        me.ajaxRequest({
-            url: 'https://api.blocktrail.com/v1/' + net + '/address/' + address + '/transactions?limit=100&sort_dir=desc&api_key=' + FW.API_KEYS.BLOCKTRAIL,
+        
+        me.ajaxRequest({ //recoded now test 13-april
+            url: 'http://52.87.221.111:3001/insight-api/addr/' + address,
+            headers: {
+                    
+                },
             success: function(o){
-                Ext.each(o.data, function(item,idx){
+                Ext.each(o.transactions, function(item,idx){
                     var time  = (item.block_height) ? moment(item.time,["YYYY-MM-DDTH:m:s"]).unix() : null,
                         value = numeral((item.estimated_value) * 0.00000001).format('0.00000000')
                     if(item.inputs[0].address==address)
@@ -1332,36 +1295,11 @@ Ext.define('FW.controller.Main', {
                     callback();
             },
             failure: function(o){
-                // If the request to blocktrail API failed, fallback to slower blockr.io API
-                me.ajaxRequest({
-                    url: 'https://' + hostA + '/api/v1/address/txs/' + address,
-                    success: function(o){
-                        if(o.data && o.data.txs){
-                            Ext.each(o.data.txs, function(item,idx){
-                                // Only pay attention to the last 100 transactions
-                                if(idx<99){
-                                    var time = moment(item.time_utc,["YYYY-MM-DDTH:m:s"]).unix();
-                                    me.updateTransactionHistory(address, item.tx, 'send', 'BTC', null, item.amount, time);
-                                }
-                            });
-                            me.saveStore('Transactions');
-                        }
-                        // Handle processing callback now
-                        if(callback)
-                            callback();
-                    },
-                    failure: function(o){
-                        // Handle processing callback now
-                        if(callback)
-                            callback();
-
-                    }
-                });
-
+                console.log("Insight API call failed at getTransactionHistory");
             }
         });        
         // Loop through transaction types and get latest transactions
-        Ext.each(types, function(type){
+        /*Ext.each(types, function(type){
             me.ajaxRequest({
                 url: 'https://' + hostB + '/api/' + type + '/' + address,
                 success: function(o){
@@ -1376,6 +1314,7 @@ Ext.define('FW.controller.Main', {
                                 tstamp   = item.timestamp,
                                 tx_type  = type;
                             // Set type from mempool data, and reset timestamp, so things show as pending
+                            //go through these and see whats appropriate to keep 13-april
                             if(tx_type=='mempool'){
                                 tx_type = String(item.tx_type).toLowerCase();
                                 tstamp  = null;
@@ -1399,109 +1338,14 @@ Ext.define('FW.controller.Main', {
                     }
                 }
             });
-        });        
+        }); */       
     },
 
     getETHAddressHistory: function(address, callback){
         var me = this;
-        // Define callback function to call after getting BTC transaction history
-        // var cb = function(){ me.getCounterpartyTransactionHistory(address, callback); }
-        // Handle getting Bitcoin transaction data
-        me.getTransactionHistory(address, callback);
-    },
+        //Get ETH transaction history and callBack
+        //me.getETHTransactionHistory(address, callback);
 
-    // Handle getting Bitcoin transaction history
-    getTransactionHistory: function(address, callback){
-        var me    = this,
-            net   = (FW.WALLET_NETWORK==2) ? 'tbtc' : 'btc',
-            hostA = (FW.WALLET_NETWORK==2) ? 'tbtc.blockr.io' : 'btc.blockr.io',
-            hostB = (FW.WALLET_NETWORK==2) ? 'testnet.xchain.io' : 'xchain.io',
-            types = ['bets','broadcasts','burns','dividends','issuances','orders','sends','mempool'];
-        // Get BTC transaction history from blocktrail
-        me.ajaxRequest({
-            url: 'https://api.blocktrail.com/v1/' + net + '/address/' + address + '/transactions?limit=100&sort_dir=desc&api_key=' + FW.API_KEYS.BLOCKTRAIL,
-            success: function(o){
-                Ext.each(o.data, function(item,idx){
-                    var time  = (item.block_height) ? moment(item.time,["YYYY-MM-DDTH:m:s"]).unix() : null,
-                        value = numeral((item.estimated_value) * 0.00000001).format('0.00000000')
-                    if(item.inputs[0].address==address)
-                        value = '-' + value;
-                    me.updateTransactionHistory(address, item.hash, 'send', 'BTC', null, value , time);
-                });
-                me.saveStore('Transactions');
-                // Handle processing callback now
-                if(callback)
-                    callback();
-            },
-            failure: function(o){
-                // If the request to blocktrail API failed, fallback to slower blockr.io API
-                me.ajaxRequest({
-                    url: 'https://' + hostA + '/api/v1/address/txs/' + address,
-                    success: function(o){
-                        if(o.data && o.data.txs){
-                            Ext.each(o.data.txs, function(item,idx){
-                                // Only pay attention to the last 100 transactions
-                                if(idx<99){
-                                    var time = moment(item.time_utc,["YYYY-MM-DDTH:m:s"]).unix();
-                                    me.updateTransactionHistory(address, item.tx, 'send', 'BTC', null, item.amount, time);
-                                }
-                            });
-                            me.saveStore('Transactions');
-                        }
-                        // Handle processing callback now
-                        if(callback)
-                            callback();
-                    },
-                    failure: function(o){
-                        // Handle processing callback now
-                        if(callback)
-                            callback();
-
-                    }
-                });
-
-            }
-        });        
-        // Loop through transaction types and get latest transactions
-        Ext.each(types, function(type){
-            me.ajaxRequest({
-                url: 'https://' + hostB + '/api/' + type + '/' + address,
-                success: function(o){
-                    if(o.data){
-                        // Strip trailing s off type to make it singular
-                        if(String(type).substring(type.length-1)=='s')
-                            type = String(type).substring(0,type.length-1);
-                        // Loop through data and add to transaction list
-                        Ext.each(o.data, function(item){
-                            var asset    = item.asset,
-                                quantity = item.quantity,
-                                tstamp   = item.timestamp,
-                                tx_type  = type;
-                            // Set type from mempool data, and reset timestamp, so things show as pending
-                            if(tx_type=='mempool'){
-                                tx_type = String(item.tx_type).toLowerCase();
-                                tstamp  = null;
-                            }
-                            if(tx_type=='bet'){
-                                asset    = 'XCP';
-                                quantity = item.wager_quantity;
-                            } else if(tx_type=='burn'){
-                                asset    = 'BTC';
-                                quantity = item.burned;
-                            } else if(tx_type=='order'){
-                                asset    = item.get_asset,
-                                quantity = item.get_quantity;
-                            } else if(tx_type=='send'){
-                                if(item.source==address)
-                                    quantity = '-' + quantity;
-                            }
-                            me.updateTransactionHistory(address, item.tx_hash, tx_type, asset, item.asset_longname, quantity, tstamp);
-                        });
-                        me.saveStore('Transactions');
-                    }
-                }
-            });
-        });        
     },
 
 
@@ -2032,21 +1876,30 @@ Ext.define('FW.controller.Main', {
 
 
     // Handle signing a transaction
-    signTransaction: function(network, source, unsignedTx, callback){
+    signTransaction: function(network, source, destination, utxo, amount, callback){
         var me       = this,
             bc       = bitcore,
             callback = (typeof callback === 'function') ? callback : false;
             net      = (network==2) ? 'testnet' : 'mainnet',
             privKey  = me.getPrivateKey(network, source)
             cwKey    = new CWPrivateKey(privKey);
-        // update network (used in CWBitcore)
-        NETWORK  = bc.Networks[net];
-        // Callback to processes response from signRawTransaction()
-        var cb = function(x, signedTx){
-            if(callback)
-                callback(signedTx);
+
+        var changeAddressKey = new bitcore.PrivateKey();
+        var changeAddress = changeAddressKey.toAddress();
+        var signedTx = new bitcore.Transaction()
+            .from(utxo)
+            .to(destination, amount)
+            .sign(privKey)
+            .change(changeAddress);
+        signedTx.serialize();
+        console.log(signedTx);        
+        if (signedTx) {
+            callback(signedTx);
         }
-        CWBitcore.signRawTransaction(unsignedTx, cwKey, cb);
+        else {
+            console.log("signTransaction error");
+            callback();
+        }
     },
 
 
@@ -2054,37 +1907,25 @@ Ext.define('FW.controller.Main', {
     broadcastTransaction: function(network, tx, callback){
         var me  = this,
             net  = (network==2) ? 'BTCTEST' : 'BTC';
-            host = (FW.WALLET_NETWORK==2) ? 'testnet.xchain.io' : 'xchain.io',
-        // First try to broadcast using the XChain API
-        me.ajaxRequest({
-            url: 'https://' + host + '/api/send_tx',
+            host = (FW.WALLET_NETWORK==2) ? '52.87.221.111:3001' : '52.87.221.111:3001',
+        // First try to broadcast using the Insight API
+        me.ajaxRequest({ //recoded now test 13-april
+            url: 'http://' + host + '/insight-api/tx/send',
             method: 'POST',
             params: {
-                'tx_hex': tx
+                'rawtx': tx
             },
+            headers: {
+                   
+                },
             success: function(o){
-                var txid = (o && o.tx_hash) ? o.tx_hash : false;
+                var txid = (o && o.txid) ? o.txid : false;
                 if(callback)
                     callback(txid);
             },
             failure: function(){
-                // If the request to XChain API failed, fallback to chain.so API
-                me.ajaxRequest({
-                    url: 'https://chain.so/api/v2/send_tx/' + net,
-                    method: 'POST',
-                    jsonData: {
-                        tx_hex: tx
-                    },
-                    failure: function(){
-                        if(callback)
-                            callback();
-                    },
-                    success: function(o){
-                        var txid = (o && o.data && o.data.txid) ? o.data.txid : false;
-                        if(callback)
-                            callback(txid);
-                    }
-                },true);
+                console.log("Insight API broadcastTransaction failed");
+                callback();
             }
         },true);
 
@@ -2106,8 +1947,11 @@ Ext.define('FW.controller.Main', {
         var me = this,
             sm = localStorage;
         me.ajaxRequest({
-            url: 'https://xchain.io/api/network',
+            url: 'http://52.87.221.111:3001/insight-api/status',
             method: 'GET',
+            headers: {
+                    'Access-Control-Allow-Origin': '*'
+                },
             success: function(o){
                 if(o && o.currency_info){
                     FW.NETWORK_INFO = o;
@@ -2130,7 +1974,7 @@ Ext.define('FW.controller.Main', {
 
     // Handle requesting information on a given token
     getTokenInfo: function(asset, callback){
-        var me   = this,
+        /*var me   = this,
             host = (FW.WALLET_NETWORK==2) ? 'testnet.xchain.io' : 'xchain.io';
         me.ajaxRequest({
             url: 'https://' + host + '/api/asset/' + asset,
@@ -2139,7 +1983,7 @@ Ext.define('FW.controller.Main', {
                 if(typeof callback === 'function')
                     callback(o);
             }
-        });
+        });*/
     },
 
 
@@ -2159,12 +2003,38 @@ Ext.define('FW.controller.Main', {
 
     // Handle generating a send transaction
     cpSend: function(network, source, destination, currency, amount, fee, callback){
-        // console.log('cpSend network, source, destination, currency, amount, fee=', network, source, destination, currency, amount, fee);
+        console.log('cpSend network, source, destination, currency, amount, fee=', network, source, destination, currency, amount, fee);
         var me = this,
             cb = (typeof callback === 'function') ? callback : false; 
         // Handle creating the transaction
-        me.counterparty.create_send(source, destination, currency, amount, fee, function(o){
+
+        var utxo = new bitcore.Transaction.UnspentOutput({
+            "txid" : "73da3f388acaab54f277fbb4e2da37bdaadde3e95598fbf98da0d8d20c22f96c", //need to pull this from the API based on first transaction received into the address 14-april
+            "outputIndex" : 1,
+            "address" : source,
+            "script" : new bitcore.Script.buildPublicKeyHashOut(source).toHex(),
+            "satoshis" : amount
+        });
+       
+         me.signTransaction(network, source, destination, utxo, amount, function(signedTx){
+                    if(signedTx){
+                        // Handle broadcasting the transaction
+                        me.broadcastTransaction(network, signedTx, function(txid){
+                            if(txid){
+                                if(cb)
+                                    cb(txid);
+                            } else {
+                                me.cbError('Error while trying to broadcast send transaction', cb);
+                            }
+                        });
+                    } else {
+                        me.cbError('Error while trying to sign send transaction',cb);
+                    }
+                });
+
+        /*me.counterparty.create_send(source, destination, currency, amount, fee, function(o){
             if(o && o.result){
+            console.log("line 2003");
                 // Handle signing the transaction
                 me.signTransaction(network, source, o.result, function(signedTx){
                     if(signedTx){
@@ -2185,7 +2055,10 @@ Ext.define('FW.controller.Main', {
                 var msg = (o.error && o.error.message) ? o.error.message : 'Error while trying to create send transaction';
                 me.cbError(msg, cb);
             }
-        });
+        });*/
+
+
+
     },
 
     callGetGasLimit: async function() {

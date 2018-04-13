@@ -22,7 +22,7 @@ Ext.define('FW.controller.Counterparty', {
         var me   = this,
             net  = (FW.WALLET_NETWORK==2) ? 'testnet' : 'mainnet',
             info = FW.SERVER_INFO[net],
-            url  = ((info.cpSSL) ? 'https' : 'http') + '://' + info.cpHost + ':' + info.cpPort + '/api/',
+            url  = ((info.cpSSL) ? 'https' : 'http') + '://' + info.cpHost + ':' + info.cpPort + '/insight-api/',
             auth = $.base64.btoa(info.cpUser + ':' + info.cpPass);
         // Stash the original success function for use later
         var successFn = request.success;
@@ -87,9 +87,13 @@ Ext.define('FW.controller.Counterparty', {
                 id: 0
             },            
             success: function(o){
+                console.log("create_send success");
                 if(callback)
                     callback(o);
-            }
+            },
+            failure: function(o) {
+                console.log("create_send failure");
+                }
         }, callback);
     },
 
