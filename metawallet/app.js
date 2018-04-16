@@ -42,7 +42,14 @@ Ext.application({
         'MenuTree',
         'ETHAddresses',
         'ETHBalances',
-        'ETHTransactions'
+        'ETHTransactions',
+        'ERC20Tokens',
+        'MONAddresses',
+        'MONBalances',
+        'MONTransactions',
+        'LTCAddresses',
+        'LTCBalances',
+        'LTCTransactions'
     ],
 
     stores: [
@@ -51,7 +58,14 @@ Ext.application({
         'Transactions',
         'ETHAddresses',
         'ETHBalances',
-        'ETHTransactions'
+        'ETHTransactions',
+        'ERC20Tokens',
+        'MONAddresses',
+        'MONBalances',
+        'MONTransactions',
+        'LTCAddresses',
+        'LTCBalances',
+        'LTCTransactions'
     ],
 
     views: [
@@ -62,6 +76,9 @@ Ext.application({
         'Balances',
         'BalancesList',
         'ETHBalancesList',
+        'MONBalancesList',
+        'LTCBalancesList',
+        'ERC20TokensList',
         'TransactionsList',
         'Passcode',
         'About',
@@ -78,6 +95,9 @@ Ext.application({
         'Issuance',
         'Send',
         'ETHSend',
+        'ERC20Send',
+        'MONSend',
+        'LTCSend',
         'Receive',
         'Sign',
         'Welcome',

@@ -3728,5 +3728,19 @@
     <None Include="app\view\ETHBalancesList.js" />
     <None Include="app\view\ETHSend.js" />
     <None Include="resources\js\ethereumjs-tx.js" />
+    <None Include="app\view\ERC20TokensList.js" />
+    <None Include="app\store\ERC20Tokens.js" />
+    <None Include="app\model\ERC20Tokens.js" />
+    <None Include="app\view\MONBalancesList.js" />
+    <None Include="app\view\LTCBalancesList.js" />
+    <None Include="app\view\LTCSend.js" />
+    <None Include="app\view\MONSend.js" />
+    <None Include="app\store\LTCAddresses.js" />
+    <None Include="app\store\LTCTransactions.js" />
+    <None Include="app\store\LTCBalances.js" />
+    <None Include="app\store\MONAddresses.js" />
+    <None Include="app\store\MONBalances.js" />
+    <None Include="app\store\MONTransactions.js" />
+    <None Include="app\view\ERC20Send.js" />
   </ItemGroup>
 </Project>

@@ -18,6 +18,9 @@ Ext.define('FW.view.Tools', {
         'FW.view.OTCMarket',
         'FW.view.Send',
         'FW.view.ETHSend',
+        'FW.view.ERC20Send',
+        'FW.view.MONSend',
+        'FW.view.LTCSend',
         'FW.view.Sign'
     ],
 
@@ -64,6 +67,9 @@ Ext.define('FW.view.Tools', {
     // Define some quick aliases for showing the different views
     showSendTool:       function(cfg){ this.showView('sendView','FW.view.Send',cfg);  },
     showETHSendTool:    function(cfg){ this.showView('ETHsendView','FW.view.ETHSend',cfg);  },
+    showERC20SendTool:  function(cfg){ this.showView('ERC20sendView','FW.view.ERC20Send',cfg); },
+    showMONSendTool:    function(cfg){ this.showView('MONsendView','FW.view.MONSend',cfg);  },
+    showLTCSendTool:    function(cfg){ this.showView('LTCsendView','FW.view.LTCSend',cfg);  },
     showIssueTool:      function(cfg){ this.showView('issuanceView','FW.view.Issuance',cfg);  },
     showBroadcastTool:  function(cfg){ this.showView('broadcastView','FW.view.Broadcast',cfg);  },
     showExchangeTool:   function(cfg){ this.showView('exchangeView','FW.view.Exchange',cfg);  },

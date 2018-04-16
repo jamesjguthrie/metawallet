@@ -1004,7 +1004,7 @@ Ext.define('FW.controller.Main', {
         var me = this,
             addr = (address) ? address : FW.ETHWALLET_ADDRESS.address,
             prefix = addr.substr(0, 5),
-            store = Ext.getStore('Balances'),
+            store = Ext.getStore('ETHBalances'),
             net = (FW.ETHWALLET_NETWORK == 2) ? 'eth' : 'eth'
         console.log("address is: ", addr);
         ETHbalance = await(me.callWeb3GetBalance(addr));
@@ -1039,6 +1039,109 @@ Ext.define('FW.controller.Main', {
                 }
             }
         }
+        // Handle processing callback now
+        if(callback)
+            callback();
+    },
+
+    updateERC20TokensList: function (address, token_symbol, token_name, quantity, decimal) {
+
+        var me = this,
+            addr = (address) ? address : FW.ETHWALLET_ADDRESS,
+            prefix = addr.substr(0, 5),
+            store = Ext.getStore('ERC20Tokens');
+        record = store.add({
+            id: address - 'ERC20',
+            prefix: prefix,
+            token_symbol : token_symbol,
+            token_name: token_name,
+            quantity: quantity,
+            decimal: decimal
+        });
+        // Mark record as dirty, so we save it to disk on the next sync
+        record[0].setDirty();
+    },
+
+    callGetERC20Tokens: async function (address) {
+        var contractABI = [
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "name",
+    "outputs": [
+      {
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "payable": false,
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "decimals",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "payable": false,
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_owner",
+        "type": "address"
+      }
+    ],
+    "name": "balanceOf",
+    "outputs": [
+      {
+        "name": "balance",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "symbol",
+    "outputs": [
+      {
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "payable": false,
+    "type": "function"
+  }
+]
+        var tokenContract = new web3.eth.Contract(contractABI, address);
+        return await(tokenContract);
+    },
+
+    getERC20Tokens: async function (address, callback) {
+        var me = this,
+            addr = (address) ? address : FW.ETHWALLET_ADDRESS.address,
+            prefix = addr.substr(0, 5),
+            store = Ext.getStore('ERC20Tokens'),
+            net = (FW.ETHWALLET_NETWORK == 2) ? 'eth' : 'eth'
+        console.log("address is: ", addr);
+        var tokenContract = await(me.callGetERC20Tokens(address));
+        var decimal = tokenContract.decimals();
+        var balance = tokenContract.balanceOf(address);
+        var adjustedBalance = balance / Math.pow(10, decimal);
+        var tokenName = tokenContract.name();
+        var tokenSymbol = tokenContract.symbol();
+        me.updateERC20TokensList(address, token_symbol, token_name, quantity, decimal);
+        me.saveStore('ERC20Tokens');
+
         // Handle processing callback now
         if(callback)
             callback();

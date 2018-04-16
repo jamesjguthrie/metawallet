@@ -2539,6 +2539,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.controller.Main": [],
   "FW.model.Addresses": [],
   "FW.model.Balances": [],
+  "FW.model.ERC20Tokens": [],
   "FW.model.ETHAddresses": [],
   "FW.model.ETHBalances": [],
   "FW.model.ETHTransactions": [],
@@ -2548,6 +2549,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.profile.Tablet": [],
   "FW.store.Addresses": [],
   "FW.store.Balances": [],
+  "FW.store.ERC20Tokens": [],
   "FW.store.ETHAddresses": [],
   "FW.store.ETHBalances": [],
   "FW.store.ETHTransactions": [],
@@ -2564,6 +2566,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.view.Broadcast": [],
   "FW.view.Callback": [],
   "FW.view.Dividend": [],
+  "FW.view.ERC20TokensList": [],
   "FW.view.ETHBalancesList": [],
   "FW.view.ETHSend": [],
   "FW.view.ETHTools": [],
@@ -3326,6 +3329,7 @@ Ext.ClassManager.addNameAliasMappings({
   "FW.controller.Main": [],
   "FW.model.Addresses": [],
   "FW.model.Balances": [],
+  "FW.model.ERC20Tokens": [],
   "FW.model.ETHAddresses": [],
   "FW.model.ETHBalances": [],
   "FW.model.ETHTransactions": [],
@@ -3335,6 +3339,7 @@ Ext.ClassManager.addNameAliasMappings({
   "FW.profile.Tablet": [],
   "FW.store.Addresses": [],
   "FW.store.Balances": [],
+  "FW.store.ERC20Tokens": [],
   "FW.store.ETHAddresses": [],
   "FW.store.ETHBalances": [],
   "FW.store.ETHTransactions": [],
@@ -3359,6 +3364,9 @@ Ext.ClassManager.addNameAliasMappings({
     "widget.fw-callback"
   ],
   "FW.view.Dividend": [],
+  "FW.view.ERC20TokensList": [
+    "widget.fw-erc20tokenslist"
+  ],
   "FW.view.ETHBalancesList": [
     "widget.fw-ethbalanceslist"
   ],

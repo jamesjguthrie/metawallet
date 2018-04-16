@@ -16,7 +16,12 @@ Ext.define('FW.view.tablet.Balances', {
         {
             xtype: 'fw-ethbalanceslist',
             width: 320
-        },{
+        },
+        {
+            xtype: 'fw-erc20tokenslist',
+            width: 320
+        },
+        {
             flex: 1,
             xtype: 'container',
             layout: 'card',

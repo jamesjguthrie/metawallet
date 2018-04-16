@@ -29267,12 +29267,14 @@ Ext.cmd.derive('FW.model.MenuTree', Ext.data.Model, {config:{fields:[{name:'text
 Ext.cmd.derive('FW.model.ETHAddresses', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'index', type:'int'}, {name:'network', type:'int'}, {name:'address', type:'string'}, {name:'label', type:'label'}], idProperty:'id', proxy:{type:'localstorage', id:'ETHAddresses', idProperty:'id'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ETHAddresses'], 0);
 Ext.cmd.derive('FW.model.ETHBalances', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'integer'}, {name:'asset', type:'string'}, {name:'asset_longname', type:'string'}, {name:'display_name', type:'string'}, {name:'quantity', type:'string'}, {name:'estimated_value', type:'object'}], idProperty:'id', proxy:{type:'localstorage', id:'ETHBalances'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ETHBalances'], 0);
 Ext.cmd.derive('FW.model.ETHTransactions', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'string'}, {name:'hash', type:'string'}, {name:'asset', type:'string'}, {name:'quantity', type:'string'}, {name:'time', type:'string'}], idProperty:'id'}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ETHTransactions'], 0);
+Ext.cmd.derive('FW.model.ERC20Tokens', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'token_symbol', type:'string'}, {name:'token_name', type:'string'}, {name:'quantity', type:'string'}, {name:'decimal', type:'object'}], idProperty:'id', proxy:{type:'localstorage', id:'ERC20Tokens'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ERC20Tokens'], 0);
 Ext.cmd.derive('FW.store.Addresses', Ext.data.Store, {config:{model:'FW.model.Addresses', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'Addresses'}, proxy:{type:'localstorage', id:'Addresses'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'Addresses'], 0);
 Ext.cmd.derive('FW.store.Balances', Ext.data.Store, {config:{model:'FW.model.Balances', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'Balances'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'Balances'], 0);
 Ext.cmd.derive('FW.store.Transactions', Ext.data.Store, {config:{model:'FW.model.Transactions', autoLoad:true, autoSync:true}}, 0, 0, 0, 0, 0, 0, [FW.store, 'Transactions'], 0);
 Ext.cmd.derive('FW.store.ETHAddresses', Ext.data.Store, {config:{model:'FW.model.ETHAddresses', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'ETHAddresses'}, proxy:{type:'localstorage', id:'ETHAddresses'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'ETHAddresses'], 0);
 Ext.cmd.derive('FW.store.ETHBalances', Ext.data.Store, {config:{model:'FW.model.ETHBalances', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'ETHBalances'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'ETHBalances'], 0);
 Ext.cmd.derive('FW.store.ETHTransactions', Ext.data.Store, {config:{model:'FW.model.ETHTransactions', autoLoad:true, autoSync:true}}, 0, 0, 0, 0, 0, 0, [FW.store, 'ETHTransactions'], 0);
+Ext.cmd.derive('FW.store.ERC20Tokens', Ext.data.Store, {config:{model:'FW.model.ERC20Tokens', autoLoad:true, autoSync:true, proxy:{type:'localstorage', id:'ERC20Tokens'}}}, 0, 0, 0, 0, 0, 0, [FW.store, 'ERC20Tokens'], 0);
 Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   var me = this, sm = localStorage, vp = Ext.Viewport, wall = sm.getItem('wallet'), pass = sm.getItem('passcode');
   var ETHme = this, ETHsm = localStorage, ETHvp = Ext.ETHViewport, ETHwall = sm.getItem('ETHwallet'), ETHpass = sm.getItem('ETHpasscode');
@@ -29287,15 +29289,15 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   FW.WALLET_ADDRESS = sm.getItem('address') || null;
   FW.TOUCHID = sm.getItem('touchid') || false;
   FW.NETWORK_INFO = {};
-  FW.API_KEYS = {BLOCKTRAIL:'efb0aae5420f167113cc81a9edf7b276d40c2565'};
+  FW.API_KEYS = {};
   FW.ETHWALLET_HEX = null;
   FW.ETHWALLET_KEYS = {};
   FW.ETHWALLET_NETWORK = sm.getItem('ETHnetwork') || 1;
   FW.ETHWALLET_PREFIX = sm.getItem('ETHprefix') || null;
   FW.ETHWALLET_ADDRESS = sm.getItem('ETHaddress') || null;
   FW.ETHNETWORK_INFO = {};
-  FW.ETHAPI_KEYS = {BLOCKTRAIL:'efb0aae5420f167113cc81a9edf7b276d40c2565'};
-  FW.SERVER_INFO = {mainnet:{cpHost:'52.87.221.111', cpPort:8544, cpUser:'metawallet', cpPass:'pass', cpSSL:true}, testnet:{cpHost:'52.87.221.111', cpPort:8544, cpUser:'rpc', cpPass:'1234', cpSSL:true}};
+  FW.ETHAPI_KEYS = {};
+  FW.SERVER_INFO = {mainnet:{cpHost:'52.87.221.111', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}, testnet:{cpHost:'52.87.221.111', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}};
   FW.ETHSERVER_INFO = {ETHmainnet:{cpHost:'52.87.221.111', cpPort:8545, cpUser:'rpc', cpPass:'1234', cpSSL:true}, ETHtestnet:{cpHost:'52.87.221.111', cpPort:8545, cpUser:'rpc', cpPass:'1234', cpSSL:true}};
   var std = 1.0E-4;
   FW.MINER_FEES = {standard:std, medium:std * 2, fast:std * 5};
@@ -29839,11 +29841,13 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   });
   return value;
 }, getAddressBalances:function(address, callback) {
-  var me = this, addr = address ? address : FW.WALLET_ADDRESS.address, prefix = addr.substr(0, 5), store = Ext.getStore('Balances'), net = FW.WALLET_NETWORK == 2 ? 'tbtc' : 'btc', hostA = FW.WALLET_NETWORK == 2 ? 'tbtc.blockr.io' : 'btc.blockr.io', hostB = FW.WALLET_NETWORK == 2 ? 'testnet.xchain.io' : 'xchain.io';
-  me.ajaxRequest({url:'https://api.blocktrail.com/v1/' + net + '/address/' + address + '?api_key\x3d' + FW.API_KEYS.BLOCKTRAIL, success:function(o) {
-    if (o.address) {
-      var quantity = o.balance ? numeral(o.balance * 1.0E-8).format('0.00000000') : '0.00000000', price_usd = me.getCurrencyPrice('bitcoin', 'usd'), price_btc = me.getCurrencyPrice('counterparty', 'btc'), values = {usd:numeral(parseFloat(price_usd * quantity)).format('0.00000000'), btc:'1.00000000', xcp:price_btc ? numeral(1 / price_btc).format('0.00000000') : '0.00000000'};
+  var me = this, addr = address ? address : FW.WALLET_ADDRESS.address, prefix = addr.substr(0, 5), store = Ext.getStore('Balances'), net = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111', hostA = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111', hostB = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
+  me.ajaxRequest({url:'http://52.87.221.111:3001/insight-api/addr/' + address, headers:{}, success:function(o) {
+    if (o.addrStr) {
+      var quantity = o.balance ? numeral(o.balance * 1.0E-8).format('0.00000000') : '0.00000000', price_usd = me.getCurrencyPrice('bitcoin', 'usd'), values = {usd:numeral(parseFloat(price_usd * quantity)).format('0.00000000'), btc:'1.00000000'};
       me.updateAddressBalance(address, 1, 'BTC', '', quantity, values);
+      console.log('BTC Address ', address);
+      console.log('Balance ', quantity);
       me.saveStore('Balances');
       if (Ext.os.name == 'iOS') {
         var cmp = Ext.getCmp('aboutView');
@@ -29860,31 +29864,8 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
       callback();
     }
   }, failure:function(o) {
-    me.ajaxRequest({url:'https://' + hostA + '/api/v1/address/info/' + address, success:function(o) {
-      if (o.data) {
-        var quantity = o.data.balance ? numeral(o.data.balance).format('0.00000000') : '0.00000000', price_usd = me.getCurrencyPrice('bitcoin', 'usd'), price_btc = me.getCurrencyPrice('counterparty', 'btc'), values = {usd:numeral(price_usd * quantity).format('0.00000000'), btc:'1.00000000', xcp:price_btc ? numeral(1 / price_btc).format('0.00000000') : '0.00000000'};
-        me.updateAddressBalance(address, 1, 'BTC', '', quantity, values);
-        me.saveStore('Balances');
-      }
-    }, callback:function() {
-      if (callback) {
-        callback();
-      }
-    }});
+    console.log('Insight API call fail at getAddressBalance');
   }});
-  me.ajaxRequest({url:'https://' + hostB + '/api/balances/' + address, success:function(o) {
-    if (o.data) {
-      Ext.each(o.data, function(item) {
-        var type = item.asset == 'XCP' ? 1 : 2;
-        me.updateAddressBalance(address, type, item.asset, item.asset_longname, item.quantity, item.estimated_value);
-      });
-    } else {
-      if (!(me.isNative && Ext.os.name == 'iOS')) {
-        me.updateAddressBalance(address, 1, 'XCP', '', '0.00000000');
-      }
-    }
-    me.saveStore('Balances');
-  }}, true);
 }, callWeb3GetBalance:function(address) {
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
@@ -29933,8 +29914,6 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
     var $jscomp$generator$next$arg25;
-    var hostB;
-    var hostA;
     var net;
     var store;
     var prefix;
@@ -29947,10 +29926,8 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             me = $jscomp$async$this;
             addr = address ? address : FW.ETHWALLET_ADDRESS.address;
             prefix = addr.substr(0, 5);
-            store = Ext.getStore('Balances');
-            net = FW.ETHWALLET_NETWORK == 2 ? 'tbtc' : 'btc';
-            hostA = FW.ETHWALLET_NETWORK == 2 ? 'tbtc.blockr.io' : 'btc.blockr.io';
-            hostB = FW.ETHWALLET_NETWORK == 2 ? 'testnet.xchain.io' : 'xchain.io';
+            store = Ext.getStore('ETHBalances');
+            net = FW.ETHWALLET_NETWORK == 2 ? 'eth' : 'eth';
             console.log('address is: ', addr);
             $jscomp$generator$state = 1;
             return {value:me.callWeb3GetBalance(addr), done:false};
@@ -29964,7 +29941,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
           case 2:
             $jscomp$generator$next$arg25 = $jscomp$generator$next$arg;
             ETHbalance = $jscomp$generator$next$arg25;
-            console.log('Balance is: ', ETHbalance);
+            console.log('ETH Balance is: ', ETHbalance);
             $jscomp$generator$state = 3;
             return {value:fetch('https://min-api.cryptocompare.com/data/price?fsym\x3dETH\x26tsyms\x3dUSD', {}).then(function(response) {
               return response.json();
@@ -29995,6 +29972,122 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
                 }
               }
             }
+            if (callback) {
+              callback();
+            }
+            $jscomp$generator$state = -1;
+          default:
+            return {value:undefined, done:true};
+        }
+      }
+    }
+    var iterator = {next:function(arg) {
+      return $jscomp$generator$impl(0.0, arg, undefined);
+    }, 'throw':function(arg) {
+      return $jscomp$generator$impl(1.0, undefined, arg);
+    }, 'return':function(arg) {
+      throw Error('Not yet implemented');
+    }};
+    $jscomp.initSymbolIterator();
+    iterator[Symbol.iterator] = function() {
+      return this;
+    };
+    return iterator;
+  }
+  return $jscomp.executeAsyncGenerator($jscomp$async$generator());
+}, updateERC20TokensList:function(address, token_symbol, token_name, quantity, decimal) {
+  var me = this, addr = address ? address : FW.ETHWALLET_ADDRESS, prefix = addr.substr(0, 5), store = Ext.getStore('ERC20Tokens');
+  record = store.add({id:address - 'ERC20', prefix:prefix, token_symbol:token_symbol, token_name:token_name, quantity:quantity, decimal:decimal});
+  record[0].setDirty();
+}, callGetERC20Tokens:function(address) {
+  function $jscomp$async$generator() {
+    var $jscomp$generator$state = 0;
+    var $jscomp$generator$next$arg26;
+    var contractABI;
+    function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
+      while (1) {
+        switch($jscomp$generator$state) {
+          case 0:
+            contractABI = [{'constant':true, 'inputs':[], 'name':'name', 'outputs':[{'name':'', 'type':'string'}], 'payable':false, 'type':'function'}, {'constant':true, 'inputs':[], 'name':'decimals', 'outputs':[{'name':'', 'type':'uint8'}], 'payable':false, 'type':'function'}, {'constant':true, 'inputs':[{'name':'_owner', 'type':'address'}], 'name':'balanceOf', 'outputs':[{'name':'balance', 'type':'uint256'}], 'payable':false, 'type':'function'}, {'constant':true, 'inputs':[], 'name':'symbol', 
+            'outputs':[{'name':'', 'type':'string'}], 'payable':false, 'type':'function'}];
+            $jscomp$generator$state = 1;
+            return {value:web3.eth.contract(contractABI).at(address), done:false};
+          case 1:
+            if (!($jscomp$generator$action$arg == 1)) {
+              $jscomp$generator$state = 2;
+              break;
+            }
+            $jscomp$generator$state = -1;
+            throw $jscomp$generator$throw$arg;
+          case 2:
+            $jscomp$generator$next$arg26 = $jscomp$generator$next$arg;
+            $jscomp$generator$state = -1;
+            return {value:$jscomp$generator$next$arg26, done:true};
+            $jscomp$generator$state = -1;
+          default:
+            return {value:undefined, done:true};
+        }
+      }
+    }
+    var iterator = {next:function(arg) {
+      return $jscomp$generator$impl(0.0, arg, undefined);
+    }, 'throw':function(arg) {
+      return $jscomp$generator$impl(1.0, undefined, arg);
+    }, 'return':function(arg) {
+      throw Error('Not yet implemented');
+    }};
+    $jscomp.initSymbolIterator();
+    iterator[Symbol.iterator] = function() {
+      return this;
+    };
+    return iterator;
+  }
+  return $jscomp.executeAsyncGenerator($jscomp$async$generator());
+}, getERC20Tokens:function(address, callback) {
+  var $jscomp$async$this = this;
+  function $jscomp$async$generator() {
+    var $jscomp$generator$state = 0;
+    var tokenSymbol;
+    var tokenName;
+    var adjustedBalance;
+    var balance;
+    var decimal;
+    var tokenContract;
+    var $jscomp$generator$next$arg27;
+    var net;
+    var store;
+    var prefix;
+    var addr;
+    var me;
+    function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
+      while (1) {
+        switch($jscomp$generator$state) {
+          case 0:
+            me = $jscomp$async$this;
+            addr = address ? address : FW.ETHWALLET_ADDRESS.address;
+            prefix = addr.substr(0, 5);
+            store = Ext.getStore('ERC20Tokens');
+            net = FW.ETHWALLET_NETWORK == 2 ? 'eth' : 'eth';
+            console.log('address is: ', addr);
+            $jscomp$generator$state = 1;
+            return {value:me.callGetERC20Tokens(address), done:false};
+          case 1:
+            if (!($jscomp$generator$action$arg == 1)) {
+              $jscomp$generator$state = 2;
+              break;
+            }
+            $jscomp$generator$state = -1;
+            throw $jscomp$generator$throw$arg;
+          case 2:
+            $jscomp$generator$next$arg27 = $jscomp$generator$next$arg;
+            tokenContract = $jscomp$generator$next$arg27;
+            decimal = tokenContract.decimals();
+            balance = tokenContract.balanceOf(address);
+            adjustedBalance = balance / Math.pow(10, decimal);
+            tokenName = tokenContract.name();
+            tokenSymbol = tokenContract.symbol();
+            me.updateERC20TokensList(address, token_symbol, token_name, quantity, decimal);
+            me.saveStore('ERC20Tokens');
             if (callback) {
               callback();
             }
@@ -30139,9 +30232,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   var me = this;
   me.getTransactionHistory(address, callback);
 }, getTransactionHistory:function(address, callback) {
-  var me = this, net = FW.WALLET_NETWORK == 2 ? 'tbtc' : 'btc', hostA = FW.WALLET_NETWORK == 2 ? 'tbtc.blockr.io' : 'btc.blockr.io', hostB = FW.WALLET_NETWORK == 2 ? 'testnet.xchain.io' : 'xchain.io', types = ['bets', 'broadcasts', 'burns', 'dividends', 'issuances', 'orders', 'sends', 'mempool'];
-  me.ajaxRequest({url:'https://api.blocktrail.com/v1/' + net + '/address/' + address + '/transactions?limit\x3d100\x26sort_dir\x3ddesc\x26api_key\x3d' + FW.API_KEYS.BLOCKTRAIL, success:function(o) {
-    Ext.each(o.data, function(item, idx) {
+  var me = this, net = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111', hostA = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111', hostB = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111', types = ['bets', 'broadcasts', 'burns', 'dividends', 'issuances', 'orders', 'sends', 'mempool'];
+  me.ajaxRequest({url:'http://52.87.221.111:3001/insight-api/addr/' + address, headers:{}, success:function(o) {
+    Ext.each(o.transactions, function(item, idx) {
       var time = item.block_height ? moment(item.time, ['YYYY-MM-DDTH:m:s']).unix() : null, value = numeral(item.estimated_value * 1.0E-8).format('0.00000000');
       if (item.inputs[0].address == address) {
         value = '-' + value;
@@ -30153,136 +30246,10 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
       callback();
     }
   }, failure:function(o) {
-    me.ajaxRequest({url:'https://' + hostA + '/api/v1/address/txs/' + address, success:function(o) {
-      if (o.data && o.data.txs) {
-        Ext.each(o.data.txs, function(item, idx) {
-          if (idx < 99) {
-            var time = moment(item.time_utc, ['YYYY-MM-DDTH:m:s']).unix();
-            me.updateTransactionHistory(address, item.tx, 'send', 'BTC', null, item.amount, time);
-          }
-        });
-        me.saveStore('Transactions');
-      }
-      if (callback) {
-        callback();
-      }
-    }, failure:function(o) {
-      if (callback) {
-        callback();
-      }
-    }});
+    console.log('Insight API call failed at getTransactionHistory');
   }});
-  Ext.each(types, function(type) {
-    me.ajaxRequest({url:'https://' + hostB + '/api/' + type + '/' + address, success:function(o) {
-      if (o.data) {
-        if (String(type).substring(type.length - 1) == 's') {
-          type = String(type).substring(0, type.length - 1);
-        }
-        Ext.each(o.data, function(item) {
-          var asset = item.asset, quantity = item.quantity, tstamp = item.timestamp, tx_type = type;
-          if (tx_type == 'mempool') {
-            tx_type = String(item.tx_type).toLowerCase();
-            tstamp = null;
-          }
-          if (tx_type == 'bet') {
-            asset = 'XCP';
-            quantity = item.wager_quantity;
-          } else {
-            if (tx_type == 'burn') {
-              asset = 'BTC';
-              quantity = item.burned;
-            } else {
-              if (tx_type == 'order') {
-                asset = item.get_asset, quantity = item.get_quantity;
-              } else {
-                if (tx_type == 'send') {
-                  if (item.source == address) {
-                    quantity = '-' + quantity;
-                  }
-                }
-              }
-            }
-          }
-          me.updateTransactionHistory(address, item.tx_hash, tx_type, asset, item.asset_longname, quantity, tstamp);
-        });
-        me.saveStore('Transactions');
-      }
-    }});
-  });
 }, getETHAddressHistory:function(address, callback) {
   var me = this;
-  me.getTransactionHistory(address, callback);
-}, getTransactionHistory:function(address, callback) {
-  var me = this, net = FW.WALLET_NETWORK == 2 ? 'tbtc' : 'btc', hostA = FW.WALLET_NETWORK == 2 ? 'tbtc.blockr.io' : 'btc.blockr.io', hostB = FW.WALLET_NETWORK == 2 ? 'testnet.xchain.io' : 'xchain.io', types = ['bets', 'broadcasts', 'burns', 'dividends', 'issuances', 'orders', 'sends', 'mempool'];
-  me.ajaxRequest({url:'https://api.blocktrail.com/v1/' + net + '/address/' + address + '/transactions?limit\x3d100\x26sort_dir\x3ddesc\x26api_key\x3d' + FW.API_KEYS.BLOCKTRAIL, success:function(o) {
-    Ext.each(o.data, function(item, idx) {
-      var time = item.block_height ? moment(item.time, ['YYYY-MM-DDTH:m:s']).unix() : null, value = numeral(item.estimated_value * 1.0E-8).format('0.00000000');
-      if (item.inputs[0].address == address) {
-        value = '-' + value;
-      }
-      me.updateTransactionHistory(address, item.hash, 'send', 'BTC', null, value, time);
-    });
-    me.saveStore('Transactions');
-    if (callback) {
-      callback();
-    }
-  }, failure:function(o) {
-    me.ajaxRequest({url:'https://' + hostA + '/api/v1/address/txs/' + address, success:function(o) {
-      if (o.data && o.data.txs) {
-        Ext.each(o.data.txs, function(item, idx) {
-          if (idx < 99) {
-            var time = moment(item.time_utc, ['YYYY-MM-DDTH:m:s']).unix();
-            me.updateTransactionHistory(address, item.tx, 'send', 'BTC', null, item.amount, time);
-          }
-        });
-        me.saveStore('Transactions');
-      }
-      if (callback) {
-        callback();
-      }
-    }, failure:function(o) {
-      if (callback) {
-        callback();
-      }
-    }});
-  }});
-  Ext.each(types, function(type) {
-    me.ajaxRequest({url:'https://' + hostB + '/api/' + type + '/' + address, success:function(o) {
-      if (o.data) {
-        if (String(type).substring(type.length - 1) == 's') {
-          type = String(type).substring(0, type.length - 1);
-        }
-        Ext.each(o.data, function(item) {
-          var asset = item.asset, quantity = item.quantity, tstamp = item.timestamp, tx_type = type;
-          if (tx_type == 'mempool') {
-            tx_type = String(item.tx_type).toLowerCase();
-            tstamp = null;
-          }
-          if (tx_type == 'bet') {
-            asset = 'XCP';
-            quantity = item.wager_quantity;
-          } else {
-            if (tx_type == 'burn') {
-              asset = 'BTC';
-              quantity = item.burned;
-            } else {
-              if (tx_type == 'order') {
-                asset = item.get_asset, quantity = item.get_quantity;
-              } else {
-                if (tx_type == 'send') {
-                  if (item.source == address) {
-                    quantity = '-' + quantity;
-                  }
-                }
-              }
-            }
-          }
-          me.updateTransactionHistory(address, item.tx_hash, tx_type, asset, item.asset_longname, quantity, tstamp);
-        });
-        me.saveStore('Transactions');
-      }
-    }});
-  });
 }, updateTransactionHistory:function(address, tx, type, asset, asset_longname, quantity, timestamp) {
   var me = this, addr = address ? address : FW.WALLET_ADDRESS.address, store = Ext.getStore('Transactions'), time = timestamp ? timestamp : 0, record = {};
   store.each(function(rec) {
@@ -30610,35 +30577,31 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     }
   });
   return balance;
-}, signTransaction:function(network, source, unsignedTx, callback) {
+}, signTransaction:function(network, source, destination, utxo, amount, callback) {
   var me = this, bc = bitcore, callback = typeof callback === 'function' ? callback : false;
   net = network == 2 ? 'testnet' : 'mainnet', privKey = me.getPrivateKey(network, source);
   cwKey = new CWPrivateKey(privKey);
-  NETWORK = bc.Networks[net];
-  var cb = function(x, signedTx) {
-    if (callback) {
-      callback(signedTx);
-    }
-  };
-  CWBitcore.signRawTransaction(unsignedTx, cwKey, cb);
+  var changeAddressKey = new bitcore.PrivateKey;
+  var changeAddress = changeAddressKey.toAddress();
+  var signedTx = (new bitcore.Transaction).from(utxo).to(destination, amount).sign(privKey).change(changeAddress);
+  signedTx.serialize();
+  console.log(signedTx);
+  if (signedTx) {
+    callback(signedTx);
+  } else {
+    console.log('signTransaction error');
+    callback();
+  }
 }, broadcastTransaction:function(network, tx, callback) {
   var me = this, net = network == 2 ? 'BTCTEST' : 'BTC';
-  host = FW.WALLET_NETWORK == 2 ? 'testnet.xchain.io' : 'xchain.io', me.ajaxRequest({url:'https://' + host + '/api/send_tx', method:'POST', params:{'tx_hex':tx}, success:function(o) {
-    var txid = o && o.tx_hash ? o.tx_hash : false;
+  host = FW.WALLET_NETWORK == 2 ? '52.87.221.111:3001' : '52.87.221.111:3001', me.ajaxRequest({url:'http://' + host + '/insight-api/tx/send', method:'POST', params:{'rawtx':tx}, headers:{}, success:function(o) {
+    var txid = o && o.txid ? o.txid : false;
     if (callback) {
       callback(txid);
     }
   }, failure:function() {
-    me.ajaxRequest({url:'https://chain.so/api/v2/send_tx/' + net, method:'POST', jsonData:{tx_hex:tx}, failure:function() {
-      if (callback) {
-        callback();
-      }
-    }, success:function(o) {
-      var txid = o && o.data && o.data.txid ? o.data.txid : false;
-      if (callback) {
-        callback(txid);
-      }
-    }}, true);
+    console.log('Insight API broadcastTransaction failed');
+    callback();
   }}, true);
 }, broadcastETHTransaction:function(network, tx, callback) {
   var me = this;
@@ -30650,7 +30613,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   });
 }, updateNetworkInfo:function(refresh) {
   var me = this, sm = localStorage;
-  me.ajaxRequest({url:'https://xchain.io/api/network', method:'GET', success:function(o) {
+  me.ajaxRequest({url:'http://52.87.221.111:3001/insight-api/status', method:'GET', headers:{'Access-Control-Allow-Origin':'*'}, success:function(o) {
     if (o && o.currency_info) {
       FW.NETWORK_INFO = o;
       sm.setItem('networkInfo', Ext.encode(o));
@@ -30662,51 +30625,40 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     }
   }}, true);
 }, getTokenInfo:function(asset, callback) {
-  var me = this, host = FW.WALLET_NETWORK == 2 ? 'testnet.xchain.io' : 'xchain.io';
-  me.ajaxRequest({url:'https://' + host + '/api/asset/' + asset, success:function(o) {
-    if (typeof callback === 'function') {
-      callback(o);
-    }
-  }});
 }, cbError:function(msg, callback) {
   Ext.Msg.alert('Error', msg);
   if (typeof callback === 'function') {
     callback();
   }
 }, cpSend:function(network, source, destination, currency, amount, fee, callback) {
+  console.log('cpSend network, source, destination, currency, amount, fee\x3d', network, source, destination, currency, amount, fee);
   var me = this, cb = typeof callback === 'function' ? callback : false;
-  me.counterparty.create_send(source, destination, currency, amount, fee, function(o) {
-    if (o && o.result) {
-      me.signTransaction(network, source, o.result, function(signedTx) {
-        if (signedTx) {
-          me.broadcastTransaction(network, signedTx, function(txid) {
-            if (txid) {
-              if (cb) {
-                cb(txid);
-              }
-            } else {
-              me.cbError('Error while trying to broadcast send transaction', cb);
-            }
-          });
+  var utxo = new bitcore.Transaction.UnspentOutput({'txid':'73da3f388acaab54f277fbb4e2da37bdaadde3e95598fbf98da0d8d20c22f96c', 'outputIndex':1, 'address':source, 'script':(new bitcore.Script.buildPublicKeyHashOut(source)).toHex(), 'satoshis':amount});
+  me.signTransaction(network, source, destination, utxo, amount, function(signedTx) {
+    if (signedTx) {
+      me.broadcastTransaction(network, signedTx, function(txid) {
+        if (txid) {
+          if (cb) {
+            cb(txid);
+          }
         } else {
-          me.cbError('Error while trying to sign send transaction', cb);
+          me.cbError('Error while trying to broadcast send transaction', cb);
         }
       });
     } else {
-      var msg = o.error && o.error.message ? o.error.message : 'Error while trying to create send transaction';
-      me.cbError(msg, cb);
+      me.cbError('Error while trying to sign send transaction', cb);
     }
   });
-}, callETHSign:function(transactionObject, ETHprivkey) {
+}, callGetGasLimit:function() {
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
-    var $jscomp$generator$next$arg26;
+    var $jscomp$generator$next$arg28;
     function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
       while (1) {
         switch($jscomp$generator$state) {
           case 0:
             $jscomp$generator$state = 1;
-            return {value:web3.eth.accounts.signTransaction(transactionObject, ETHprivkey), done:false};
+            return {value:web3.eth.getBlock('pending').gasLimit, done:false};
           case 1:
             if (!($jscomp$generator$action$arg == 1)) {
               $jscomp$generator$state = 2;
@@ -30715,9 +30667,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             $jscomp$generator$state = -1;
             throw $jscomp$generator$throw$arg;
           case 2:
-            $jscomp$generator$next$arg26 = $jscomp$generator$next$arg;
+            $jscomp$generator$next$arg28 = $jscomp$generator$next$arg;
             $jscomp$generator$state = -1;
-            return {value:$jscomp$generator$next$arg26, done:true};
+            return {value:$jscomp$generator$next$arg28, done:true};
             $jscomp$generator$state = -1;
           default:
             return {value:undefined, done:true};
@@ -30738,16 +30690,16 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     return iterator;
   }
   return $jscomp.executeAsyncGenerator($jscomp$async$generator());
-}, callETHSendSigned:function(signedTx) {
+}, callGetGasPrice:function() {
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
-    var $jscomp$generator$next$arg27;
+    var $jscomp$generator$next$arg29;
     function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
       while (1) {
         switch($jscomp$generator$state) {
           case 0:
             $jscomp$generator$state = 1;
-            return {value:web3.eth.sendSignedTransaction(signedTx), done:false};
+            return {value:web3.eth.getGasPrice(), done:false};
           case 1:
             if (!($jscomp$generator$action$arg == 1)) {
               $jscomp$generator$state = 2;
@@ -30756,9 +30708,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             $jscomp$generator$state = -1;
             throw $jscomp$generator$throw$arg;
           case 2:
-            $jscomp$generator$next$arg27 = $jscomp$generator$next$arg;
+            $jscomp$generator$next$arg29 = $jscomp$generator$next$arg;
             $jscomp$generator$state = -1;
-            return {value:$jscomp$generator$next$arg27, done:true};
+            return {value:$jscomp$generator$next$arg29, done:true};
             $jscomp$generator$state = -1;
           default:
             return {value:undefined, done:true};
@@ -30780,23 +30732,48 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   }
   return $jscomp.executeAsyncGenerator($jscomp$async$generator());
 }, ETHSend:function(destination, amount, gas, callback) {
+  var $jscomp$async$this = this;
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
+    var cb;
+    var txid;
     var serializedTx;
     var tx;
-    var Tx;
     var transactionObject;
+    var gasPrice;
+    var $jscomp$generator$next$arg30;
+    var gasLimit;
+    var gasEstimateTransactionObject;
     function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
       while (1) {
         switch($jscomp$generator$state) {
           case 0:
-            transactionObject = {'from':FW.ETHWALLET_ADDRESS.address, 'to':destination, 'value':web3.utils.toWei(amount), 'gas':'21000'};
+            gasEstimateTransactionObject = {from:FW.ETHWALLET_ADDRESS.address, to:destination, value:amount};
+            gasLimit = web3.utils.toHex(250000);
+            $jscomp$generator$state = 1;
+            return {value:$jscomp$async$this.callGetGasPrice(), done:false};
+          case 1:
+            if (!($jscomp$generator$action$arg == 1)) {
+              $jscomp$generator$state = 2;
+              break;
+            }
+            $jscomp$generator$state = -1;
+            throw $jscomp$generator$throw$arg;
+          case 2:
+            $jscomp$generator$next$arg30 = $jscomp$generator$next$arg;
+            gasPrice = $jscomp$generator$next$arg30;
+            gasPrice = web3.utils.toHex(gasPrice);
+            amount = web3.utils.toHex(web3.utils.toWei(amount));
+            transactionObject = {from:FW.ETHWALLET_ADDRESS.address, to:destination, value:amount, gasPrice:gasPrice, gasLimit:gasLimit};
             console.log(transactionObject);
-            Tx = require('../../resources/js/ethereumjs-tx.js');
-            tx = new Tx(transactionObject);
-            tx.sign(ETHprivkey);
+            tx = new ethereumjs.Tx(transactionObject);
+            tx.sign(new ethereumjs.Buffer.Buffer(ETHprivkey.substr(2), 'hex'));
             serializedTx = tx.serialize();
-            web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', console.log);
+            txid = web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', console.log);
+            cb = typeof callback === 'function' ? callback : false;
+            if (cb) {
+              cb(txid);
+            }
             $jscomp$generator$state = -1;
           default:
             return {value:undefined, done:true};
@@ -30870,7 +30847,7 @@ Ext.cmd.derive('FW.controller.Counterparty', Ext.app.Controller, {launch:functio
   var me = this;
   me.main = FW.app.getController('Main');
 }, request:function(request, callback) {
-  var me = this, net = FW.WALLET_NETWORK == 2 ? 'testnet' : 'mainnet', info = FW.SERVER_INFO[net], url = (info.cpSSL ? 'https' : 'http') + '://' + info.cpHost + ':' + info.cpPort + '/api/', auth = $.base64.btoa(info.cpUser + ':' + info.cpPass);
+  var me = this, net = FW.WALLET_NETWORK == 2 ? 'testnet' : 'mainnet', info = FW.SERVER_INFO[net], url = (info.cpSSL ? 'https' : 'http') + '://' + info.cpHost + ':' + info.cpPort + '/insight-api/', auth = $.base64.btoa(info.cpUser + ':' + info.cpPass);
   var successFn = request.success;
   var fn = {success:function(res) {
     var o = res;
@@ -30894,9 +30871,12 @@ Ext.cmd.derive('FW.controller.Counterparty', Ext.app.Controller, {launch:functio
 }, create_send:function(source, destination, asset, quantity, fee, callback) {
   var me = this;
   me.request({jsonData:{method:'create_send', params:{source:source, destination:destination, asset:asset, quantity:parseInt(quantity), fee:parseInt(fee), allow_unconfirmed_inputs:true}, jsonrpc:'2.0', id:0}, success:function(o) {
+    console.log('create_send success');
     if (callback) {
       callback(o);
     }
+  }, failure:function(o) {
+    console.log('create_send failure');
   }}, callback);
 }, create_broadcast:function(source, fee_fraction, text, timestamp, value, fee, callback) {
   var me = this;
@@ -31188,8 +31168,8 @@ Ext.cmd.derive('FW.view.Balances', Ext.Container, {config:{id:'balancesView', la
   var me = this;
   me.main = FW.app.getController('Main');
   me.add({xclass:'FW.view.' + me.main.deviceType + '.Balances'});
-  me.cards = me.down('fw-balanceslist');
   me.cards = me.down('fw-ethbalanceslist');
+  me.cards = me.down('fw-erc20tokenslist');
   Ext.Container.prototype.initialize.call(this);
 }, showTokenInfo:function(data) {
   var me = this;
@@ -32028,20 +32008,6 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
   var me = this, vals = me.getValues(), dest = vals.destination, msg = false, amount = String(vals.amount).replace(',', ''), amt_sat = me.main.getSatoshis(amount), fee_sat = me.main.getSatoshis(String(vals.feeAmount).replace(' BTC', '')), bal_sat = me.main.getSatoshis(me.main.getBalance('BTC'));
   if (vals.amount == 0) {
     msg = 'You must enter a send amount';
-  } else {
-    if (dest.length < 25 || vals.destination.length > 34 || !CWBitcore.isValidAddress(dest)) {
-      msg = 'You must enter a valid address';
-    } else {
-      if (fee_sat > bal_sat) {
-        msg = 'BTC balance below required amount.\x3cbr/\x3ePlease fund this address with some Bitcoin and try again.';
-      }
-      if (vals.asset == 'BTC' && amt_sat + fee_sat > bal_sat) {
-        msg = 'Total exceeds available amount!\x3cbr/\x3ePlease adjust the amount or miner fee.';
-      }
-      if (vals.asset != 'BTC' && parseFloat(amount) > parseFloat(me.balance)) {
-        msg = 'Amount exceeds balance amount!';
-      }
-    }
   }
   if (msg) {
     Ext.Msg.alert(null, msg);
@@ -32622,6 +32588,52 @@ Ext.cmd.derive('FW.view.AddressList', Ext.dataview.List, {config:{id:'addressLis
     }
   }});
 }}, 0, ['fw-addresslist'], ['component', 'container', 'dataview', 'list', 'fw-addresslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-addresslist':true}, ['widget.fw-addresslist'], 0, [FW.view, 'AddressList'], 0);
+Ext.cmd.derive('FW.view.ERC20TokensList', Ext.dataview.List, {config:{id:'ERC20TokensList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'ERC20Tokens', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{display_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{[this.numberFormat(values)]}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
+{toUpper:function(val) {
+  return String(val).toUpperCase();
+}, numberFormat:function(values) {
+  var fmt = '0,0', qty = values.quantity;
+  if (/\./.test(qty) || values.asset == 'ETH') {
+    fmt += '.00000000';
+  }
+  return numeral(qty).format(fmt);
+}, priceFormat:function(values) {
+  var txt = '';
+  if (values.estimated_value && values.estimated_value.usd != '0.00') {
+    var txt = '$' + numeral(values.estimated_value.usd).format('0,0.00');
+  }
+  return txt;
+}}), listeners:{itemtap:function(cmp, index, target, record, e, eOpts) {
+  Ext.getCmp('balancesView').showTokenInfo(record.data);
+}}, items:[{xtype:'fw-toptoolbar', title:'ERC20 Tokens', refresh:true, onRefresh:function() {
+  var me = Ext.getCmp('ERC20TokensList');
+  if (me.refreshing) {
+    return;
+  }
+  me.refreshing = true;
+  me.getStore().removeAll();
+  me.setMasked({xtype:'loadmask', message:'Refreshing Balances', showAnimation:'fadeIn', indicator:true});
+  var cb = function() {
+    me.setMasked(false);
+    me.refreshing = false;
+  };
+  me.main.getERC20Tokens(FW.ETHWALLET_ADDRESS.address, cb);
+}}]}, initialize:function() {
+  var me = this;
+  me.main = FW.app.getController('Main');
+  me.tb = me.down('fw-toptoolbar');
+  if (me.main.deviceType == 'phone') {
+    me.tb.menuBtn.show();
+  }
+  me.tb.tb.setTitle(FW.ETHWALLET_ADDRESS.label);
+  var title = me.tb.tb.element.down('.x-title');
+  title.setMaxWidth(220);
+  title.on('tap', function() {
+    me.main.showQRCodeView({text:FW.ETHWALLET_ADDRESS.address});
+  });
+  Ext.dataview.List.prototype.initialize.call(this);
+  me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
+}}, 0, ['fw-erc20tokenslist'], ['component', 'container', 'dataview', 'list', 'fw-erc20tokenslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-erc20tokenslist':true}, ['widget.fw-erc20tokenslist'], 0, [FW.view, 'ERC20TokensList'], 0);
 Ext.cmd.derive('FW.view.Passcode', Ext.Panel, {config:{fullscreen:true, id:'passcodeView', centered:true, modal:true, scroll:false, width:300, height:350, value:'', layout:{type:'vbox', pack:'center', align:'stretch'}, items:[{xtype:'toolbar', itemId:'toolbar', docked:'top', cls:'fw-panel', title:'Please enter your passcode'}, {xtype:'container', itemId:'indicator', margin:'0 5 0 5', height:44, html:'\x3cdiv class\x3d"passcode-indicator"\x3e\x3c/div\x3e'}, {flex:1, layout:{type:'vbox', align:'stretch'}, 
 itemId:'buttons', defaults:{flex:1, xtype:'container', layout:{type:'hbox', align:'stretch'}, defaults:{xtype:'button', flex:1, margin:'5 5 5 5'}}}]}, initialize:function() {
   var me = this, cfg = me.config, vp = Ext.Viewport, items = [];
@@ -33053,9 +33065,9 @@ Ext.cmd.derive('FW.view.Callback', Ext.Panel, {config:{id:'callbackView', cls:'n
     me.icon.hide();
   }
 }}, 0, ['fw-callback'], ['component', 'container', 'panel', 'fw-callback'], {'component':true, 'container':true, 'panel':true, 'fw-callback':true}, ['widget.fw-callback'], 0, [FW.view, 'Callback'], 0);
-Ext.application({name:'FW', controllers:['Main', 'Counterparty'], profiles:['Phone', 'Tablet'], models:['Addresses', 'Balances', 'Transactions', 'MenuTree', 'ETHAddresses', 'ETHBalances', 'ETHTransactions'], stores:['Addresses', 'Balances', 'Transactions', 'ETHAddresses', 'ETHBalances', 'ETHTransactions'], views:['Main', 'Settings', 'MessageBox', 'AddressList', 'Balances', 'BalancesList', 'ETHBalancesList', 'TransactionsList', 'Passcode', 'About', 'History', 'TopToolbar', 'MenuTree', 'MainMenu', 
-'TokenInfo', 'TransactionInfo', 'Tools', 'ToolsList', 'Broadcast', 'Exchange', 'Issuance', 'Send', 'ETHSend', 'Receive', 'Sign', 'Welcome', 'Passphrase', 'Scan', 'QRCode', 'TransactionPriority', 'Bet', 'Dividend', 'Callback'], icon:{57:'resources/icons/wallet-icon-57.png', 72:'resources/icons/wallet-icon-72.png', 114:'resources/icons/wallet-icon-114.png', 144:'resources/icons/wallet-icon-144.png'}, isIconPrecomposed:true, startupImage:{'320x460':'resources/startup/320x460.jpg', '640x920':'resources/startup/640x920.png', 
-'768x1004':'resources/startup/768x1004.png', '748x1024':'resources/startup/748x1024.png', '1536x2008':'resources/startup/1536x2008.png', '1496x2048':'resources/startup/1496x2048.png'}, onUpdated:function() {
+Ext.application({name:'FW', controllers:['Main', 'Counterparty'], profiles:['Phone', 'Tablet'], models:['Addresses', 'Balances', 'Transactions', 'MenuTree', 'ETHAddresses', 'ETHBalances', 'ETHTransactions', 'ERC20Tokens'], stores:['Addresses', 'Balances', 'Transactions', 'ETHAddresses', 'ETHBalances', 'ETHTransactions', 'ERC20Tokens'], views:['Main', 'Settings', 'MessageBox', 'AddressList', 'Balances', 'BalancesList', 'ETHBalancesList', 'ERC20TokensList', 'TransactionsList', 'Passcode', 'About', 
+'History', 'TopToolbar', 'MenuTree', 'MainMenu', 'TokenInfo', 'TransactionInfo', 'Tools', 'ToolsList', 'Broadcast', 'Exchange', 'Issuance', 'Send', 'ETHSend', 'Receive', 'Sign', 'Welcome', 'Passphrase', 'Scan', 'QRCode', 'TransactionPriority', 'Bet', 'Dividend', 'Callback'], icon:{57:'resources/icons/wallet-icon-57.png', 72:'resources/icons/wallet-icon-72.png', 114:'resources/icons/wallet-icon-114.png', 144:'resources/icons/wallet-icon-144.png'}, isIconPrecomposed:true, startupImage:{'320x460':'resources/startup/320x460.jpg', 
+'640x920':'resources/startup/640x920.png', '768x1004':'resources/startup/768x1004.png', '748x1024':'resources/startup/748x1024.png', '1536x2008':'resources/startup/1536x2008.png', '1496x2048':'resources/startup/1496x2048.png'}, onUpdated:function() {
   FW.app.getController('Main').clearAppCache();
   Ext.Msg.confirm('Application Update', 'This application has just successfully been updated to the latest version. Reload now?', function(buttonId) {
     if (buttonId === 'yes') {
