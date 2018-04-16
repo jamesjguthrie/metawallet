@@ -3742,5 +3742,11 @@
     <None Include="app\store\MONBalances.js" />
     <None Include="app\store\MONTransactions.js" />
     <None Include="app\view\ERC20Send.js" />
+    <None Include="app\model\MONAddresses.js" />
+    <None Include="app\model\MONBalances.js" />
+    <None Include="app\model\MONTransactions.js" />
+    <None Include="app\model\LTCAddresses.js" />
+    <None Include="app\model\LTCBalances.js" />
+    <None Include="app\model\LTCTransactions.js" />
   </ItemGroup>
 </Project>

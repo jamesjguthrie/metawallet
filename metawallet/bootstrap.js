@@ -687,6 +687,12 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.store.ETHAddresses": [],
   "FW.store.ETHBalances": [],
   "FW.store.ETHTransactions": [],
+  "FW.store.LTCAddresses": [],
+  "FW.store.LTCBalances": [],
+  "FW.store.LTCTransactions": [],
+  "FW.store.MONAddresses": [],
+  "FW.store.MONBalances": [],
+  "FW.store.MONTransactions": [],
   "FW.store.Transactions": [],
   "FW.ux.AccordionList": [
     "Ext.AccordionList"
@@ -700,6 +706,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.view.Broadcast": [],
   "FW.view.Callback": [],
   "FW.view.Dividend": [],
+  "FW.view.ERC20Send": [],
   "FW.view.ERC20TokensList": [],
   "FW.view.ETHBalancesList": [],
   "FW.view.ETHSend": [],
@@ -707,6 +714,10 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.view.Exchange": [],
   "FW.view.History": [],
   "FW.view.Issuance": [],
+  "FW.view.LTCBalancesList": [],
+  "FW.view.LTCSend": [],
+  "FW.view.MONBalancesList": [],
+  "FW.view.MONSend": [],
   "FW.view.Main": [],
   "FW.view.MainMenu": [],
   "FW.view.MenuTree": [],
@@ -1488,6 +1499,12 @@ Ext.ClassManager.addNameAliasMappings({
   "FW.store.ETHAddresses": [],
   "FW.store.ETHBalances": [],
   "FW.store.ETHTransactions": [],
+  "FW.store.LTCAddresses": [],
+  "FW.store.LTCBalances": [],
+  "FW.store.LTCTransactions": [],
+  "FW.store.MONAddresses": [],
+  "FW.store.MONBalances": [],
+  "FW.store.MONTransactions": [],
   "FW.store.Transactions": [],
   "FW.ux.AccordionList": [
     "widget.accordionlist"
@@ -1509,6 +1526,7 @@ Ext.ClassManager.addNameAliasMappings({
     "widget.fw-callback"
   ],
   "FW.view.Dividend": [],
+  "FW.view.ERC20Send": [],
   "FW.view.ERC20TokensList": [
     "widget.fw-erc20tokenslist"
   ],
@@ -1520,6 +1538,14 @@ Ext.ClassManager.addNameAliasMappings({
   "FW.view.Exchange": [],
   "FW.view.History": [],
   "FW.view.Issuance": [],
+  "FW.view.LTCBalancesList": [
+    "widget.fw-ltcbalanceslist"
+  ],
+  "FW.view.LTCSend": [],
+  "FW.view.MONBalancesList": [
+    "widget.fw-monbalanceslist"
+  ],
+  "FW.view.MONSend": [],
   "FW.view.Main": [
     "widget.main"
   ],

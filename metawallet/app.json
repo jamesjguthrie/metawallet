@@ -145,6 +145,14 @@
       "update": "delta"
     },
     {
+      "path": "resources/js/monero-nodejs/lib/wallet.js",
+      "update": "delta"
+    },
+    {
+      "path": "resources/js/litecoin-lib.js",
+      "update": "delta"
+    },
+    {
       "path": "app.js",
       "bundle": true, /* Indicates that all class dependencies are concatenated into this file when build */
       "update": "delta"
