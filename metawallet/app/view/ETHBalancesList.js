@@ -90,7 +90,7 @@ Ext.define('FW.view.ETHBalancesList', {
         if(me.main.deviceType=='phone')
             me.tb.menuBtn.show();
         // Display address label in titlebar, wrap at 220 pixels, display address on tap
-        me.tb.tb.setTitle(FW.ETHWALLET_ADDRESS.label);
+        me.tb.tb.setTitle("Ethereum");
         var title = me.tb.tb.element.down('.x-title');
         title.setMaxWidth(220);
         title.on('tap',function(){ me.main.showQRCodeView({ text: FW.ETHWALLET_ADDRESS.address }); });

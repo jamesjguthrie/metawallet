@@ -1050,6 +1050,7 @@ Ext.define('FW.controller.Main', {
             addr = (address) ? address : FW.ETHWALLET_ADDRESS,
             prefix = addr.substr(0, 5),
             store = Ext.getStore('ERC20Tokens');
+        console.log("Line 1053");
         record = store.add({
             id: address - 'ERC20',
             prefix: prefix,
@@ -1058,72 +1059,17 @@ Ext.define('FW.controller.Main', {
             quantity: quantity,
             decimal: decimal
         });
+        console.log(record);
         // Mark record as dirty, so we save it to disk on the next sync
-        record[0].setDirty();
+        //record[0].setDirty();
     },
 
-    callGetERC20Tokens: async function (address) {
-        var contractABI = [
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "name",
-    "outputs": [
-      {
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "payable": false,
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "decimals",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint8"
-      }
-    ],
-    "payable": false,
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_owner",
-        "type": "address"
-      }
-    ],
-    "name": "balanceOf",
-    "outputs": [
-      {
-        "name": "balance",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "symbol",
-    "outputs": [
-      {
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "payable": false,
-    "type": "function"
-  }
-]
-        var tokenContract = new web3.eth.Contract(contractABI, address);
-        return await(tokenContract);
+    callGetERC20Tokens: function (address) {
+        var me = this;
+        var tokenContract;
+
+        //console.log(tokenContract);
+        return tokenContract;
     },
 
     getERC20Tokens: async function (address, callback) {
@@ -1132,15 +1078,34 @@ Ext.define('FW.controller.Main', {
             prefix = addr.substr(0, 5),
             store = Ext.getStore('ERC20Tokens'),
             net = (FW.ETHWALLET_NETWORK == 2) ? 'eth' : 'eth'
-        console.log("address is: ", addr);
-        var tokenContract = await(me.callGetERC20Tokens(address));
-        var decimal = tokenContract.decimals();
-        var balance = tokenContract.balanceOf(address);
-        var adjustedBalance = balance / Math.pow(10, decimal);
-        var tokenName = tokenContract.name();
-        var tokenSymbol = tokenContract.symbol();
-        me.updateERC20TokensList(address, token_symbol, token_name, quantity, decimal);
-        me.saveStore('ERC20Tokens');
+        //address = '0xa171f47d071A781cc354305C1B88B9AC6BD6f043'; Jabo's testing address which has tokens
+        console.log("address is: ", address);
+        me.ajaxRequest({
+            url: 'http://api.etherscan.io/api?module=account&action=tokentx&address=' + address + '&startblock=0&endblock=999999999&sort=asc&apikey=RNQKYFEVMGQ1MM49IRFTBTVD7383X96BJP',
+            headers: {
+                    
+                },
+            success: function(o){
+                if(o.result.length > 0) {
+                    Ext.each(o.result, function(item,idx){
+                        console.log(item);
+                        var decimal = item.tokenDecimal;
+                        var quantity = item.value;
+                        quantity = quantity / Math.pow(10, decimal);
+                        var token_name = item.tokenName;
+                        var token_symbol = item.tokenSymbol;
+                        me.updateERC20TokensList(address, token_symbol, token_name, quantity, decimal);
+                        me.saveStore('ERC20Tokens');
+            });
+                }
+                else {
+                    //tokenContract.valid = false;
+                }
+            },
+            failure: function(o){
+                console.log("get token list from etherscan failed");
+            }
+        });
 
         // Handle processing callback now
         if(callback)
@@ -1195,7 +1160,6 @@ Ext.define('FW.controller.Main', {
         // Mark record as dirty, so we save it to disk on the next sync
         record[0].setDirty();
     },
-
 
     // Handle prompting user to enter a wallet passphrase
     promptWalletPassphrase: function(callback){

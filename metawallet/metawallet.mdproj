@@ -3748,5 +3748,6 @@
     <None Include="app\model\LTCAddresses.js" />
     <None Include="app\model\LTCBalances.js" />
     <None Include="app\model\LTCTransactions.js" />
+    <None Include="resources\js\monero-nodejs\lib\wallet.js" />
   </ItemGroup>
 </Project>

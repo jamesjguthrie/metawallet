@@ -24,9 +24,9 @@ Ext.define('FW.view.ERC20TokensList', {
                     '<img src="https://xchain.io/icon/{[this.toUpper(values.asset)]}.png">' + 
                 '</div>' +
                 '<div class="fw-balanceslist-info">' +
-                    '<div class="fw-balanceslist-currency">{display_name}</div>' +
+                    '<div class="fw-balanceslist-currency">{token_name}</div>' +
                     '<div>' +
-                        '<div class="fw-balanceslist-amount">{[this.numberFormat(values)]}</div>' +
+                        '<div class="fw-balanceslist-amount">{quantity / Math.pow(10, decimal)}</div>' +
                         '<div class="fw-balanceslist-price">{[this.priceFormat(values)]}</div>' +
                     '</div>' +
                 '</div>' +
@@ -38,14 +38,13 @@ Ext.define('FW.view.ERC20TokensList', {
                 numberFormat: function(values){
                     var fmt = '0,0',
                         qty = values.quantity;
-                    if(/\./.test(qty) || values.asset=='ETH')
-                        fmt += '.00000000';
+                    fmt += '.00000000';
                     return numeral(qty).format(fmt);
                 },
                 priceFormat: function(values){
-                    var txt = '';
-                    if(values.estimated_value && values.estimated_value.usd!='0.00')
-                        var txt = '$' + numeral(values.estimated_value.usd).format('0,0.00');
+                    var txt = 'Tokens';
+                    //if(values.estimated_value && values.estimated_value.usd!='0.00')
+                    //    var txt = '$' + numeral(values.estimated_value.usd).format('0,0.00');
                     return txt;
                 }
             }
@@ -90,7 +89,7 @@ Ext.define('FW.view.ERC20TokensList', {
         if(me.main.deviceType=='phone')
             me.tb.menuBtn.show();
         // Display address label in titlebar, wrap at 220 pixels, display address on tap
-        me.tb.tb.setTitle(FW.ETHWALLET_ADDRESS.label);
+        me.tb.tb.setTitle("ERC20 Tokens");
         var title = me.tb.tb.element.down('.x-title');
         title.setMaxWidth(220);
         title.on('tap',function(){ me.main.showQRCodeView({ text: FW.ETHWALLET_ADDRESS.address }); });
@@ -99,13 +98,13 @@ Ext.define('FW.view.ERC20TokensList', {
         // Handle sorting currencies by type and name
         // We do this so we show currencies (BTC,XCP) before assets
         me.getStore().sort([{
-            property : 'type',
+            property : 'id',
             direction: 'ASC'
         },{
-            property : 'asset',
+            property : 'token_symbol',
             direction: 'ASC'
         },{
-            property : 'asset_longname',
+            property : 'token_name',
             direction: 'ASC'
         }]);
     }
