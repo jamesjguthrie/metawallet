@@ -8,7 +8,7 @@ Ext.define('FW.view.ERC20Send', {
     extend: 'Ext.form.Panel',
 
     config: {
-        id: 'ERC20sendView',
+        id: 'ERC20SendView',
         layout: 'vbox',
         scrollable: 'vertical',
         cls: 'fw-panel',
@@ -39,13 +39,13 @@ Ext.define('FW.view.ERC20Send', {
                     items:[{
                         xtype: 'image',
                         itemId: 'image',
-                        src: 'resources/images/icons/erc20.png',
+                        src: 'resources/images/icons/eth.png',
                         width: 48,
                         height: 48,
                         listeners: {
                             // When user taps the currency icon, treat as if they had tapped the currency field
                             tap: function(cmp, value){
-                                var me = Ext.getCmp('ERC20sendView');
+                                var me = Ext.getCmp('ERC20SendView');
                                 me.asset.showPicker(cmp);
                             }
                         }
@@ -60,9 +60,9 @@ Ext.define('FW.view.ERC20Send', {
                         label: 'Name',
                         labelAlign: 'top',
                         name: 'asset',
-                        store: 'ERC20Balances',
-                        displayField: 'display_name',
-                        valueField: 'asset',
+                        store: 'ERC20Tokens',
+                        displayField: 'token_symbol',
+                        valueField: 'token_symbol',
                         value: 'ERC20',
                         defaultTabletPickerConfig: {
                             cls: 'fw-currency-picker',
@@ -72,7 +72,7 @@ Ext.define('FW.view.ERC20Send', {
                                         '<img src="https://xchain.io/icon/{[this.toUpper(values.asset)]}.png">' + 
                                     '</div>' +
                                     '<div class="fw-pickerlist-info">' +
-                                        '<div class="fw-pickerlist-currency">{display_name}</div>' +
+                                        '<div class="fw-pickerlist-currency">{token_name}</div>' +
                                     '</div>' +
                                 '</div>',
                                 {
@@ -103,7 +103,7 @@ Ext.define('FW.view.ERC20Send', {
                         listeners: {
                             // When currency changes, update currency image and balance
                             change: function(cmp, value){
-                                var me   = Ext.getCmp('ERC20sendView'),
+                                var me   = Ext.getCmp('ERC20SendView'),
                                     step = (value=='ERC20') ? 0.01 : 1;
                                 me.amount.setValue(0);
                                 me.amount.setStepValue(step);
@@ -129,7 +129,7 @@ Ext.define('FW.view.ERC20Send', {
                     name: 'destination',
                     iconCls: 'fa fa-qrcode',
                     handler: function(){
-                        var view = Ext.getCmp('ERC20sendView');
+                        var view = Ext.getCmp('ERC20SendView');
                         FW.app.getController('Main').scanQRCode(view);
                     }
                 },{
@@ -151,7 +151,7 @@ Ext.define('FW.view.ERC20Send', {
                         change: function(cmp, newVal, oldVal){
                             // console.log('change old,new=',oldVal,newVal);
                             if(newVal!=oldVal){
-                                var me  = Ext.getCmp('ERC20sendView'),
+                                var me  = Ext.getCmp('ERC20SendView'),
                                     cur = me.asset.getValue();
                                 if(newVal=='')
                                     newVal = 0;
@@ -181,7 +181,7 @@ Ext.define('FW.view.ERC20Send', {
                         // Handle detecting amount changes and updating the price
                         change: function(cmp, newVal, oldVal){
                             if(newVal!=oldVal){
-                                var me  = Ext.getCmp('ERC20sendView'),
+                                var me  = Ext.getCmp('ERC20SendView'),
                                     cur = me.asset.getValue();
                                 // Handle updating price
                                 if(!me.price.isDisabled() && me.tokenInfo && me.tokenInfo.estimated_value.btc!='0.00000000'){
@@ -207,7 +207,7 @@ Ext.define('FW.view.ERC20Send', {
                 iconCls: 'fa fa-send',
                 ui: 'confirm',
                 handler: function(btn){
-                    Ext.getCmp('ERC20sendView').validate();
+                    Ext.getCmp('ERC20SendView').validate();
                 }
             }]
         }]
@@ -261,14 +261,17 @@ Ext.define('FW.view.ERC20Send', {
         me.updateImage(val);
         me.updateBalance(val);
         me.updateForm(cfg);
+        console.log(me.token_symbol);
         me.getTokenInfo(asset);
     },
 
 
     // Handle getting information on a specific token
     getTokenInfo: function(asset){
+        console.log(asset);
         var me = this;
         price_erc20 = 1;
+        store   = Ext.getStore('ERC20Tokens');
         if(asset=='ERC20'){
             var price_usd = me.main.getCurrencyPrice('erc20','usd'),
                 price_btc = me.main.getCurrencyPrice('counterparty','erc20');
@@ -312,7 +315,7 @@ Ext.define('FW.view.ERC20Send', {
     // Handle looking up asset balance and updating field
     updateBalance: function(asset){
         var me      = this,
-            store   = Ext.getStore('ERC20Balances'),
+            store   = Ext.getStore('ERC20Tokens'),
             prefix  = FW.ETHWALLET_ADDRESS.address.substr(0,5);
             balance = 0,
             values  = false,
@@ -320,10 +323,12 @@ Ext.define('FW.view.ERC20Send', {
         // Find balance in store
         store.each(function(item){
             var rec = item.data;
-            if(rec.asset==asset && rec.prefix==prefix){
-                balance = rec.quantity;
-                values  = rec.estimated_value;
-            }
+            me.token_symbol = rec.token_symbol;
+            me.contract_address = rec.contract_address;
+            //if(rec.asset==asset && rec.prefix==prefix){
+            balance = 1;
+            values  = 1;
+            //}
         });
         // If balance is divisible, update display format and precision
         if(/\./.test(balance)){
@@ -345,7 +350,7 @@ Ext.define('FW.view.ERC20Send', {
 
 
     // Handle validating the send data and sending the send
-    validate: function(){ //probably change these for gwei
+    validate: function(){
         var me      = this,
             vals    = me.getValues(),
             dest    = vals.destination,
@@ -394,10 +399,10 @@ Ext.define('FW.view.ERC20Send', {
             // Convert amount to satoshis
             //amt_sat = (/\./.test(vals.available)) ? amt_sat : String(vals.amount).replace(/\,/g,'');
             console.log(vals);
-            me.main.ERC20Send(vals.destination, vals.amount, fee_sat, cb);
+            me.main.ERC20Send(vals.destination, vals.amount, me.contract_address, cb);
         }
         // Confirm action with user
-        var asset = (me.tokenInfo.asset_longname && me.tokenInfo.asset_longname!='') ? me.tokenInfo.asset_longname : me.tokenInfo.asset;
+        var asset = me.tokenInfo.token_symbol;
         Ext.Msg.confirm('Confirm Send', 'Send ' + vals.amount + ' ' +  asset +'?', function(btn){
             if(btn=='yes')
                 fn();

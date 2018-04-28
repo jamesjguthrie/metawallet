@@ -29267,7 +29267,7 @@ Ext.cmd.derive('FW.model.MenuTree', Ext.data.Model, {config:{fields:[{name:'text
 Ext.cmd.derive('FW.model.ETHAddresses', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'index', type:'int'}, {name:'network', type:'int'}, {name:'address', type:'string'}, {name:'label', type:'label'}], idProperty:'id', proxy:{type:'localstorage', id:'ETHAddresses', idProperty:'id'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ETHAddresses'], 0);
 Ext.cmd.derive('FW.model.ETHBalances', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'integer'}, {name:'asset', type:'string'}, {name:'asset_longname', type:'string'}, {name:'display_name', type:'string'}, {name:'quantity', type:'string'}, {name:'estimated_value', type:'object'}], idProperty:'id', proxy:{type:'localstorage', id:'ETHBalances'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ETHBalances'], 0);
 Ext.cmd.derive('FW.model.ETHTransactions', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'string'}, {name:'hash', type:'string'}, {name:'asset', type:'string'}, {name:'quantity', type:'string'}, {name:'time', type:'string'}], idProperty:'id'}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ETHTransactions'], 0);
-Ext.cmd.derive('FW.model.ERC20Tokens', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'token_symbol', type:'string'}, {name:'token_name', type:'string'}, {name:'quantity', type:'string'}, {name:'decimal', type:'object'}], idProperty:'id', proxy:{type:'localstorage', id:'ERC20Tokens'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ERC20Tokens'], 0);
+Ext.cmd.derive('FW.model.ERC20Tokens', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'token_symbol', type:'string'}, {name:'token_name', type:'string'}, {name:'quantity', type:'string'}, {name:'decimal', type:'string'}, {name:'contract_address', type:'string'}, {name:'asset', type:'string'}], idProperty:'id', proxy:{type:'localstorage', id:'ERC20Tokens'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'ERC20Tokens'], 0);
 Ext.cmd.derive('FW.model.MONAddresses', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'index', type:'int'}, {name:'network', type:'int'}, {name:'address', type:'string'}, {name:'label', type:'label'}], idProperty:'id', proxy:{type:'localstorage', id:'MONAddresses', idProperty:'id'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'MONAddresses'], 0);
 Ext.cmd.derive('FW.model.MONBalances', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'integer'}, {name:'asset', type:'string'}, {name:'asset_longname', type:'string'}, {name:'display_name', type:'string'}, {name:'quantity', type:'string'}, {name:'estimated_value', type:'object'}], idProperty:'id', proxy:{type:'localstorage', id:'MONBalances'}}}, 0, 0, 0, 0, 0, 0, [FW.model, 'MONBalances'], 0);
 Ext.cmd.derive('FW.model.MONTransactions', Ext.data.Model, {config:{fields:[{name:'id', type:'string'}, {name:'prefix', type:'string'}, {name:'type', type:'string'}, {name:'hash', type:'string'}, {name:'asset', type:'string'}, {name:'quantity', type:'string'}, {name:'time', type:'string'}], idProperty:'id'}}, 0, 0, 0, 0, 0, 0, [FW.model, 'MONTransactions'], 0);
@@ -29492,6 +29492,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   if (tool == 'ETHsend') {
     tools.showETHSendTool(cfg);
   }
+  if (tool == 'ERC20Send') {
+    tools.showERC20SendTool(cfg);
+  }
   if (tool == 'sign') {
     tools.showSignTool(cfg);
   }
@@ -29534,10 +29537,6 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     console.log(ETHaddr);
   }
   me.setETHWalletAddress(ETHaddr, true);
-  if (alert) {
-    Ext.Msg.alert('New ETHAddress', addr);
-  }
-  return addr;
 }, showWalletPassphrase:function() {
   var me = this, m = Mnemonic.fromHex(FW.WALLET_HEX), p = m.toWords().toString().replace(/,/gi, ' ');
   me.showPassphraseView({phrase:p});
@@ -29984,6 +29983,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
                 }
               }
             }
+            me.getERC20Tokens(address);
             if (callback) {
               callback();
             }
@@ -30007,67 +30007,19 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     return iterator;
   }
   return $jscomp.executeAsyncGenerator($jscomp$async$generator());
-}, updateERC20TokensList:function(address, token_symbol, token_name, quantity, decimal) {
+}, updateERC20TokensList:function(address, token_symbol, token_name, quantity, decimal, contract_address) {
   var me = this, addr = address ? address : FW.ETHWALLET_ADDRESS, prefix = addr.substr(0, 5), store = Ext.getStore('ERC20Tokens');
-  record = store.add({id:address - 'ERC20', prefix:prefix, token_symbol:token_symbol, token_name:token_name, quantity:quantity, decimal:decimal});
-  record[0].setDirty();
+  console.log('Line 1053');
+  record = store.add({id:address - 'ERC20', prefix:prefix, token_symbol:token_symbol, token_name:token_name, quantity:quantity, decimal:decimal, contract_address:contract_address, asset:'ERC20'});
+  console.log(record);
 }, callGetERC20Tokens:function(address) {
-  function $jscomp$async$generator() {
-    var $jscomp$generator$state = 0;
-    var $jscomp$generator$next$arg26;
-    var tokenContract;
-    var contractABI;
-    function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
-      while (1) {
-        switch($jscomp$generator$state) {
-          case 0:
-            contractABI = [{'constant':true, 'inputs':[], 'name':'name', 'outputs':[{'name':'', 'type':'string'}], 'payable':false, 'type':'function'}, {'constant':true, 'inputs':[], 'name':'decimals', 'outputs':[{'name':'', 'type':'uint8'}], 'payable':false, 'type':'function'}, {'constant':true, 'inputs':[{'name':'_owner', 'type':'address'}], 'name':'balanceOf', 'outputs':[{'name':'balance', 'type':'uint256'}], 'payable':false, 'type':'function'}, {'constant':true, 'inputs':[], 'name':'symbol', 
-            'outputs':[{'name':'', 'type':'string'}], 'payable':false, 'type':'function'}];
-            tokenContract = new web3.eth.Contract(contractABI, address);
-            $jscomp$generator$state = 1;
-            return {value:tokenContract, done:false};
-          case 1:
-            if (!($jscomp$generator$action$arg == 1)) {
-              $jscomp$generator$state = 2;
-              break;
-            }
-            $jscomp$generator$state = -1;
-            throw $jscomp$generator$throw$arg;
-          case 2:
-            $jscomp$generator$next$arg26 = $jscomp$generator$next$arg;
-            $jscomp$generator$state = -1;
-            return {value:$jscomp$generator$next$arg26, done:true};
-            $jscomp$generator$state = -1;
-          default:
-            return {value:undefined, done:true};
-        }
-      }
-    }
-    var iterator = {next:function(arg) {
-      return $jscomp$generator$impl(0.0, arg, undefined);
-    }, 'throw':function(arg) {
-      return $jscomp$generator$impl(1.0, undefined, arg);
-    }, 'return':function(arg) {
-      throw Error('Not yet implemented');
-    }};
-    $jscomp.initSymbolIterator();
-    iterator[Symbol.iterator] = function() {
-      return this;
-    };
-    return iterator;
-  }
-  return $jscomp.executeAsyncGenerator($jscomp$async$generator());
+  var me = this;
+  var tokenContract;
+  return tokenContract;
 }, getERC20Tokens:function(address, callback) {
   var $jscomp$async$this = this;
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
-    var tokenSymbol;
-    var tokenName;
-    var adjustedBalance;
-    var balance;
-    var decimal;
-    var tokenContract;
-    var $jscomp$generator$next$arg27;
     var net;
     var store;
     var prefix;
@@ -30082,26 +30034,25 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             prefix = addr.substr(0, 5);
             store = Ext.getStore('ERC20Tokens');
             net = FW.ETHWALLET_NETWORK == 2 ? 'eth' : 'eth';
-            console.log('address is: ', addr);
-            $jscomp$generator$state = 1;
-            return {value:me.callGetERC20Tokens(address), done:false};
-          case 1:
-            if (!($jscomp$generator$action$arg == 1)) {
-              $jscomp$generator$state = 2;
-              break;
-            }
-            $jscomp$generator$state = -1;
-            throw $jscomp$generator$throw$arg;
-          case 2:
-            $jscomp$generator$next$arg27 = $jscomp$generator$next$arg;
-            tokenContract = $jscomp$generator$next$arg27;
-            decimal = tokenContract.decimals();
-            balance = tokenContract.balanceOf(address);
-            adjustedBalance = balance / Math.pow(10, decimal);
-            tokenName = tokenContract.name();
-            tokenSymbol = tokenContract.symbol();
-            me.updateERC20TokensList(address, token_symbol, token_name, quantity, decimal);
-            me.saveStore('ERC20Tokens');
+            console.log('address is: ', address);
+            me.ajaxRequest({url:'http://api.etherscan.io/api?module\x3daccount\x26action\x3dtokentx\x26address\x3d' + address + '\x26startblock\x3d0\x26endblock\x3d999999999\x26sort\x3dasc\x26apikey\x3dRNQKYFEVMGQ1MM49IRFTBTVD7383X96BJP', headers:{}, success:function(o) {
+              if (o.result.length > 0) {
+                Ext.each(o.result, function(item, idx) {
+                  console.log(item);
+                  var decimal = item.tokenDecimal;
+                  var quantity = item.value;
+                  quantity = quantity / Math.pow(10, decimal);
+                  var token_name = item.tokenName;
+                  var token_symbol = item.tokenSymbol;
+                  var contract_address = item.contractAddress;
+                  me.updateERC20TokensList(address, token_symbol, token_name, quantity, decimal, contract_address);
+                  me.saveStore('ERC20Tokens');
+                });
+              } else {
+              }
+            }, failure:function(o) {
+              console.log('get token list from etherscan failed');
+            }});
             if (callback) {
               callback();
             }
@@ -30666,7 +30617,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
 }, callGetGasLimit:function() {
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
-    var $jscomp$generator$next$arg28;
+    var $jscomp$generator$next$arg26;
     function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
       while (1) {
         switch($jscomp$generator$state) {
@@ -30681,9 +30632,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             $jscomp$generator$state = -1;
             throw $jscomp$generator$throw$arg;
           case 2:
-            $jscomp$generator$next$arg28 = $jscomp$generator$next$arg;
+            $jscomp$generator$next$arg26 = $jscomp$generator$next$arg;
             $jscomp$generator$state = -1;
-            return {value:$jscomp$generator$next$arg28, done:true};
+            return {value:$jscomp$generator$next$arg26, done:true};
             $jscomp$generator$state = -1;
           default:
             return {value:undefined, done:true};
@@ -30707,7 +30658,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
 }, callGetGasPrice:function() {
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
-    var $jscomp$generator$next$arg29;
+    var $jscomp$generator$next$arg27;
     function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
       while (1) {
         switch($jscomp$generator$state) {
@@ -30722,9 +30673,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             $jscomp$generator$state = -1;
             throw $jscomp$generator$throw$arg;
           case 2:
-            $jscomp$generator$next$arg29 = $jscomp$generator$next$arg;
+            $jscomp$generator$next$arg27 = $jscomp$generator$next$arg;
             $jscomp$generator$state = -1;
-            return {value:$jscomp$generator$next$arg29, done:true};
+            return {value:$jscomp$generator$next$arg27, done:true};
             $jscomp$generator$state = -1;
           default:
             return {value:undefined, done:true};
@@ -30755,7 +30706,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     var tx;
     var transactionObject;
     var gasPrice;
-    var $jscomp$generator$next$arg30;
+    var $jscomp$generator$next$arg28;
     var gasLimit;
     var gasEstimateTransactionObject;
     function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
@@ -30774,8 +30725,96 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             $jscomp$generator$state = -1;
             throw $jscomp$generator$throw$arg;
           case 2:
-            $jscomp$generator$next$arg30 = $jscomp$generator$next$arg;
-            gasPrice = $jscomp$generator$next$arg30;
+            $jscomp$generator$next$arg28 = $jscomp$generator$next$arg;
+            gasPrice = $jscomp$generator$next$arg28;
+            gasPrice = web3.utils.toHex(gasPrice);
+            amount = web3.utils.toHex(web3.utils.toWei(amount));
+            transactionObject = {from:FW.ETHWALLET_ADDRESS.address, to:destination, value:amount, gasPrice:gasPrice, gasLimit:gasLimit};
+            console.log(transactionObject);
+            tx = new ethereumjs.Tx(transactionObject);
+            tx.sign(new ethereumjs.Buffer.Buffer(ETHprivkey.substr(2), 'hex'));
+            serializedTx = tx.serialize();
+            txid = web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', console.log);
+            cb = typeof callback === 'function' ? callback : false;
+            if (cb) {
+              cb(txid);
+            }
+            $jscomp$generator$state = -1;
+          default:
+            return {value:undefined, done:true};
+        }
+      }
+    }
+    var iterator = {next:function(arg) {
+      return $jscomp$generator$impl(0.0, arg, undefined);
+    }, 'throw':function(arg) {
+      return $jscomp$generator$impl(1.0, undefined, arg);
+    }, 'return':function(arg) {
+      throw Error('Not yet implemented');
+    }};
+    $jscomp.initSymbolIterator();
+    iterator[Symbol.iterator] = function() {
+      return this;
+    };
+    return iterator;
+  }
+  return $jscomp.executeAsyncGenerator($jscomp$async$generator());
+}, ERC20Send:function(destination, amount, contract_address, callback) {
+  var $jscomp$async$this = this;
+  function $jscomp$async$generator() {
+    var $jscomp$generator$state = 0;
+    var cb;
+    var txid;
+    var serializedTx;
+    var tx;
+    var transactionObject;
+    var gasPrice;
+    var $jscomp$generator$next$arg29;
+    var gasLimit;
+    var serializedTx;
+    var tx;
+    var privKey;
+    var rawTransaction;
+    var contract;
+    var contractAddress;
+    var count;
+    function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
+      while (1) {
+        switch($jscomp$generator$state) {
+          case 0:
+            count = web3.eth.getTransactionCount(FW.ETHWALLET_ADDRESS.address);
+            me.ajaxRequest({url:'https://api.etherscan.io/api?module\x3dcontract\x26action\x3dgetabi\x26address\x3d' + contract_address + '\x26apikey\x3dRNQKYFEVMGQ1MM49IRFTBTVD7383X96BJP', headers:{}, success:function(o) {
+              console.log(o);
+            }, failure:function(o) {
+              console.log('get token list from etherscan failed');
+            }});
+            contractAddress = '0x8...';
+            contract = web3.eth.contract(abiArray).at(contractAddress);
+            rawTransaction = {'from':'0x26...', 'nonce':web3.toHex(count), 'gasPrice':'0x04e3b29200', 'gasLimit':'0x7458', 'to':contractAddress, 'value':'0x0', 'data':contract.transfer.getData('0xCb...', 10, {from:'0x26...'}), 'chainId':3};
+            privKey = new Buffer('fc3...', 'hex');
+            tx = new Tx(rawTransaction);
+            tx.sign(privKey);
+            serializedTx = tx.serialize();
+            web3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'), function(err, hash) {
+              if (!err) {
+                console.log(hash);
+              } else {
+                console.log(err);
+              }
+            });
+            gasLimit = web3.utils.toHex(250000);
+            $jscomp$generator$state = 1;
+            return {value:$jscomp$async$this.callGetGasPrice(), done:false};
+          case 1:
+            if (!($jscomp$generator$action$arg == 1)) {
+              $jscomp$generator$state = 2;
+              break;
+            }
+            $jscomp$generator$state = -1;
+            throw $jscomp$generator$throw$arg;
+          case 2:
+            $jscomp$generator$next$arg29 = $jscomp$generator$next$arg;
+            gasPrice = $jscomp$generator$next$arg29;
             gasPrice = web3.utils.toHex(gasPrice);
             amount = web3.utils.toHex(web3.utils.toWei(amount));
             transactionObject = {from:FW.ETHWALLET_ADDRESS.address, to:destination, value:amount, gasPrice:gasPrice, gasLimit:gasLimit};
@@ -30994,7 +31033,7 @@ Ext.cmd.derive('FW.view.BalancesList', Ext.dataview.List, {config:{id:'balancesL
   if (me.main.deviceType == 'phone') {
     me.tb.menuBtn.show();
   }
-  me.tb.tb.setTitle(FW.WALLET_ADDRESS.label);
+  me.tb.tb.setTitle('Bitcoin');
   var title = me.tb.tb.element.down('.x-title');
   title.setMaxWidth(220);
   title.on('tap', function() {
@@ -31040,7 +31079,7 @@ Ext.cmd.derive('FW.view.ETHBalancesList', Ext.dataview.List, {config:{id:'ETHbal
   if (me.main.deviceType == 'phone') {
     me.tb.menuBtn.show();
   }
-  me.tb.tb.setTitle(FW.ETHWALLET_ADDRESS.label);
+  me.tb.tb.setTitle('Ethereum');
   var title = me.tb.tb.element.down('.x-title');
   title.setMaxWidth(220);
   title.on('tap', function() {
@@ -31049,20 +31088,15 @@ Ext.cmd.derive('FW.view.ETHBalancesList', Ext.dataview.List, {config:{id:'ETHbal
   Ext.dataview.List.prototype.initialize.call(this);
   me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
 }}, 0, ['fw-ethbalanceslist'], ['component', 'container', 'dataview', 'list', 'fw-ethbalanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-ethbalanceslist':true}, ['widget.fw-ethbalanceslist'], 0, [FW.view, 'ETHBalancesList'], 0);
-Ext.cmd.derive('FW.view.ERC20TokensList', Ext.dataview.List, {config:{id:'ERC20TokensList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'ERC20Tokens', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{display_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{[this.numberFormat(values)]}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
+Ext.cmd.derive('FW.view.ERC20TokensList', Ext.dataview.List, {config:{id:'ERC20TokensList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'ERC20Tokens', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{token_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{quantity / Math.pow(10, decimal)}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
 {toUpper:function(val) {
   return String(val).toUpperCase();
 }, numberFormat:function(values) {
   var fmt = '0,0', qty = values.quantity;
-  if (/\./.test(qty) || values.asset == 'ETH') {
-    fmt += '.00000000';
-  }
+  fmt += '.00000000';
   return numeral(qty).format(fmt);
 }, priceFormat:function(values) {
-  var txt = '';
-  if (values.estimated_value && values.estimated_value.usd != '0.00') {
-    var txt = '$' + numeral(values.estimated_value.usd).format('0,0.00');
-  }
+  var txt = 'Tokens';
   return txt;
 }}), listeners:{itemtap:function(cmp, index, target, record, e, eOpts) {
   Ext.getCmp('balancesView').showTokenInfo(record.data);
@@ -31086,14 +31120,14 @@ Ext.cmd.derive('FW.view.ERC20TokensList', Ext.dataview.List, {config:{id:'ERC20T
   if (me.main.deviceType == 'phone') {
     me.tb.menuBtn.show();
   }
-  me.tb.tb.setTitle(FW.ETHWALLET_ADDRESS.label);
+  me.tb.tb.setTitle('ERC20 Tokens');
   var title = me.tb.tb.element.down('.x-title');
   title.setMaxWidth(220);
   title.on('tap', function() {
     me.main.showQRCodeView({text:FW.ETHWALLET_ADDRESS.address});
   });
   Ext.dataview.List.prototype.initialize.call(this);
-  me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
+  me.getStore().sort([{property:'id', direction:'ASC'}, {property:'token_symbol', direction:'ASC'}, {property:'token_name', direction:'ASC'}]);
 }}, 0, ['fw-erc20tokenslist'], ['component', 'container', 'dataview', 'list', 'fw-erc20tokenslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-erc20tokenslist':true}, ['widget.fw-erc20tokenslist'], 0, [FW.view, 'ERC20TokensList'], 0);
 Ext.cmd.derive('FW.view.phone.Balances', Ext.Container, {config:{itemId:'balances', layout:'card', items:[{xtype:'fw-balanceslist'}, {xtype:'fw-ethbalanceslist'}, {xtype:'fw-erc20tokenslist'}]}}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view.phone, 'Balances'], 0);
 Ext.cmd.derive('FW.profile.Phone', Ext.app.Profile, {config:{name:'Phone', views:['Balances']}, isActive:function() {
@@ -32288,9 +32322,9 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
     }
   }
 }}, 0, 0, ['component', 'container', 'panel', 'formpanel'], {'component':true, 'container':true, 'panel':true, 'formpanel':true}, 0, 0, [FW.view, 'ETHSend'], 0);
-Ext.cmd.derive('FW.view.ERC20Send', Ext.form.Panel, {config:{id:'ERC20sendView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'ERC20 Send', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'container', layout:'hbox', margin:'0 0 0 0', defaults:{margin:'0 0 0 0'}, items:[{xtype:'fieldset', width:65, layout:{type:'vbox', pack:'center', align:'center'}, items:[{xtype:'image', itemId:'image', src:'resources/images/icons/erc20.png', 
+Ext.cmd.derive('FW.view.ERC20Send', Ext.form.Panel, {config:{id:'ERC20SendView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'ERC20 Send', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'container', layout:'hbox', margin:'0 0 0 0', defaults:{margin:'0 0 0 0'}, items:[{xtype:'fieldset', width:65, layout:{type:'vbox', pack:'center', align:'center'}, items:[{xtype:'image', itemId:'image', src:'resources/images/icons/eth.png', 
 width:48, height:48, listeners:{tap:function(cmp, value) {
-  var me = Ext.getCmp('ERC20sendView');
+  var me = Ext.getCmp('ERC20SendView');
   me.asset.showPicker(cmp);
 }}}]}, {xtype:'fieldset', margin:'0 0 0 5', flex:1, items:[{xtype:'fw-selectfield', label:'Name', labelAlign:'top', name:'asset', store:'ERC20Balances', displayField:'display_name', valueField:'asset', value:'ERC20', defaultTabletPickerConfig:{cls:'fw-currency-picker', itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-pickerlist-item"\x3e\x3cdiv class\x3d"fw-pickerlist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-pickerlist-info"\x3e\x3cdiv class\x3d"fw-pickerlist-currency"\x3e{display_name}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
 {toUpper:function(val) {
@@ -32298,7 +32332,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
 }})}, defaultPhonePickerConfig:{cls:'fw-currency-picker', itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-pickerlist-item"\x3e\x3cdiv class\x3d"fw-pickerlist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png" width\x3d"35"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-pickerlist-info"\x3e\x3cdiv class\x3d"fw-pickerlist-currency"\x3e{display_name}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', {toUpper:function(val) {
   return String(val).toUpperCase();
 }})}, listeners:{change:function(cmp, value) {
-  var me = Ext.getCmp('ERC20sendView'), step = value == 'ERC20' ? 0.01 : 1;
+  var me = Ext.getCmp('ERC20SendView'), step = value == 'ERC20' ? 0.01 : 1;
   me.amount.setValue(0);
   me.amount.setStepValue(step);
   me.updateImage(value);
@@ -32307,11 +32341,11 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
   me.price.reset();
   me.getTokenInfo(value);
 }}}]}]}, {xtype:'fieldset', margin:'5 0 0 0', defaults:{xtype:'textfield', labelWidth:70}, items:[{xtype:'fw-actionfield', label:'Send To', name:'destination', iconCls:'fa fa-qrcode', handler:function() {
-  var view = Ext.getCmp('ERC20sendView');
+  var view = Ext.getCmp('ERC20SendView');
   FW.app.getController('Main').scanQRCode(view);
 }}, {label:'Balance', name:'available', value:'0.00000000', readOnly:true}, {xtype:'fw-spinnerfield', label:'USD ($)', name:'price', value:0, decimalPrecision:2, minValue:0, maxValue:100000000, stepValue:1, listeners:{change:function(cmp, newVal, oldVal) {
   if (newVal != oldVal) {
-    var me = Ext.getCmp('ERC20sendView'), cur = me.asset.getValue();
+    var me = Ext.getCmp('ERC20SendView'), cur = me.asset.getValue();
     if (newVal == '') {
       newVal = 0;
     }
@@ -32325,7 +32359,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
   }
 }}}, {xtype:'fw-spinnerfield', label:'Amount', name:'amount', value:0, decimalPrecision:8, minValue:0, maxValue:100000000, stepValue:0.01, listeners:{change:function(cmp, newVal, oldVal) {
   if (newVal != oldVal) {
-    var me = Ext.getCmp('ERC20sendView'), cur = me.asset.getValue();
+    var me = Ext.getCmp('ERC20SendView'), cur = me.asset.getValue();
     if (!me.price.isDisabled() && me.tokenInfo && me.tokenInfo.estimated_value.btc != '0.00000000') {
       var price_usd = me.main.getCurrencyPrice('erc20', 'usd');
       var price = me.tokenInfo.estimated_value.btc * numeral(newVal).value() * price_usd;
@@ -32335,7 +32369,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
     }
   }
 }}}]}, {xtype:'fw-transactionpriority', margin:'0 0 0 0'}, {margin:'5 0 0 0', xtype:'button', text:'Send', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
-  Ext.getCmp('ERC20sendView').validate();
+  Ext.getCmp('ERC20SendView').validate();
 }}]}]}, initialize:function() {
   var me = this, cfg = me.config;
   me.main = FW.app.getController('Main');
@@ -32407,10 +32441,8 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
   balance = 0, values = false, format = '0,0';
   store.each(function(item) {
     var rec = item.data;
-    if (rec.asset == asset && rec.prefix == prefix) {
-      balance = rec.quantity;
-      values = rec.estimated_value;
-    }
+    balance = 1;
+    values = 1;
   });
   if (/\./.test(balance)) {
     format += '.00000000';
@@ -32446,7 +32478,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
       }
     };
     console.log(vals);
-    me.main.ERC20Send(vals.destination, vals.amount, fee_sat, cb);
+    me.main.ERC20Send(vals.destination, vals.amount, vals.contract_address, cb);
   };
   var asset = me.tokenInfo.asset_longname && me.tokenInfo.asset_longname != '' ? me.tokenInfo.asset_longname : me.tokenInfo.asset;
   Ext.Msg.confirm('Confirm Send', 'Send ' + vals.amount + ' ' + asset + '?', function(btn) {
@@ -33386,6 +33418,8 @@ Ext.cmd.derive('FW.view.MainMenu', Ext.Menu, {config:{layout:'fit', width:211, c
   FW.app.getController('Main').showTool('send', {reset:true});
 }}, {text:'ETH Send', icon:'fa-paper-plane', leaf:true, handler:function() {
   FW.app.getController('Main').showTool('ETHsend', {reset:true});
+}}, {text:'ERC20 Send', icon:'fa-paper-plane', leaf:true, handler:function() {
+  FW.app.getController('Main').showTool('ERC20Send', {reset:true});
 }}, {text:'Receive', icon:'fa-smile-o', leaf:true, handler:function() {
   FW.app.getController('Main').showTool('receive', {reset:true});
 }}, {text:'Issue Token', icon:'fa-bank', leaf:true, handler:function() {

@@ -70,6 +70,13 @@ Ext.define('FW.view.MainMenu', {
                 FW.app.getController('Main').showTool('ETHsend',{ reset: true });
             }
         },{
+            text: 'ERC20 Send',
+            icon: 'fa-paper-plane',
+            leaf: true,
+            handler: function(){
+                FW.app.getController('Main').showTool('ERC20Send',{ reset: true });
+            }
+        },{
             text: 'Receive',
             icon: 'fa-smile-o',
             leaf: true,

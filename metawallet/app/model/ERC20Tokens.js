@@ -10,7 +10,9 @@ Ext.define('FW.model.ERC20Tokens', {
             {name: 'token_symbol',    type: 'string'},  // Token name as symbol
             {name: 'token_name',      type: 'string'},  // Display name for token (fix so we can use as displayField in select fields)
             {name: 'quantity',        type: 'string'},  // Quantity (1,234.12345678)
-            {name: 'decimal',         type: 'string'}   // quantity again maybe, verify this
+            {name: 'decimal',         type: 'string'},  // how many decimal points represented
+            {name: 'contract_address', type: 'string'}, // contract address
+            {name: 'asset',           type: 'string'}   // will always be 'erc20'
         ],
         idProperty: 'id',
         proxy: {

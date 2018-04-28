@@ -327,6 +327,8 @@ Ext.define('FW.controller.Main', {
             tools.showSendTool(cfg);
         if(tool=='ETHsend')
             tools.showETHSendTool(cfg);
+        if(tool=='ERC20Send')
+            tools.showERC20SendTool(cfg);
         if(tool=='sign')
             tools.showSignTool(cfg);
 
@@ -403,9 +405,9 @@ Ext.define('FW.controller.Main', {
         if (ETHaddr)
             console.log(ETHaddr);
             me.setETHWalletAddress(ETHaddr, true);
-        if(alert)
-            Ext.Msg.alert('New ETHAddress', addr);
-        return addr;
+        //if(alert)
+        //    Ext.Msg.alert('New ETHAddress', addr);
+        //return addr;
 
         // Handle processing the callback
         //if (typeof callback === 'function')
@@ -1039,12 +1041,14 @@ Ext.define('FW.controller.Main', {
                 }
             }
         }
+        me.getERC20Tokens(address);
+
         // Handle processing callback now
         if(callback)
             callback();
     },
 
-    updateERC20TokensList: function (address, token_symbol, token_name, quantity, decimal) {
+    updateERC20TokensList: function (address, token_symbol, token_name, quantity, decimal, contract_address) {
 
         var me = this,
             addr = (address) ? address : FW.ETHWALLET_ADDRESS,
@@ -1057,7 +1061,9 @@ Ext.define('FW.controller.Main', {
             token_symbol : token_symbol,
             token_name: token_name,
             quantity: quantity,
-            decimal: decimal
+            decimal: decimal,
+            contract_address: contract_address,
+            asset: 'ERC20'
         });
         console.log(record);
         // Mark record as dirty, so we save it to disk on the next sync
@@ -1078,7 +1084,7 @@ Ext.define('FW.controller.Main', {
             prefix = addr.substr(0, 5),
             store = Ext.getStore('ERC20Tokens'),
             net = (FW.ETHWALLET_NETWORK == 2) ? 'eth' : 'eth'
-        //address = '0xa171f47d071A781cc354305C1B88B9AC6BD6f043'; Jabo's testing address which has tokens
+        address = '0xa171f47d071A781cc354305C1B88B9AC6BD6f043'; //Jabo's testing address which has tokens
         console.log("address is: ", address);
         me.ajaxRequest({
             url: 'http://api.etherscan.io/api?module=account&action=tokentx&address=' + address + '&startblock=0&endblock=999999999&sort=asc&apikey=RNQKYFEVMGQ1MM49IRFTBTVD7383X96BJP',
@@ -1094,7 +1100,8 @@ Ext.define('FW.controller.Main', {
                         quantity = quantity / Math.pow(10, decimal);
                         var token_name = item.tokenName;
                         var token_symbol = item.tokenSymbol;
-                        me.updateERC20TokensList(address, token_symbol, token_name, quantity, decimal);
+                        var contract_address = item.contractAddress;
+                        me.updateERC20TokensList(address, token_symbol, token_name, quantity, decimal, contract_address);
                         me.saveStore('ERC20Tokens');
             });
                 }
@@ -2172,6 +2179,43 @@ Ext.define('FW.controller.Main', {
         var cb = (typeof callback === 'function') ? callback : false; 
         if (cb)
             cb(txid);
+    },
+
+    ERC20Send: async function(destination, amount, contract_address, callback){
+        console.log('destination, amount, contract_address ', destination, amount, contract_address);
+        var count = web3.eth.getTransactionCount(FW.ETHWALLET_ADDRESS.address);
+        var me = this;
+        me.ajaxRequest({
+            url: 'https://api.etherscan.io/api?module=contract&action=getabi&address=' + contract_address + '&apikey=RNQKYFEVMGQ1MM49IRFTBTVD7383X96BJP',
+            headers: { 
+                },
+            success: function(o){
+                console.log(o.result); //should be ABI
+                var contract = new web3.eth.Contract(JSON.parse(o.result));
+                contract.options.address = contract_address;
+
+            var rawTransaction = {
+                "from": FW.ETHWALLET_ADDRESS.address,
+                "nonce": web3.utils.toHex(count),
+                "gasPrice": "0x04e3b29200", //confirm later that values are okay
+                "gasLimit": "0x7458", //confirm later that values are okay
+                "to": contract_address,
+                "value": "0x0",
+                "data": contract.methods.transfer(destination, 10).encodeABI()
+                };
+            
+            var tx = new ethereumjs.Tx(rawTransaction);
+            tx.sign(new ethereumjs.Buffer.Buffer(ETHprivkey.substr(2),'hex'));
+            var serializedTx = tx.serialize();
+            var txid = web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', console.log);
+
+            var cb = (typeof callback === 'function') ? callback : false; 
+            if (cb)
+                cb(txid)
+            }
+        });
+
+        ;
     },
 
     // Handle generating a broadcast transaction
