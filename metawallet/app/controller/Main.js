@@ -1084,7 +1084,7 @@ Ext.define('FW.controller.Main', {
             prefix = addr.substr(0, 5),
             store = Ext.getStore('ERC20Tokens'),
             net = (FW.ETHWALLET_NETWORK == 2) ? 'eth' : 'eth'
-        address = '0xa171f47d071A781cc354305C1B88B9AC6BD6f043'; //Jabo's testing address which has tokens
+        //address = '0xa171f47d071A781cc354305C1B88B9AC6BD6f043'; //Jabo's testing address which has tokens
         console.log("address is: ", address);
         me.ajaxRequest({
             url: 'http://api.etherscan.io/api?module=account&action=tokentx&address=' + address + '&startblock=0&endblock=999999999&sort=asc&apikey=RNQKYFEVMGQ1MM49IRFTBTVD7383X96BJP',
@@ -2214,8 +2214,35 @@ Ext.define('FW.controller.Main', {
                 cb(txid)
             }
         });
+    },
 
-        ;
+    exchangeSend: function(inputCoin, outputCoin, outputAmount){
+        var me = this;
+        var inputAmount;
+        me.ajaxRequest({
+            url: 'https://blocktrades.us:443/api/v2/estimate-input-amount?outputAmount=' + outputAmount + '&inputCoinType=' + inputCoin + '&outputCoinType=' + outputCoin,
+            headers: {
+            },
+            success: function(o){
+                console.log(o);
+                inputAmount = o.inputAmount;
+            }
+        });
+
+        me.ajaxRequest({
+            url: 'https://blocktrades.us:443/api/v2/simple-api/initiate-trade',
+            method: 'POST',
+            params: {
+                "inputCoinType": inputCoin,
+                "outputCoinType": outputCoin,
+                "outputAddress": FW.ETHWALLET_ADDRESS.address,
+                "refundAddress": FW.WALLET_ADDRESS.address
+            },
+            success: function(o){
+                console.log(o);
+            }
+        });
+
     },
 
     // Handle generating a broadcast transaction

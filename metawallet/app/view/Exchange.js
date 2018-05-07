@@ -19,14 +19,123 @@ Ext.define('FW.view.Exchange', {
         },{
             xtype: 'container',
             layout: 'vbox',
-            margin: '5 5 5 5',
+            margin: '5 0 0 0',
             items:[{
-                margin: '10 0 0 0',
+                margin: '5 0 0 0',
                 html:'<center><img src="resources/images/logo.png" width="90%" style="max-width:350px;"></center>'
             },{
-                margin: '10 0 0 0',
+                margin: '5 0 0 0',
                 cls: 'fw-placeholder-instructions',
-                html:'<center>Coming Soon</center>'
+                html:'<center>Press the button to test exchange transaction</center>'
+            },
+            {
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'BTC -> ETH',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').BTCETHSend();
+                }
+            },{
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'BTC -> LTC',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').BTCLTCSend();
+                }
+            },{
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'BTC -> MON',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').BTCMONSend();
+                }
+            },{
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'ETH -> BTC',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').ETHBTCSend();
+                }
+            },{
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'ETH -> LTC',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').ETHLTCSend();
+                }
+            },{
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'ETH -> MON',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').ETHMONSend();
+                }
+            },{
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'LTC -> BTC',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').LTCBTCSend();
+                }
+            },{
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'LTC -> ETH',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').LTCETHSend();
+                }
+            },{
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'LTC -> MON',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').LTCMONSend();
+                }
+            },{
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'MON -> BTC',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').MONBTCSend();
+                }
+            },{
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'MON -> ETH',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').MONETHSend();
+                }
+            },{
+                margin: '5 0 0 0',
+                xtype: 'button',
+                text: 'MON -> LTC',
+                iconCls: 'fa fa-send',
+                ui: 'confirm',
+                handler: function(btn){
+                    Ext.getCmp('exchangeView').MONLTCSend();
+                }
             }]
         }]
     },
@@ -46,6 +155,66 @@ Ext.define('FW.view.Exchange', {
         // me.available   = me.down('[name=available]');
         // Call parent
         me.callParent();
+    },
+
+    BTCETHSend: function(){
+        var me = this;
+        me.main.exchangeSend("btc","eth","1");
+    },
+
+    BTCLTCSend: function(){
+        var me = this;
+        me.main.exchangeSend("btc","ltc","1");
+    },
+
+    BTCMONSend: function(){
+        var me = this;
+        me.main.exchangeSend("btc","mon","1");
+    },
+
+    ETHBTCSend: function(){
+        var me = this;
+        me.main.exchangeSend("eth","btc","1");
+    },
+
+    ETHLTCSend: function(){
+        var me = this;
+        me.main.exchangeSend("eth","ltc","1");
+    },
+
+    ETHMONSend: function(){
+        var me = this;
+        me.main.exchangeSend("eth","mon","1");
+    },
+
+    LTCBTCSend: function(){
+        var me = this;
+        me.main.exchangeSend("ltc","btc","1");
+    },
+
+    LTCETHSend: function(){
+        var me = this;
+        me.main.exchangeSend("ltc","eth","1");
+    },
+
+    LTCMONSend: function(){
+        var me = this;
+        me.main.exchangeSend("ltc","mon","1");
+    },
+
+    MONBTCSend: function(){
+        var me = this;
+        me.main.exchangeSend("mon","btc","1");
+    },
+
+    MONETHSend: function(){
+        var me = this;
+        me.main.exchangeSend("mon","eth","1");
+    },
+
+    MONLTCSend: function(){
+        var me = this;
+        me.main.exchangeSend("mon","ltc","1");
     },
 
     // Handle updating the view with passed config info
