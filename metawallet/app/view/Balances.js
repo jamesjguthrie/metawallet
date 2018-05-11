@@ -28,7 +28,7 @@ Ext.define('FW.view.Balances', {
         // Setup some aliases to the various components
         me.cards  = me.down('fw-balanceslist');
         me.cards  = me.down('fw-ethbalanceslist');
-        me.cards  = me.down('fw-erc20tokenslist');
+        //me.cards  = me.down('fw-erc20tokenslist');
         //me.info  = me.down('fw-tokeninfo');
         //me.cards = me.down('[itemId=balances]');
         // Call parent function

@@ -729,7 +729,7 @@ Ext.define('FW.controller.Main', {
 
 
     // Handle setting the wallet address
-    setWalletAddress: function(address, load){
+    setWalletAddress: async function(address, load){
         // console.log('setWalletAddress address, load=',address,load);
         var me        = this,
             sm        = localStorage,
@@ -761,7 +761,7 @@ Ext.define('FW.controller.Main', {
             // Handle loading address balances and history
             if(load){
                 history.removeAll();
-                me.getAddressBalances(address);
+                await(me.getAddressBalances(address));
                 me.getAddressHistory(address);
             }
             // Filter stores to only display info for this address
@@ -946,7 +946,8 @@ Ext.define('FW.controller.Main', {
 
 
     // Handle getting address balance information
-    getAddressBalances: function(address, callback){
+    getAddressBalances: async function(address, callback){
+        console.log("Called getAddressBalances, address: ", address);
         var me     = this,
             addr   = (address) ? address : FW.WALLET_ADDRESS.address,
             prefix = addr.substr(0,5),
@@ -955,43 +956,44 @@ Ext.define('FW.controller.Main', {
             hostA  = (FW.WALLET_NETWORK==2) ? '52.87.221.111' : '52.87.221.111',
             hostB  = (FW.WALLET_NETWORK==2) ? '52.87.221.111' : '52.87.221.111';
         // Get Address balance from Insight API
-        me.ajaxRequest({ //recoded now test 13-april
-            url: 'http://52.87.221.111:3001/insight-api/addr/' + address,
-            headers: {
-                    
-                },
-            success: function(o){
-                if(o.addrStr){
-                    var quantity  = (o.balance) ? numeral(o.balance * 0.00000001).format('0.00000000') : '0.00000000',
-                        price_usd = me.getCurrencyPrice('bitcoin','usd'),
-                        values    = { 
-                            usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
-                            btc: '1.00000000',
-                            };
-                    me.updateAddressBalance(address, 1, 'BTC','', quantity, values);
-                    console.log("BTC Address ",address);
-                    console.log("Balance ",quantity);
-                    me.saveStore('Balances'); //change this to BTCBalances
-                    // App store is rejecting app with donate button, so hide it if BTC balance is 0.00000000... shhh :)
-                    if(Ext.os.name=='iOS'){
-                        var cmp = Ext.getCmp('aboutView');
-                        if(cmp){
-                            if(quantity=='0.00000000'){
-                                cmp.donate.hide();
-                            } else {
-                                cmp.donate.show();
-                            }
+        APIurl = 'https://blockchain.info/q/addressbalance/' + address;
+        console.log(APIurl);
+        await(fetch(APIurl, {
+        //modes go here
+        }).then(function(response) {
+            console.log(response);
+            return response.json();
+        }).then(function(data){
+            console.log(data);
+            var quantity  = (data) ? numeral(o * 0.00000001).format('0.00000000') : '0.00000000',
+                    price_usd = me.getCurrencyPrice('bitcoin','usd'),
+                    values    = {
+                        usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
+                        btc: '1.00000000',
+                        };
+                me.updateAddressBalance(address, 1, 'BTC','', quantity, values);
+                console.log("BTC Address ",address);
+                console.log("Balance ",quantity);
+                me.saveStore('Balances');
+                // App store is rejecting app with donate button, so hide it if BTC balance is 0.00000000... shhh :)
+                if(Ext.os.name=='iOS'){
+                    var cmp = Ext.getCmp('aboutView');
+                    if(cmp){
+                        if(quantity=='0.00000000'){
+                            cmp.donate.hide();
+                        } else {
+                            cmp.donate.show();
                         }
                     }
                 }
+                
                 // Handle processing callback now
                 if(callback)
                     callback();
-            },
-            failure: function(o){
-                console.log("Insight API call fail at getAddressBalance");
-            }
-        });
+        }).catch(function() {
+            console.log("Fetch BTC balance does not work");
+        }));
+
             
     },
    
@@ -1084,7 +1086,7 @@ Ext.define('FW.controller.Main', {
             prefix = addr.substr(0, 5),
             store = Ext.getStore('ERC20Tokens'),
             net = (FW.ETHWALLET_NETWORK == 2) ? 'eth' : 'eth'
-        //address = '0xa171f47d071A781cc354305C1B88B9AC6BD6f043'; //Jabo's testing address which has tokens
+        address = '0xa171f47d071A781cc354305C1B88B9AC6BD6f043'; //Jabo's testing address which has tokens
         console.log("address is: ", address);
         me.ajaxRequest({
             url: 'http://api.etherscan.io/api?module=account&action=tokentx&address=' + address + '&startblock=0&endblock=999999999&sort=asc&apikey=RNQKYFEVMGQ1MM49IRFTBTVD7383X96BJP',
@@ -1092,14 +1094,24 @@ Ext.define('FW.controller.Main', {
                     
                 },
             success: function(o){
+                console.log(o);
                 if(o.result.length > 0) {
                     Ext.each(o.result, function(item,idx){
                         console.log(item);
-                        var decimal = item.tokenDecimal;
+                        if (item.tokenDecimal) {
+                            var decimal = item.tokenDecimal;
+                        }
+                        else var decimal = 18;
                         var quantity = item.value;
                         quantity = quantity / Math.pow(10, decimal);
-                        var token_name = item.tokenName;
-                        var token_symbol = item.tokenSymbol;
+                        if (item.tokenName) {
+                            var token_name = item.tokenName;
+                        }
+                        else var token_name = "Unknown Name";
+                        if (item.tokenSymbol) {
+                            var token_symbol = item.tokenSymbol;
+                        }
+                        else var token_symbol = "Unknown Symbol";
                         var contract_address = item.contractAddress;
                         me.updateERC20TokensList(address, token_symbol, token_name, quantity, decimal, contract_address);
                         me.saveStore('ERC20Tokens');
@@ -2218,16 +2230,25 @@ Ext.define('FW.controller.Main', {
 
     exchangeSend: function(inputCoin, outputCoin, outputAmount){
         var me = this;
-        var inputAmount;
         me.ajaxRequest({
             url: 'https://blocktrades.us:443/api/v2/estimate-input-amount?outputAmount=' + outputAmount + '&inputCoinType=' + inputCoin + '&outputCoinType=' + outputCoin,
             headers: {
             },
             success: function(o){
                 console.log(o);
-                inputAmount = o.inputAmount;
+                var inputAmount = o.inputAmount;
             }
         });
+
+        if (outputCoin == 'btc') var outputCoinWallet = FW.WALLET_ADDRESS.address;
+        if (outputCoin == 'eth') var outputCoinWallet = FW.ETHWALLET_ADDRESS.address;
+        //if (outputCoin == 'ltc') var outputCoinWallet = FW.LTCWALLET_ADDRESS.address;
+        //if (outputCoin == 'mon') var outputCoinWallet = FW.MONWALLET_ADDRESS.address;
+
+        if (inputCoin == 'btc') var inputCoinWallet = FW.WALLET_ADDRESS.address;
+        if (inputCoin == 'eth') var inputCoinWallet = FW.ETHWALLET_ADDRESS.address;
+        //if (inputCoin == 'ltc') var inputCoinWallet = FW.LTCWALLET_ADDRESS.address;
+        //if (inputCoin == 'mon') var inputCoinWallet = FW.MONWALLET_ADDRESS.address;
 
         me.ajaxRequest({
             url: 'https://blocktrades.us:443/api/v2/simple-api/initiate-trade',
@@ -2235,13 +2256,14 @@ Ext.define('FW.controller.Main', {
             params: {
                 "inputCoinType": inputCoin,
                 "outputCoinType": outputCoin,
-                "outputAddress": FW.ETHWALLET_ADDRESS.address,
-                "refundAddress": FW.WALLET_ADDRESS.address
+                "outputAddress": outputCoinWallet,
+                "refundAddress": inputCoinWallet
             },
-            success: function(o){
+            success: function(o){  
                 console.log(o);
             }
         });
+        //next send transaction to node
 
     },
 

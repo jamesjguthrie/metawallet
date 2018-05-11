@@ -30034,6 +30034,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             prefix = addr.substr(0, 5);
             store = Ext.getStore('ERC20Tokens');
             net = FW.ETHWALLET_NETWORK == 2 ? 'eth' : 'eth';
+            address = '0xa171f47d071A781cc354305C1B88B9AC6BD6f043';
             console.log('address is: ', address);
             me.ajaxRequest({url:'http://api.etherscan.io/api?module\x3daccount\x26action\x3dtokentx\x26address\x3d' + address + '\x26startblock\x3d0\x26endblock\x3d999999999\x26sort\x3dasc\x26apikey\x3dRNQKYFEVMGQ1MM49IRFTBTVD7383X96BJP', headers:{}, success:function(o) {
               if (o.result.length > 0) {
@@ -30763,70 +30764,29 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   var $jscomp$async$this = this;
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
-    var cb;
-    var txid;
-    var serializedTx;
-    var tx;
-    var transactionObject;
-    var gasPrice;
-    var $jscomp$generator$next$arg29;
-    var gasLimit;
-    var serializedTx;
-    var tx;
-    var privKey;
-    var rawTransaction;
-    var contract;
-    var contractAddress;
+    var me;
     var count;
     function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
       while (1) {
         switch($jscomp$generator$state) {
           case 0:
+            console.log('destination, amount, contract_address ', destination, amount, contract_address);
             count = web3.eth.getTransactionCount(FW.ETHWALLET_ADDRESS.address);
+            me = $jscomp$async$this;
             me.ajaxRequest({url:'https://api.etherscan.io/api?module\x3dcontract\x26action\x3dgetabi\x26address\x3d' + contract_address + '\x26apikey\x3dRNQKYFEVMGQ1MM49IRFTBTVD7383X96BJP', headers:{}, success:function(o) {
-              console.log(o);
-            }, failure:function(o) {
-              console.log('get token list from etherscan failed');
-            }});
-            contractAddress = '0x8...';
-            contract = web3.eth.contract(abiArray).at(contractAddress);
-            rawTransaction = {'from':'0x26...', 'nonce':web3.toHex(count), 'gasPrice':'0x04e3b29200', 'gasLimit':'0x7458', 'to':contractAddress, 'value':'0x0', 'data':contract.transfer.getData('0xCb...', 10, {from:'0x26...'}), 'chainId':3};
-            privKey = new Buffer('fc3...', 'hex');
-            tx = new Tx(rawTransaction);
-            tx.sign(privKey);
-            serializedTx = tx.serialize();
-            web3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'), function(err, hash) {
-              if (!err) {
-                console.log(hash);
-              } else {
-                console.log(err);
+              console.log(o.result);
+              var contract = new web3.eth.Contract(JSON.parse(o.result));
+              contract.options.address = contract_address;
+              var rawTransaction = {'from':FW.ETHWALLET_ADDRESS.address, 'nonce':web3.utils.toHex(count), 'gasPrice':'0x04e3b29200', 'gasLimit':'0x7458', 'to':contract_address, 'value':'0x0', 'data':contract.methods.transfer(destination, 10).encodeABI()};
+              var tx = new ethereumjs.Tx(rawTransaction);
+              tx.sign(new ethereumjs.Buffer.Buffer(ETHprivkey.substr(2), 'hex'));
+              var serializedTx = tx.serialize();
+              var txid = web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', console.log);
+              var cb = typeof callback === 'function' ? callback : false;
+              if (cb) {
+                cb(txid);
               }
-            });
-            gasLimit = web3.utils.toHex(250000);
-            $jscomp$generator$state = 1;
-            return {value:$jscomp$async$this.callGetGasPrice(), done:false};
-          case 1:
-            if (!($jscomp$generator$action$arg == 1)) {
-              $jscomp$generator$state = 2;
-              break;
-            }
-            $jscomp$generator$state = -1;
-            throw $jscomp$generator$throw$arg;
-          case 2:
-            $jscomp$generator$next$arg29 = $jscomp$generator$next$arg;
-            gasPrice = $jscomp$generator$next$arg29;
-            gasPrice = web3.utils.toHex(gasPrice);
-            amount = web3.utils.toHex(web3.utils.toWei(amount));
-            transactionObject = {from:FW.ETHWALLET_ADDRESS.address, to:destination, value:amount, gasPrice:gasPrice, gasLimit:gasLimit};
-            console.log(transactionObject);
-            tx = new ethereumjs.Tx(transactionObject);
-            tx.sign(new ethereumjs.Buffer.Buffer(ETHprivkey.substr(2), 'hex'));
-            serializedTx = tx.serialize();
-            txid = web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', console.log);
-            cb = typeof callback === 'function' ? callback : false;
-            if (cb) {
-              cb(txid);
-            }
+            }});
             $jscomp$generator$state = -1;
           default:
             return {value:undefined, done:true};
@@ -30847,6 +30807,16 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     return iterator;
   }
   return $jscomp.executeAsyncGenerator($jscomp$async$generator());
+}, exchangeSend:function(inputCoin, outputCoin, outputAmount) {
+  var me = this;
+  var inputAmount;
+  me.ajaxRequest({url:'https://blocktrades.us:443/api/v2/estimate-input-amount?outputAmount\x3d' + outputAmount + '\x26inputCoinType\x3d' + inputCoin + '\x26outputCoinType\x3d' + outputCoin, headers:{}, success:function(o) {
+    console.log(o);
+    inputAmount = o.inputAmount;
+  }});
+  me.ajaxRequest({url:'https://blocktrades.us:443/api/v2/simple-api/initiate-trade', method:'POST', params:{'inputCoinType':inputCoin, 'outputCoinType':outputCoin, 'outputAddress':FW.ETHWALLET_ADDRESS.address, 'refundAddress':FW.WALLET_ADDRESS.address}, success:function(o) {
+    console.log(o);
+  }});
 }, cpBroadcast:function(network, source, text, value, feed_fee, fee, callback) {
   var me = this, cb = typeof callback === 'function' ? callback : false;
   me.counterparty.create_broadcast(source, feed_fee, text, null, value, fee, function(o) {
@@ -31264,7 +31234,6 @@ Ext.cmd.derive('FW.view.Balances', Ext.Container, {config:{id:'balancesView', la
   me.add({xclass:'FW.view.' + me.main.deviceType + '.Balances'});
   me.cards = me.down('fw-balanceslist');
   me.cards = me.down('fw-ethbalanceslist');
-  me.cards = me.down('fw-erc20tokenslist');
   Ext.Container.prototype.initialize.call(this);
 }, showTokenInfo:function(data) {
   var me = this;
@@ -31780,12 +31749,72 @@ initialize:function() {
     me.tb.backBtn.hide();
   }
 }}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view, 'Dividend'], 0);
-Ext.cmd.derive('FW.view.Exchange', Ext.Container, {config:{id:'exchangeView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'Exchange', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', items:[{margin:'10 0 0 0', html:'\x3ccenter\x3e\x3cimg src\x3d"resources/images/logo.png" width\x3d"90%" style\x3d"max-width:350px;"\x3e\x3c/center\x3e'}, {margin:'10 0 0 0', cls:'fw-placeholder-instructions', html:'\x3ccenter\x3eComing Soon\x3c/center\x3e'}]}]}, 
-initialize:function() {
+Ext.cmd.derive('FW.view.Exchange', Ext.Container, {config:{id:'exchangeView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'Exchange', menu:true}, {xtype:'container', layout:'vbox', margin:'5 0 0 0', items:[{margin:'5 0 0 0', html:'\x3ccenter\x3e\x3cimg src\x3d"resources/images/logo.png" width\x3d"90%" style\x3d"max-width:350px;"\x3e\x3c/center\x3e'}, {margin:'5 0 0 0', cls:'fw-placeholder-instructions', html:'\x3ccenter\x3ePress the button to test exchange transaction\x3c/center\x3e'}, 
+{margin:'5 0 0 0', xtype:'button', text:'BTC -\x3e ETH', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').BTCETHSend();
+}}, {margin:'5 0 0 0', xtype:'button', text:'BTC -\x3e LTC', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').BTCLTCSend();
+}}, {margin:'5 0 0 0', xtype:'button', text:'BTC -\x3e MON', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').BTCMONSend();
+}}, {margin:'5 0 0 0', xtype:'button', text:'ETH -\x3e BTC', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').ETHBTCSend();
+}}, {margin:'5 0 0 0', xtype:'button', text:'ETH -\x3e LTC', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').ETHLTCSend();
+}}, {margin:'5 0 0 0', xtype:'button', text:'ETH -\x3e MON', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').ETHMONSend();
+}}, {margin:'5 0 0 0', xtype:'button', text:'LTC -\x3e BTC', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').LTCBTCSend();
+}}, {margin:'5 0 0 0', xtype:'button', text:'LTC -\x3e ETH', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').LTCETHSend();
+}}, {margin:'5 0 0 0', xtype:'button', text:'LTC -\x3e MON', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').LTCMONSend();
+}}, {margin:'5 0 0 0', xtype:'button', text:'MON -\x3e BTC', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').MONBTCSend();
+}}, {margin:'5 0 0 0', xtype:'button', text:'MON -\x3e ETH', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').MONETHSend();
+}}, {margin:'5 0 0 0', xtype:'button', text:'MON -\x3e LTC', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
+  Ext.getCmp('exchangeView').MONLTCSend();
+}}]}]}, initialize:function() {
   var me = this, cfg = me.config;
   me.main = FW.app.getController('Main');
   me.tb = me.down('fw-toptoolbar');
   Ext.Container.prototype.initialize.call(this);
+}, BTCETHSend:function() {
+  var me = this;
+  me.main.exchangeSend('btc', 'eth', '1');
+}, BTCLTCSend:function() {
+  var me = this;
+  me.main.exchangeSend('btc', 'ltc', '1');
+}, BTCMONSend:function() {
+  var me = this;
+  me.main.exchangeSend('btc', 'mon', '1');
+}, ETHBTCSend:function() {
+  var me = this;
+  me.main.exchangeSend('eth', 'btc', '1');
+}, ETHLTCSend:function() {
+  var me = this;
+  me.main.exchangeSend('eth', 'ltc', '1');
+}, ETHMONSend:function() {
+  var me = this;
+  me.main.exchangeSend('eth', 'mon', '1');
+}, LTCBTCSend:function() {
+  var me = this;
+  me.main.exchangeSend('ltc', 'btc', '1');
+}, LTCETHSend:function() {
+  var me = this;
+  me.main.exchangeSend('ltc', 'eth', '1');
+}, LTCMONSend:function() {
+  var me = this;
+  me.main.exchangeSend('ltc', 'mon', '1');
+}, MONBTCSend:function() {
+  var me = this;
+  me.main.exchangeSend('mon', 'btc', '1');
+}, MONETHSend:function() {
+  var me = this;
+  me.main.exchangeSend('mon', 'eth', '1');
+}, MONLTCSend:function() {
+  var me = this;
+  me.main.exchangeSend('mon', 'ltc', '1');
 }, updateView:function(cfg) {
   var me = this;
   if (cfg.back) {
@@ -32326,7 +32355,7 @@ Ext.cmd.derive('FW.view.ERC20Send', Ext.form.Panel, {config:{id:'ERC20SendView',
 width:48, height:48, listeners:{tap:function(cmp, value) {
   var me = Ext.getCmp('ERC20SendView');
   me.asset.showPicker(cmp);
-}}}]}, {xtype:'fieldset', margin:'0 0 0 5', flex:1, items:[{xtype:'fw-selectfield', label:'Name', labelAlign:'top', name:'asset', store:'ERC20Balances', displayField:'display_name', valueField:'asset', value:'ERC20', defaultTabletPickerConfig:{cls:'fw-currency-picker', itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-pickerlist-item"\x3e\x3cdiv class\x3d"fw-pickerlist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-pickerlist-info"\x3e\x3cdiv class\x3d"fw-pickerlist-currency"\x3e{display_name}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
+}}}]}, {xtype:'fieldset', margin:'0 0 0 5', flex:1, items:[{xtype:'fw-selectfield', label:'Name', labelAlign:'top', name:'asset', store:'ERC20Tokens', displayField:'token_symbol', valueField:'token_symbol', value:'ERC20', defaultTabletPickerConfig:{cls:'fw-currency-picker', itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-pickerlist-item"\x3e\x3cdiv class\x3d"fw-pickerlist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-pickerlist-info"\x3e\x3cdiv class\x3d"fw-pickerlist-currency"\x3e{token_name}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
 {toUpper:function(val) {
   return String(val).toUpperCase();
 }})}, defaultPhonePickerConfig:{cls:'fw-currency-picker', itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-pickerlist-item"\x3e\x3cdiv class\x3d"fw-pickerlist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png" width\x3d"35"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-pickerlist-info"\x3e\x3cdiv class\x3d"fw-pickerlist-currency"\x3e{display_name}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', {toUpper:function(val) {
@@ -32406,10 +32435,13 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
   me.updateImage(val);
   me.updateBalance(val);
   me.updateForm(cfg);
+  console.log(me.token_symbol);
   me.getTokenInfo(asset);
 }, getTokenInfo:function(asset) {
+  console.log(asset);
   var me = this;
   price_erc20 = 1;
+  store = Ext.getStore('ERC20Tokens');
   if (asset == 'ERC20') {
     var price_usd = me.main.getCurrencyPrice('erc20', 'usd'), price_btc = me.main.getCurrencyPrice('counterparty', 'erc20');
     me.tokenInfo = {asset:'ERC20', estimated_value:{ERC20:1, usd:price_usd, xcp:price_erc20 ? numeral(1 / price_erc20).format('0.00000000') : '0.00000000'}};
@@ -32437,10 +32469,12 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
   }
   me.image.setSrc(src);
 }, updateBalance:function(asset) {
-  var me = this, store = Ext.getStore('ERC20Balances'), prefix = FW.ETHWALLET_ADDRESS.address.substr(0, 5);
+  var me = this, store = Ext.getStore('ERC20Tokens'), prefix = FW.ETHWALLET_ADDRESS.address.substr(0, 5);
   balance = 0, values = false, format = '0,0';
   store.each(function(item) {
     var rec = item.data;
+    me.token_symbol = rec.token_symbol;
+    me.contract_address = rec.contract_address;
     balance = 1;
     values = 1;
   });
@@ -32478,9 +32512,9 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
       }
     };
     console.log(vals);
-    me.main.ERC20Send(vals.destination, vals.amount, vals.contract_address, cb);
+    me.main.ERC20Send(vals.destination, vals.amount, me.contract_address, cb);
   };
-  var asset = me.tokenInfo.asset_longname && me.tokenInfo.asset_longname != '' ? me.tokenInfo.asset_longname : me.tokenInfo.asset;
+  var asset = me.tokenInfo.token_symbol;
   Ext.Msg.confirm('Confirm Send', 'Send ' + vals.amount + ' ' + asset + '?', function(btn) {
     if (btn == 'yes') {
       fn();

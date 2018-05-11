@@ -14,7 +14,8 @@ Ext.define('FW.view.phone.Balances', {
         },
         {
             xtype: 'fw-ethbalanceslist'
-        },{
+        },
+        {
             xtype: 'fw-erc20tokenslist'
         }]
     }
