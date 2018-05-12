@@ -96,6 +96,7 @@ Ext.define('FW.view.Welcome', {
         Ext.defer(function(){
             me.main.generateWallet(phrase, cb);
             me.main.generateETHWallet(phrase, cb); //might need different phrase, cb
+            me.main.generateLTCWallet(phrase, cb);
         },500)
     },
 
