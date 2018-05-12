@@ -25,6 +25,10 @@ Global
 		$3.FormatOnPaste = True
 		$3.scope = text/x-json
 		$0.VersionControlPolicy = $4
+		$0.TextStylePolicy = $5
+		$5.FileWidth = 80
+		$5.TabsToSpaces = True
+		$5.scope = text/x-javascript
 		description = MetaWallet for McAfee Crypto Team
 	EndGlobalSection
 EndGlobal

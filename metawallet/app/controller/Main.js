@@ -2102,7 +2102,7 @@ Ext.define('FW.controller.Main', {
             "satoshis" : amount
         });
        
-         me.signTransaction(network, source, destination, utxo, amount, function(signedTx){
+        me.signTransaction(network, source, destination, utxo, amount, function(signedTx){
                     if(signedTx){
                         // Handle broadcasting the transaction
                         me.broadcastTransaction(network, signedTx, function(txid){
@@ -2239,16 +2239,23 @@ Ext.define('FW.controller.Main', {
                 var inputAmount = o.inputAmount;
             }
         });
-
-        if (outputCoin == 'btc') var outputCoinWallet = FW.WALLET_ADDRESS.address;
-        if (outputCoin == 'eth') var outputCoinWallet = FW.ETHWALLET_ADDRESS.address;
-        //if (outputCoin == 'ltc') var outputCoinWallet = FW.LTCWALLET_ADDRESS.address;
-        //if (outputCoin == 'mon') var outputCoinWallet = FW.MONWALLET_ADDRESS.address;
-
         if (inputCoin == 'btc') var inputCoinWallet = FW.WALLET_ADDRESS.address;
         if (inputCoin == 'eth') var inputCoinWallet = FW.ETHWALLET_ADDRESS.address;
         //if (inputCoin == 'ltc') var inputCoinWallet = FW.LTCWALLET_ADDRESS.address;
         //if (inputCoin == 'mon') var inputCoinWallet = FW.MONWALLET_ADDRESS.address;
+
+        if (outputCoin == 'btc') {
+            var outputCoinWallet = FW.WALLET_ADDRESS.address;
+            var sendExchangeTransaction = function(o){
+                me.ETHSend(o.inputAddress, o.inputAmount, 1);
+            }
+        }
+        if (outputCoin == 'eth'){
+            var outputCoinWallet = FW.ETHWALLET_ADDRESS.address;
+            var sendExchangeTransaction = function(o){
+                me.cpSend(1, inputCoinWallet, o.inputAddress, 1, o.inputAmount, 1, callback);
+            }
+        }
 
         me.ajaxRequest({
             url: 'https://blocktrades.us:443/api/v2/simple-api/initiate-trade',
@@ -2261,9 +2268,17 @@ Ext.define('FW.controller.Main', {
             },
             success: function(o){  
                 console.log(o);
+                sendExchangeTransaction(o);
             }
-        });
-        //next send transaction to node
+        });     
+        //if (outputCoin == 'ltc') var outputCoinWallet = FW.LTCWALLET_ADDRESS.address;
+        //if (outputCoin == 'mon') var outputCoinWallet = FW.MONWALLET_ADDRESS.address;
+
+
+
+
+
+        
 
     },
 

@@ -1,14 +1,14 @@
 ﻿<Properties StartupConfiguration="{508430AB-CFD1-41AD-92B8-06EA8B8CE810}|Default" VersionControlDisabled="True">
   <MonoDevelop.Ide.Workbench ActiveDocument="metawallet/app/controller/Main.js">
     <Files>
-      <File FileName="metawallet/app/controller/Main.js" Line="2223" Column="23" />
+      <File FileName="metawallet/app/controller/Main.js" Line="2164" Column="46" />
       <File FileName="metawallet/app/view/ETHSend.js" Line="398" Column="20" />
       <File FileName="metawallet/app/view/Tools.js" Line="70" Column="17" />
       <File FileName="metawallet/app/view/ERC20TokensList.js" Line="92" Column="40" />
       <File FileName="metawallet/app/store/ERC20Tokens.js" Line="15" Column="28" />
       <File FileName="metawallet/app/model/ERC20Tokens.js" Line="15" Column="81" />
       <File FileName="metawallet/app/view/phone/Balances.js" Line="18" Column="10" />
-      <File FileName="metawallet/app/view/tablet/Balances.js" Line="11" Column="19" />
+      <File FileName="metawallet/app/view/tablet/Balances.js" Line="13" Column="28" />
       <File FileName="metawallet/app/view/ETHBalancesList.js" Line="93" Column="36" />
       <File FileName="metawallet/app/view/Exchange.js" Line="197" Column="40" />
       <File FileName="metawallet/app/model/ETHBalances.js" Line="13" Column="27" />
@@ -20,7 +20,6 @@
       <File FileName="metawallet/touch/resources/css/cupertino.css" Line="4" Column="22" />
       <File FileName="metawallet/touch/build.xml" Line="93" Column="23" />
       <File FileName="metawallet/app.js" Line="136" Column="102" />
-      <File FileName="metawallet/app/view/Balances.js" Line="31" Column="12" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" />
