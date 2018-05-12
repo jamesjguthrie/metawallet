@@ -1729,7 +1729,7 @@ Ext.define('FW.controller.Main', {
         var me = this,
             vp = Ext.Viewport,
             main = Ext.getCmp('mainView'),
-            side = (side) ? side : 'right';
+            side = 'left';
         // Handle creating the menuTree if we don't already have one
         if (!me.menu)
             me.menu = Ext.create('FW.view.MainMenu');
