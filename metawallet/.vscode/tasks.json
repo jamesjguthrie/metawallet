@@ -6,7 +6,22 @@
         {
             "label": "sencha web start",
             "type": "shell",
-            "command": "/Users/jabo/bin/Sencha/Cmd/sencha web start"
+            "command": "/Users/ds/bin/Sencha/Cmd/sencha web start"
+        },
+        {
+            "label": "sencha app clean",
+            "type": "shell",
+            "command": "/Users/ds/bin/Sencha/Cmd/sencha app clean"
+        },
+        {
+            "label": "sencha app rebuild",
+            "type": "shell",
+            "command": "/Users/ds/bin/Sencha/Cmd/sencha app rebuild"
+        },
+        {
+            "label": "sencha app build",
+            "type": "shell",
+            "command": "/Users/ds/bin/Sencha/Cmd/sencha app build"
         }
     ]
 }
