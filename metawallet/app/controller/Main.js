@@ -67,18 +67,18 @@ Ext.define('FW.controller.Main', {
 
         FW.LTCSERVER_INFO = {
             mainnet: {
-                cpHost: '34.230.76.175',          // BTC Host
-                cpPort: 3001,                           // BTC Port
-                cpUser: 'metawallet',                   // BTC Username
-                cpPass: 'pass',                         // BTC Password
-                cpSSL: false                             // BTC SSL Enabled (true=https, false=http)
+                cpHost: '34.230.76.175',          // LTC Host
+                cpPort: 3001,                           // LTC Port
+                cpUser: 'metawallet',                   // LTC Username
+                cpPass: 'pass',                         // LTC Password
+                cpSSL: false                             // LTC SSL Enabled (true=https, false=http)
             },
             testnet: {
-                cpHost: '34.230.76.175',          // BTC Host
-                cpPort: 3001,                          // BTC Port
-                cpUser: 'metawallet',                          // BTC Username
-                cpPass: 'pass',                         // BTC Password
-                cpSSL: false                            // BTC SSL Enabled (true=https, false=http)
+                cpHost: '34.230.76.175',          // LTC Host
+                cpPort: 3001,                          // LTC Port
+                cpUser: 'metawallet',                   // LTC Username
+                cpPass: 'pass',                         // LTC Password
+                cpSSL: false                            // LTC SSL Enabled (true=https, false=http)
             }
         };
 
@@ -788,6 +788,7 @@ Ext.define('FW.controller.Main', {
         for (var i = 0; total < count; i++) {
             var derived = key.derive("m/0'/0/" + i),
                 address = lc.Address(derived.publicKey, net).toString();
+                console.log("LTC address: ",address);
             found = false;
             // Check if this record already exists
             Ext.each(store.data.all, function (rec) {
