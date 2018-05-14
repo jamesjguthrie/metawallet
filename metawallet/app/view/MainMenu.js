@@ -27,7 +27,7 @@ Ext.define('FW.view.MainMenu', {
             },{
                 iconCls: 'fa fa-list',
                 handler: function(){
-                    Ext.Viewport.hideMenu('right');
+                    Ext.Viewport.hideMenu('left');
                 }
             }]
         },{ 
