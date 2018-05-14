@@ -6,12 +6,14 @@
         {
             "label": "sencha web start",
             "type": "shell",
-            "command": "/Users/ds/bin/Sencha/Cmd/sencha web start"
+            "command": "/Users/ds/bin/Sencha/Cmd/sencha web start",
+            "problemMatcher": []
         },
         {
             "label": "sencha app clean",
             "type": "shell",
-            "command": "/Users/ds/bin/Sencha/Cmd/sencha app clean"
+            "command": "/Users/ds/bin/Sencha/Cmd/sencha app clean",
+            "problemMatcher": []
         },
         {
             "label": "sencha app rebuild",
@@ -21,7 +23,8 @@
         {
             "label": "sencha app build",
             "type": "shell",
-            "command": "/Users/ds/bin/Sencha/Cmd/sencha app build"
+            "command": "/Users/ds/bin/Sencha/Cmd/sencha app build",
+            "problemMatcher": []
         }
     ]
 }
