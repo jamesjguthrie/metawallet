@@ -13,16 +13,13 @@ Ext.define('FW.view.Welcome', {
         scrollable: true,
         cls: 'fw-panel',
         items:[{
-            xtype: 'toolbar',
-            docked: 'top',
-            title: 'Welcome to'
-        },{
             xtype: 'container',
             margin: '0 5 0 5',
             items:[{
                 xtype: 'image',
+                docked: 'top',
                 src: 'resources/images/logo.png',
-                height: '120px',
+                height: '160px',
                 margin: '10 0 10 0'
             },{
                 xtype: 'container',
@@ -30,10 +27,11 @@ Ext.define('FW.view.Welcome', {
                 html:'<p align="justify">Please click a button below to indicate if you would like to generate a new wallet, or use an existing wallet passphrase.'
             },{
                 xtype: 'container',
-                layout: 'hbox',
+                layout: 'vbox',
                 defaults: {
                     xtype: 'button',
-                    flex: 1
+                        height: 100,
+                        margin: '10 10 10 10'
                 },
                 items:[{
                     iconCls: 'fa fa-spinner',
@@ -46,7 +44,6 @@ Ext.define('FW.view.Welcome', {
                     iconCls: 'fa fa-keyboard-o margin-bottom-4',
                     text: 'Existing Wallet',
                     ui: 'action',
-                    margin: '0 0 0 5',
                     handler: function(btn){
                         Ext.getCmp('welcomeView').existingWallet();
                     }
