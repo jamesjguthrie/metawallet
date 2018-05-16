@@ -30549,7 +30549,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   var records = store.add(Ext.applyIf(rec, record));
   records[0].setDirty();
 }, showMainMenu:function(side) {
-  var me = this, vp = Ext.Viewport, main = Ext.getCmp('mainView'), side = side ? side : 'right';
+  var me = this, vp = Ext.Viewport, main = Ext.getCmp('mainView'), side = 'left';
   if (!me.menu) {
     me.menu = Ext.create('FW.view.MainMenu');
   }
@@ -33771,7 +33771,7 @@ contentItemTpl:'\x3cdiv class\x3d"fw-sidemenu"\x3e\x3cdiv class\x3d"float-left f
   }
 }}, 0, ['fw-menutree'], ['component', 'container', 'accordionlist', 'fw-menutree'], {'component':true, 'container':true, 'accordionlist':true, 'fw-menutree':true}, ['widget.fw-menutree'], 0, [FW.view, 'MenuTree'], 0);
 Ext.cmd.derive('FW.view.MainMenu', Ext.Menu, {config:{layout:'fit', width:211, cls:'fw-panel fw-mainmenu', items:[{title:'MetaWallet', xtype:'toolbar', height:37, border:0, docked:'top', defaults:{ui:'plain', iconMask:true}, items:[{xtype:'spacer'}, {iconCls:'fa fa-list', handler:function() {
-  Ext.Viewport.hideMenu('right');
+  Ext.Viewport.hideMenu('left');
 }}]}, {xtype:'fw-menutree'}], storeData:[{text:'Change Wallet Address', icon:'fa-edit', leaf:true, handler:function() {
   FW.app.getController('Main').showAddressListView();
 }}, {text:'View Wallet Address', icon:'fa-bitcoin', leaf:true, handler:function() {
@@ -33915,10 +33915,10 @@ newVal, oldVal) {
   $('#receive-qrcode \x3e canvas').remove();
   $('#receive-qrcode').qrcode({text:txt, height:250, width:250});
 }}, 0, 0, ['component', 'container', 'panel', 'formpanel'], {'component':true, 'container':true, 'panel':true, 'formpanel':true}, 0, 0, [FW.view, 'Receive'], 0);
-Ext.cmd.derive('FW.view.Welcome', Ext.Container, {config:{id:'welcomeView', layout:'vbox', scrollable:true, cls:'fw-panel', items:[{xtype:'toolbar', docked:'top', title:'Welcome to'}, {xtype:'container', margin:'0 5 0 5', items:[{xtype:'image', src:'resources/images/logo.png', height:'120px', margin:'10 0 10 0'}, {xtype:'container', margin:'10 0 10 0', html:'\x3cp align\x3d"justify"\x3ePlease click a button below to indicate if you would like to generate a new wallet, or use an existing wallet passphrase.'}, 
-{xtype:'container', layout:'hbox', defaults:{xtype:'button', flex:1}, items:[{iconCls:'fa fa-spinner', text:'New Wallet', ui:'confirm', handler:function(btn) {
+Ext.cmd.derive('FW.view.Welcome', Ext.Container, {config:{id:'welcomeView', layout:'vbox', scrollable:true, cls:'fw-panel', items:[{xtype:'container', margin:'0 5 0 5', items:[{xtype:'image', docked:'top', src:'resources/images/logo.png', height:'160px', margin:'10 0 10 0'}, {xtype:'container', margin:'10 0 10 0', html:'\x3cp align\x3d"justify"\x3ePlease click a button below to indicate if you would like to generate a new wallet, or use an existing wallet passphrase.'}, {xtype:'container', layout:'vbox', 
+defaults:{xtype:'button', height:100, margin:'10 10 10 10'}, items:[{iconCls:'fa fa-spinner', text:'New Wallet', ui:'confirm', handler:function(btn) {
   Ext.getCmp('welcomeView').createWallet();
-}}, {iconCls:'fa fa-keyboard-o margin-bottom-4', text:'Existing Wallet', ui:'action', margin:'0 0 0 5', handler:function(btn) {
+}}, {iconCls:'fa fa-keyboard-o margin-bottom-4', text:'Existing Wallet', ui:'action', handler:function(btn) {
   Ext.getCmp('welcomeView').existingWallet();
 }}]}, {xtype:'container', margin:'10 0 10 0', html:'\x3cp align\x3d"justify"\x3eYou should only have to complete this wallet setup process once, after which your wallet is encrypted and saved to your device or browser.\x3c/p\x3e'}, {xtype:'container', margin:'10 0 10 0', itemId:'spinner', hidden:true, html:'\x3ccenter\x3e\x3ci class\x3d"fa fa-5x fa-spin fa-spinner"\x3e\x3c/i\x3e\x3cdiv style\x3d"font-weight: bold;margin-top: 10px;"\x3eGenerating Wallet...\x3c/div\x3e\x3c/center\x3e'}]}]}, initialize:function() {
   var me = this;

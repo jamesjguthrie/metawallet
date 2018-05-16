@@ -1,48 +1,43 @@
 {
-    "builds": {
-        "web": {"default": true},
-        "native": {
-            "packager": "phonegap",
-            "phonegap" : {
-                "config": {
-                    // Uncomment the line below and add the platform you wish to build for
-                    "platform": "ios android",
-
-                    // Uncomment and Set this line to true to enable PhoneGap Remote Building.
-                    // To properly use this you must set the following properties in your local.properties file (if this file does not exist create it in your app root)
-                    // phonegap.remote.username=myname@domain.com
-                    // phonegap.remote.password=mys3cr3tp@ssw0rd
-                    "remote": true,
-
-                    "id": "io.metawallet.mobile",
-                    "name": "MetaWallet"
-                }
-            }
-        }
+  "builds": {
+    "web": {
+      "default": true
     },
-
-                
-    "framework": "touch",
-    /**
+    "native": {
+      "packager": "phonegap",
+      "phonegap": {
+        "config": {
+          // Uncomment the line below and add the platform you wish to build for
+          "platform": "ios android",
+          // Uncomment and Set this line to true to enable PhoneGap Remote Building.
+          // To properly use this you must set the following properties in your local.properties file (if this file does not exist create it in your app root)
+          // phonegap.remote.username=myname@domain.com
+          // phonegap.remote.password=mys3cr3tp@ssw0rd
+          "remote": true,
+          "id": "io.metawallet.mobile",
+          "name": "MetaWallet"
+        }
+      }
+    }
+  },
+  "framework": "touch",
+  /**
      * The application's namespace, used by Sencha Command to generate classes
      */
-    "name": "FW",
-
-    /**
+  "name": "FW",
+  /**
      * The file path to this application's front HTML document, relative to this app.json file
      */
-    "indexHtmlPath": "index.html",
-
-    /**
+  "indexHtmlPath": "index.html",
+  /**
      * The absolute URL to this application in development environment, i.e: the URL to run this application
      * on your web browser during development, e.g: "http://localhost/myapp/index.html".
      *
      * This value is needed when build to resolve your application's dependencies if it requires server-side resources
      * that are not accessible via file system protocol.
      */
-    "url": null,
-
-    /**
+  "url": null,
+  /**
      * List of all JavaScript assets in the right execution order.
      * Each item is an object with the following format:
      *      {
@@ -62,9 +57,6 @@
      *
      *      }
      */
-
-
-
   "js": [
     {
       "path": "touch/sencha-touch.js",
@@ -149,7 +141,7 @@
       "update": "delta"
     },
     {
-      "path": "resources/js/litecore-lib.js",
+      "path": "resources/js/litecore-lib.min.js",
       "update": "delta"
     },
     {
@@ -158,8 +150,7 @@
       "update": "delta"
     }
   ],
-
-    /**
+  /**
      * List of all CSS assets in the right inclusion order.
      * Each item is an object with the following format:
      *      {
@@ -175,71 +166,65 @@
      *
      *      }
      */
-    "css": [
-        {
-            "path": "resources/css/app.css",
-            "update": "delta"
-        },{
-            "path": "resources/css/font-awesome.min.css",
-            "update": "delta"
-        }
-    ],
-
-    /**
+  "css": [
+    {
+      "path": "resources/css/app.css",
+      "update": "delta"
+    },
+    {
+      "path": "resources/css/font-awesome.min.css",
+      "update": "delta"
+    }
+  ],
+  /**
      * Used to automatically generate cache.manifest (HTML 5 application cache manifest) file when you build
      */
-    "appCache": {
-        /**
+  "appCache": {
+    /**
          * List of items in the CACHE MANIFEST section
          */
-        "cache": [
-            "index.html"
-        ],
-        /**
+    "cache": [
+      "index.html"
+    ],
+    /**
          * List of items in the NETWORK section
          */
-        "network": [
-            "*"
-        ],
-        /**
+    "network": [
+      "*"
+    ],
+    /**
          * List of items in the FALLBACK section
          */
-        "fallback": []
-    },
-
-    /**
+    "fallback": []
+  },
+  /**
      * Extra resources to be copied along when build
      */
-    "resources": [
-        "resources/images",
-        "resources/icons",
-        "resources/startup",
-        "resources/fonts",
-        "resources/js"
-    ],
-
-    /**
+  "resources": [
+    "resources/images",
+    "resources/icons",
+    "resources/startup",
+    "resources/fonts",
+    "resources/js"
+  ],
+  /**
      * File / directory name matchers to ignore when copying to the builds, must be valid regular expressions
      */
-    "ignore": [
+  "ignore": [
         "\.svn$"
-    ],
-
-    /**
+  ],
+  /**
      * Directory path to store all previous production builds. Note that the content generated inside this directory
      * must be kept intact for proper generation of deltas between updates
      */
-    "archivePath": "archive",
-
-    /**
+  "archivePath": "archive",
+  /**
      * List of package names to require for the cmd build process
      */
-    "requires": [
-    ],
-
-    /**
+  "requires": [],
+  /**
      * Uniquely generated id for this application, used as prefix for localStorage keys.
      * Normally you should never change this value.
      */
-    "id": "202fa8b2-901b-4586-8fea-5fa442de295d"
+  "id": "202fa8b2-901b-4586-8fea-5fa442de295d"
 }

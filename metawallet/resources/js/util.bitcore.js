@@ -2,7 +2,7 @@
 
 var bitcore = require('bitcore-lib');
 var bitcoreMessage = require('bitcore-message'); // this also binds itself to bitcore.Message as soon as it's require'd
-var litecore = require('litecore-lib');  
+
 // this 'global' is overwritten by tests!
 var NETWORK = USE_TESTNET ? bitcore.Networks.testnet : bitcore.Networks.livenet;
 

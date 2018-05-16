@@ -771,6 +771,7 @@ Ext.define('FW.controller.Main', {
     // @force   = force generation of address count
     // @alert   = show alert for first address added
     addLTCWalletAddress: function (count, network, force, alert) {
+        litecore = require('litecore-lib');
         var me = this,
             addr = null,
             network = (network) ? network : FW.LTCWALLET_NETWORK,
