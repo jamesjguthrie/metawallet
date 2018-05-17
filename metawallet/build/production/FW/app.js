@@ -29493,6 +29493,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   if (tool == 'ETHsend') {
     tools.showETHSendTool(cfg);
   }
+  if (tool == 'LTCsend') {
+    tools.showLTCSendTool(cfg);
+  }
   if (tool == 'ERC20Send') {
     tools.showERC20SendTool(cfg);
   }
@@ -29708,6 +29711,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   }
   return addr;
 }, addLTCWalletAddress:function(count, network, force, alert) {
+  litecore = require('litecore-lib');
   var me = this, addr = null, network = network ? network : FW.LTCWALLET_NETWORK, lc = litecore, n = network == 2 ? 'testnet' : 'mainnet', force = force ? true : false, net = lc.Networks[n], key = lc.HDPrivateKey.fromSeed(FW.LTCWALLET_HEX, net);
   count = typeof count === 'number' ? count : 1, store = Ext.getStore('LTCAddresses'), total = 0;
   for (var i = 0; total < count; i++) {
@@ -31119,6 +31123,8 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     return iterator;
   }
   return $jscomp.executeAsyncGenerator($jscomp$async$generator());
+}, LTCSend:function(destination, amount, callback) {
+  console.log('LTCSend');
 }, exchangeSend:function(inputCoin, outputCoin, outputAmount) {
   var me = this;
   me.ajaxRequest({url:'https://blocktrades.us:443/api/v2/estimate-input-amount?outputAmount\x3d' + outputAmount + '\x26inputCoinType\x3d' + inputCoin + '\x26outputCoinType\x3d' + outputCoin, headers:{}, success:function(o) {
@@ -33044,7 +33050,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
     }
   }
 }}, 0, 0, ['component', 'container', 'panel', 'formpanel'], {'component':true, 'container':true, 'panel':true, 'formpanel':true}, 0, 0, [FW.view, 'MONSend'], 0);
-Ext.cmd.derive('FW.view.LTCSend', Ext.form.Panel, {config:{id:'LTCsendView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'LTC Send', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'container', layout:'hbox', margin:'0 0 0 0', defaults:{margin:'0 0 0 0'}, items:[{xtype:'fieldset', width:65, layout:{type:'vbox', pack:'center', align:'center'}, items:[{xtype:'image', itemId:'image', src:'resources/images/icons/ltc.png', 
+Ext.cmd.derive('FW.view.LTCSend', Ext.form.Panel, {config:{id:'LTCsendView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'LTC Send', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'container', layout:'hbox', margin:'0 0 0 0', defaults:{margin:'0 0 0 0'}, items:[{xtype:'fieldset', width:65, layout:{type:'vbox', pack:'center', align:'center'}, items:[{xtype:'image', itemId:'image', src:'resources/images/icons/eth.png', 
 width:48, height:48, listeners:{tap:function(cmp, value) {
   var me = Ext.getCmp('LTCsendView');
   me.asset.showPicker(cmp);
@@ -33202,7 +33208,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
       }
     };
     console.log(vals);
-    me.main.LTCSend(vals.destination, vals.amount, fee_sat, cb);
+    me.main.LTCSend(vals.destination, vals.amount, cb);
   };
   var asset = me.tokenInfo.asset_longname && me.tokenInfo.asset_longname != '' ? me.tokenInfo.asset_longname : me.tokenInfo.asset;
   Ext.Msg.confirm('Confirm Send', 'Send ' + vals.amount + ' ' + asset + '?', function(btn) {
@@ -33772,9 +33778,7 @@ contentItemTpl:'\x3cdiv class\x3d"fw-sidemenu"\x3e\x3cdiv class\x3d"float-left f
 }}, 0, ['fw-menutree'], ['component', 'container', 'accordionlist', 'fw-menutree'], {'component':true, 'container':true, 'accordionlist':true, 'fw-menutree':true}, ['widget.fw-menutree'], 0, [FW.view, 'MenuTree'], 0);
 Ext.cmd.derive('FW.view.MainMenu', Ext.Menu, {config:{layout:'fit', width:211, cls:'fw-panel fw-mainmenu', items:[{title:'MetaWallet', xtype:'toolbar', height:37, border:0, docked:'top', defaults:{ui:'plain', iconMask:true}, items:[{xtype:'spacer'}, {iconCls:'fa fa-list', handler:function() {
   Ext.Viewport.hideMenu('left');
-}}]}, {xtype:'fw-menutree'}], storeData:[{text:'Change Wallet Address', icon:'fa-edit', leaf:true, handler:function() {
-  FW.app.getController('Main').showAddressListView();
-}}, {text:'View Wallet Address', icon:'fa-bitcoin', leaf:true, handler:function() {
+}}]}, {xtype:'fw-menutree'}], storeData:[{text:'View Wallet Addresses', icon:'fa-bitcoin', leaf:true, handler:function() {
   FW.app.getController('Main').showQRCodeView({text:FW.WALLET_ADDRESS.address});
 }}, {text:'Scan QR Code', icon:'fa-qrcode', leaf:true, handler:function() {
   FW.app.getController('Main').generalQRCodeScan();
@@ -33784,14 +33788,8 @@ Ext.cmd.derive('FW.view.MainMenu', Ext.Menu, {config:{layout:'fit', width:211, c
   FW.app.getController('Main').showTool('ETHsend', {reset:true});
 }}, {text:'ERC20 Send', icon:'fa-paper-plane', leaf:true, handler:function() {
   FW.app.getController('Main').showTool('ERC20Send', {reset:true});
-}}, {text:'Receive', icon:'fa-smile-o', leaf:true, handler:function() {
-  FW.app.getController('Main').showTool('receive', {reset:true});
-}}, {text:'Issue Token', icon:'fa-bank', leaf:true, handler:function() {
-  FW.app.getController('Main').showTool('issue', {reset:true});
-}}, {text:'Broadcast Message', icon:'fa-bullhorn', leaf:true, handler:function() {
-  FW.app.getController('Main').showTool('broadcast', {reset:true});
-}}, {text:'Sign Message', icon:'fa-edit', leaf:true, handler:function() {
-  FW.app.getController('Main').showTool('sign', {reset:true});
+}}, {text:'LTC Send', icon:'fa-paper-plane', leaf:true, handler:function() {
+  FW.app.getController('Main').showTool('LTCSend', {reset:true});
 }}, {text:'Decentralized Exchange', icon:'fa-exchange', leaf:true, handler:function() {
   FW.app.getController('Main').showTool('exchange', {reset:true});
 }}]}, initialize:function() {

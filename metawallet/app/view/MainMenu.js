@@ -35,14 +35,7 @@ Ext.define('FW.view.MainMenu', {
         }],
         // Define the menuitems we want in the data store
         storeData: [{
-            text: 'Change Wallet Address', 
-            icon: 'fa-edit', 
-            leaf: true,
-            handler: function(){
-                FW.app.getController('Main').showAddressListView();
-            }
-        },{
-            text: 'View Wallet Address', 
+            text: 'View Wallet Addresses', 
             icon: 'fa-bitcoin', 
             leaf: true,
             handler: function(){
@@ -77,32 +70,11 @@ Ext.define('FW.view.MainMenu', {
                 FW.app.getController('Main').showTool('ERC20Send',{ reset: true });
             }
         },{
-            text: 'Receive',
-            icon: 'fa-smile-o',
+            text: 'LTC Send',
+            icon: 'fa-paper-plane',
             leaf: true,
             handler: function(){
-                FW.app.getController('Main').showTool('receive',{ reset: true });
-            }
-        },{
-            text: 'Issue Token',
-            icon: 'fa-bank',
-            leaf: true,
-            handler: function(){
-                FW.app.getController('Main').showTool('issue',{ reset: true });
-            }
-        },{
-            text: 'Broadcast Message',
-            icon: 'fa-bullhorn',
-            leaf: true,
-            handler: function(){
-                FW.app.getController('Main').showTool('broadcast',{ reset: true });
-            }
-        },{
-            text: 'Sign Message',
-            icon: 'fa-edit',
-            leaf: true,
-            handler: function(){
-                FW.app.getController('Main').showTool('sign',{ reset: true });
+                FW.app.getController('Main').showTool('LTCsend',{ reset: true });
             }
         },{
             text: 'Decentralized Exchange',

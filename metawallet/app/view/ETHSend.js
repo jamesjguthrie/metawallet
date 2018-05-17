@@ -3,7 +3,7 @@
  *
  * Handle displaying 'Send' form 
  */
- //recode this for ETH
+
 
 Ext.define('FW.view.ETHSend', {
     extend: 'Ext.form.Panel',

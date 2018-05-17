@@ -722,6 +722,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "FW.view.Issuance": [],
   "FW.view.LTCBalancesList": [],
   "FW.view.LTCSend": [],
+  "FW.view.LTCTools": [],
   "FW.view.MONBalancesList": [],
   "FW.view.MONSend": [],
   "FW.view.Main": [],
@@ -1554,6 +1555,7 @@ Ext.ClassManager.addNameAliasMappings({
     "widget.fw-ltcbalanceslist"
   ],
   "FW.view.LTCSend": [],
+  "FW.view.LTCTools": [],
   "FW.view.MONBalancesList": [
     "widget.fw-monbalanceslist"
   ],

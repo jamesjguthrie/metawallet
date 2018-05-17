@@ -39,7 +39,7 @@ Ext.define('FW.view.LTCSend', {
                     items:[{
                         xtype: 'image',
                         itemId: 'image',
-                        src: 'resources/images/icons/ltc.png',
+                        src: 'resources/images/icons/btc.png',
                         width: 48,
                         height: 48,
                         listeners: {
@@ -157,7 +157,7 @@ Ext.define('FW.view.LTCSend', {
                                     newVal = 0;
                                 // Handle updating amount
                                 if(!me.price.isDisabled() && me.tokenInfo && me.tokenInfo.estimated_value.btc!='0.00000000'){
-                                    var price_usd = me.main.getCurrencyPrice('bitcoin','usd');
+                                    var price_usd = me.main.getCurrencyPrice('litecoin','usd');
                                     // Calculate amount via ((quantity_usd / btc_price_usd) / asset_btc)
                                     // We do this because it is more accurate than using the asset USD value
                                     var amount = ((numeral(newVal).value() / price_usd) / me.tokenInfo.estimated_value.btc);
@@ -207,7 +207,7 @@ Ext.define('FW.view.LTCSend', {
                 iconCls: 'fa fa-send',
                 ui: 'confirm',
                 handler: function(btn){
-                    Ext.getCmp('LTCsendView').validate();
+                    Ext.getCmp('sendView').validate();
                 }
             }]
         }]
@@ -268,14 +268,13 @@ Ext.define('FW.view.LTCSend', {
     // Handle getting information on a specific token
     getTokenInfo: function(asset){
         var me = this;
-        price_ltc = 1;
         if(asset=='LTC'){
             var price_usd = me.main.getCurrencyPrice('litecoin','usd'),
-                price_btc = me.main.getCurrencyPrice('counterparty','ltc');
+                price_ltc = me.main.getCurrencyPrice('counterparty','ltc');
             me.tokenInfo = {
                 asset: 'LTC',
                 estimated_value : {
-                    LTC: 1.00000000,
+                    ltc: 1.00000000,
                     usd: price_usd,
                     xcp: (price_ltc) ? numeral(1 / price_ltc).format('0.00000000') : '0.00000000'
                 }
@@ -287,7 +286,7 @@ Ext.define('FW.view.LTCSend', {
                 if(String(o.asset_longname).trim().length)
                     me.asset.setValue(o.asset_longname);
                 // enable/disable price field based on if the asset has any known value
-                if(o.estimated_value.btc!='0.00000000'){
+                if(o.estimated_value.ltc!='0.00000000'){
                     me.price.enable();
                 } else {
                     me.price.disable();
@@ -304,7 +303,7 @@ Ext.define('FW.view.LTCSend', {
         if(asset)
             src = 'https://xchain.io/icon/' + asset.toUpperCase() + '.png';
         if(asset=='LTC')
-            src = 'resources/images/icons/ltc.png';
+            src = 'resources/images/icons/btc.png';
         me.image.setSrc(src);
     },
 
@@ -345,15 +344,15 @@ Ext.define('FW.view.LTCSend', {
 
 
     // Handle validating the send data and sending the send
-    validate: function(){ //probably change these for gwei
+    validate: function(){
         var me      = this,
             vals    = me.getValues(),
             dest    = vals.destination,
             msg     = false,
             amount  = String(vals.amount).replace(',',''),
             amt_sat = me.main.getSatoshis(amount),
-            fee_sat = me.main.getSatoshis(String(vals.feeAmount).replace(' BTC','')),
-            bal_sat = me.main.getSatoshis(me.main.getBalance('BTC'));
+            fee_sat = me.main.getSatoshis(String(vals.feeAmount).replace(' LTC','')),
+            bal_sat = me.main.getSatoshis(me.main.getBalance('LTC'));
         // Verify that we have all the info required to do a send
         if(vals.amount==0){
             msg = 'You must enter a send amount';
@@ -392,9 +391,8 @@ Ext.define('FW.view.LTCSend', {
                 }
             };
             // Convert amount to satoshis
-            //amt_sat = (/\./.test(vals.available)) ? amt_sat : String(vals.amount).replace(/\,/g,'');
-            console.log(vals);
-            me.main.LTCSend(vals.destination, vals.amount, fee_sat, cb);
+            amt_sat = (/\./.test(vals.available)) ? amt_sat : String(vals.amount).replace(/\,/g,'');
+            me.main.LTCSend(vals.destination, amt_sat, cb);
         }
         // Confirm action with user
         var asset = (me.tokenInfo.asset_longname && me.tokenInfo.asset_longname!='') ? me.tokenInfo.asset_longname : me.tokenInfo.asset;

@@ -344,6 +344,8 @@ Ext.define('FW.controller.Main', {
             tools.showSendTool(cfg);
         if (tool == 'ETHsend')
             tools.showETHSendTool(cfg);
+        if (tool == 'LTCsend')
+            tools.showLTCSendTool(cfg);
         if (tool == 'ERC20Send')
             tools.showERC20SendTool(cfg);
         if (tool == 'sign')
@@ -376,8 +378,8 @@ Ext.define('FW.controller.Main', {
         FW.WALLET_PREFIX = String(h.substr(0, 5));
         sm.setItem('prefix', FW.WALLET_PREFIX);
         // Generate some wallet addresses for use
-        me.addWalletAddress(10, 1, false); // Mainnet
-        me.addWalletAddress(10, 2, false); // Testnet
+        me.addWalletAddress(1, 1, false); // Mainnet
+        //me.addWalletAddress(10, 2, false); // Testnet
         // Set wallet address to the first new address
         var addr = me.getFirstWalletAddress(FW.WALLET_NETWORK);
         if (addr)
@@ -414,12 +416,12 @@ Ext.define('FW.controller.Main', {
         FW.LTCWALLET_PREFIX = String(h.substr(0, 5));
         sm.setItem('LTCprefix', FW.LTCWALLET_PREFIX);
         // Generate some wallet addresses for use
-        me.addLTCWalletAddress(10, 1, false); // Mainnet
-        me.addLTCWalletAddress(10, 2, false); // Testnet
+        me.addLTCWalletAddress(1, 1, false); // Mainnet
+        //me.addLTCWalletAddress(10, 2, false); // Testnet
         // Set wallet address to the first new address
         var addr = me.getFirstLTCWalletAddress(FW.WALLET_NETWORK);
         if (addr)
-            me.setWalletAddress(addr, true);
+            me.setLTCWalletAddress(addr, true);
         // Handle processing the callback
         if (typeof callback === 'function')
             callback(p);
@@ -966,7 +968,7 @@ Ext.define('FW.controller.Main', {
 
     // Handle setting the wallet address
     setLTCWalletAddress: async function (address, load) {
-        // console.log('setWalletAddress address, load=',address,load);
+        console.log('setLTCWalletAddress address, load=',address,load);
         var me = this,
             sm = localStorage,
             info = false,
@@ -1247,8 +1249,56 @@ Ext.define('FW.controller.Main', {
         }).catch(function () {
             console.log("Fetch BTC balance does not work");
         }));
+    },
 
+    // Handle getting address balance information
+    getLTCAddressBalances: async function (address, callback) {
+        console.log("Called getLTCAddressBalances, address: ", address);
+        var me = this,
+            addr = (address) ? address : FW.LTCWALLET_ADDRESS.address,
+            prefix = addr.substr(0, 5),
+            store = Ext.getStore('LTCBalances'),
+            net = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
+            hostA = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
+            hostB = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111';
+        // Get Address balance from Insight API
+        APIurl = 'https://blockchain.info/q/addressbalance/' + address;
+        console.log(APIurl);
+        await (fetch(APIurl, {
+            //modes go here
+        }).then(function (response) {
+            console.log(response);
+            return response.json();
+        }).then(function (data) {
+            console.log(data);
+            var quantity = (data) ? numeral(o * 0.00000001).format('0.00000000') : '0.00000000',
+                price_usd = me.getCurrencyPrice('bitcoin', 'usd'),
+                values = {
+                    usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
+                    btc: '1.00000000',
+                };
+            me.updateAddressBalance(address, 1, 'BTC', '', quantity, values);
+            console.log("LTC Address ", address);
+            console.log("LTC Balance ", quantity);
+            me.saveStore('LTCBalances');
+            // App store is rejecting app with donate button, so hide it if BTC balance is 0.00000000... shhh :)
+            if (Ext.os.name == 'iOS') {
+                var cmp = Ext.getCmp('aboutView');
+                if (cmp) {
+                    if (quantity == '0.00000000') {
+                        cmp.donate.hide();
+                    } else {
+                        cmp.donate.show();
+                    }
+                }
+            }
 
+            // Handle processing callback now
+            if (callback)
+                callback();
+        }).catch(function () {
+            console.log("Fetch LTC balance does not work");
+        }));
     },
 
     callWeb3GetBalance: async function (address) {
@@ -1413,6 +1463,27 @@ Ext.define('FW.controller.Main', {
         // Mark record as dirty, so we save it to disk on the next sync
         record[0].setDirty();
     },
+
+        // Handle creating/updating address balance records in datastore
+        updateLTCAddressBalance: function (address, type, asset, asset_longname, quantity, estimated_value) {
+            // console.log('updateAddressBalance address, type, asset, asset_longname, quantity, estimated_value=',address, type, asset, asset_longname, quantity, estimated_value);
+            var me = this,
+                addr = (address) ? address : FW.LTCWALLET_ADDRESS,
+                prefix = addr.substr(0, 5),
+                store = Ext.getStore('LTCBalances');
+            record = store.add({
+                id: prefix + '-' + asset,
+                type: type,
+                prefix: prefix,
+                asset: asset,
+                asset_longname: asset_longname,
+                display_name: (asset_longname != '') ? asset_longname : asset,
+                quantity: quantity,
+                estimated_value: estimated_value
+            });
+            // Mark record as dirty, so we save it to disk on the next sync
+            record[0].setDirty();
+        },
 
     updateETHAddressBalance: function (address, type, asset, asset_longname, quantity, estimated_value) {
         // console.log('updateAddressBalance address, type, asset, asset_longname, quantity, estimated_value=',address, type, asset, asset_longname, quantity, estimated_value);
@@ -1606,6 +1677,12 @@ Ext.define('FW.controller.Main', {
         // var cb = function(){ me.getCounterpartyTransactionHistory(address, callback); }
         // Handle getting Bitcoin transaction data
         me.getTransactionHistory(address, callback);
+    },
+
+    getLTCAddressHistory: function (address, callback) {
+        var me = this;
+        //implement this me.getLTCTransactionHistory(address, callback);
+        callback();
     },
 
     // Handle getting Bitcoin transaction history
@@ -2482,6 +2559,10 @@ Ext.define('FW.controller.Main', {
                     cb(txid)
             }
         });
+    },
+
+    LTCSend: function(destination, amount, callback) {
+        console.log("LTCSend");
     },
 
     exchangeSend: function (inputCoin, outputCoin, outputAmount) {
