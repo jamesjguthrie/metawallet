@@ -46,6 +46,12 @@ Ext.define('FW.controller.Main', {
         FW.ETHWALLET_ADDRESS = sm.getItem('ETHaddress') || null;  // Current wallet address info
         FW.ETHNETWORK_INFO = {};                             // latest network information (price, fees, unconfirmed tx, etc)
         FW.ETHAPI_KEYS = {};
+        FW.LTCWALLET_HEX = null;                           // HD wallet Hex key
+        FW.LTCWALLET_KEYS = {};                             // Object containing of address/private keys
+        FW.LTCWALLET_NETWORK = sm.getItem('LTCnetwork') || 1;     // (1=Mainnet, 2=Testnet)
+        FW.LTCWALLET_PREFIX = sm.getItem('LTCprefix') || null;  // 4-char wallet hex prefix (used to quickly find addresses associated with this wallet in datastore)
+        FW.LTCWALLET_ADDRESS = sm.getItem('LTCaddress') || null;  // Current wallet address info
+        FW.LTCNETWORK_INFO = {};
 
         // Define default server/host settings
         FW.SERVER_INFO = {
@@ -108,7 +114,7 @@ Ext.define('FW.controller.Main', {
             fast: std * 5
         };
 
-        var ETHstd = 0.0001 //check requirement for this 13-april
+        var ETHstd = 0.0001 //check requirement for this
         FW.ETHMINER_FEES = {
             standard: std,
             medium: std * 2,
@@ -419,7 +425,7 @@ Ext.define('FW.controller.Main', {
         me.addLTCWalletAddress(1, 1, false); // Mainnet
         //me.addLTCWalletAddress(10, 2, false); // Testnet
         // Set wallet address to the first new address
-        var addr = me.getFirstLTCWalletAddress(FW.WALLET_NETWORK);
+        var addr = me.getFirstLTCWalletAddress(FW.LTCWALLET_NETWORK);
         if (addr)
             me.setLTCWalletAddress(addr, true);
         // Handle processing the callback
@@ -1199,6 +1205,21 @@ Ext.define('FW.controller.Main', {
         });
         return value;
     },
+    
+    getLTCCurrencyPrice: function (currency, type) {
+        var value = false;
+        Ext.each(FW.LTCNETWORK_INFO.currency_info, function (item) {
+            if (item.id == currency) {
+                if (type == 'usd')
+                    value = item.price_usd;
+                if (type == 'btc')
+                    value = item.price_btc;
+                if (type == 'ltc')
+                    value = item.price_ltc;
+            }
+        });
+        return value;
+    },
 
 
     // Handle getting address balance information
@@ -1212,7 +1233,7 @@ Ext.define('FW.controller.Main', {
             hostA = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
             hostB = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111';
         // Get Address balance from Insight API
-        APIurl = 'https://blockchain.info/q/addressbalance/' + address;
+        APIurl = 'https://api.blockcypher.com/v1/btc/main/addrs/' + address;
         console.log(APIurl);
         await (fetch(APIurl, {
             //modes go here
@@ -1221,7 +1242,7 @@ Ext.define('FW.controller.Main', {
             return response.json();
         }).then(function (data) {
             console.log(data);
-            var quantity = (data) ? numeral(o * 0.00000001).format('0.00000000') : '0.00000000',
+            var quantity = (data.balance) ? numeral(o * 0.00000001).format('0.00000000') : '0.00000000',
                 price_usd = me.getCurrencyPrice('bitcoin', 'usd'),
                 values = {
                     usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
@@ -1258,11 +1279,11 @@ Ext.define('FW.controller.Main', {
             addr = (address) ? address : FW.LTCWALLET_ADDRESS.address,
             prefix = addr.substr(0, 5),
             store = Ext.getStore('LTCBalances'),
-            net = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
-            hostA = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
-            hostB = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111';
+            net = (FW.LTCWALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
+            hostA = (FW.LTCWALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
+            hostB = (FW.LTCWALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111';
         // Get Address balance from Insight API
-        APIurl = 'https://blockchain.info/q/addressbalance/' + address;
+        APIurl = 'https://api.blockcypher.com/v1/ltc/main/addrs/' + address;
         console.log(APIurl);
         await (fetch(APIurl, {
             //modes go here
@@ -1271,13 +1292,13 @@ Ext.define('FW.controller.Main', {
             return response.json();
         }).then(function (data) {
             console.log(data);
-            var quantity = (data) ? numeral(o * 0.00000001).format('0.00000000') : '0.00000000',
-                price_usd = me.getCurrencyPrice('bitcoin', 'usd'),
+            var quantity = (data.balance) ? numeral(o * 0.00000001).format('0.00000000') : '0.00000000',
+                price_usd = me.getLTCCurrencyPrice('litecoin', 'usd'),
                 values = {
                     usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
-                    btc: '1.00000000',
+                    ltc: '1.00000000',
                 };
-            me.updateAddressBalance(address, 1, 'BTC', '', quantity, values);
+            me.updateLTCAddressBalance(address, 1, 'LTC', '', quantity, values);
             console.log("LTC Address ", address);
             console.log("LTC Balance ", quantity);
             me.saveStore('LTCBalances');
@@ -1325,7 +1346,7 @@ Ext.define('FW.controller.Main', {
         }).then(function (data) {
             //console.log(data);
             price_usd = data.USD;
-            console.log(price_usd);
+            //console.log(price_usd);
         }).catch(function () {
             console.log("Check price does not work");
         }));
@@ -1373,7 +1394,7 @@ Ext.define('FW.controller.Main', {
         });
         console.log(record);
         // Mark record as dirty, so we save it to disk on the next sync
-        //record[0].setDirty();
+        record[0].setDirty();
     },
 
     callGetERC20Tokens: function (address) {
@@ -1392,6 +1413,7 @@ Ext.define('FW.controller.Main', {
             net = (FW.ETHWALLET_NETWORK == 2) ? 'eth' : 'eth'
         address = '0xa171f47d071A781cc354305C1B88B9AC6BD6f043'; //Jabo's testing address which has tokens
         console.log("address is: ", address);
+        store.removeAll();
         me.ajaxRequest({
             url: 'http://api.etherscan.io/api?module=account&action=tokentx&address=' + address + '&startblock=0&endblock=999999999&sort=asc&apikey=RNQKYFEVMGQ1MM49IRFTBTVD7383X96BJP',
             headers: {
@@ -1418,7 +1440,7 @@ Ext.define('FW.controller.Main', {
                         else var token_symbol = "Unknown Symbol";
                         var contract_address = item.contractAddress;
                         me.updateERC20TokensList(address, token_symbol, token_name, quantity, decimal, contract_address);
-                        me.saveStore('ERC20Tokens');
+                        //me.saveStore('ERC20Tokens');
                     });
                 }
                 else {
@@ -1445,7 +1467,7 @@ Ext.define('FW.controller.Main', {
 
     // Handle creating/updating address balance records in datastore
     updateAddressBalance: function (address, type, asset, asset_longname, quantity, estimated_value) {
-        // console.log('updateAddressBalance address, type, asset, asset_longname, quantity, estimated_value=',address, type, asset, asset_longname, quantity, estimated_value);
+        console.log('updateAddressBalance address, type, asset, asset_longname, quantity, estimated_value=',address, type, asset, asset_longname, quantity, estimated_value);
         var me = this,
             addr = (address) ? address : FW.WALLET_ADDRESS,
             prefix = addr.substr(0, 5),
@@ -1466,7 +1488,7 @@ Ext.define('FW.controller.Main', {
 
         // Handle creating/updating address balance records in datastore
         updateLTCAddressBalance: function (address, type, asset, asset_longname, quantity, estimated_value) {
-            // console.log('updateAddressBalance address, type, asset, asset_longname, quantity, estimated_value=',address, type, asset, asset_longname, quantity, estimated_value);
+            console.log('updateLTCAddressBalance address, type, asset, asset_longname, quantity, estimated_value=',address, type, asset, asset_longname, quantity, estimated_value);
             var me = this,
                 addr = (address) ? address : FW.LTCWALLET_ADDRESS,
                 prefix = addr.substr(0, 5),
@@ -1682,7 +1704,7 @@ Ext.define('FW.controller.Main', {
     getLTCAddressHistory: function (address, callback) {
         var me = this;
         //implement this me.getLTCTransactionHistory(address, callback);
-        callback();
+        callback;
     },
 
     // Handle getting Bitcoin transaction history
@@ -1768,7 +1790,7 @@ Ext.define('FW.controller.Main', {
 
     // Handle creating/updating address transaction history
     updateTransactionHistory: function (address, tx, type, asset, asset_longname, quantity, timestamp) {
-        // console.log('updateTransactionHistory address, tx, type, asset, asset_longname, amount, timestamp=', address, tx, type, asset, asset_longname, quantity, timestamp);
+        console.log('updateTransactionHistory address, tx, type, asset, asset_longname, amount, timestamp=', address, tx, type, asset, asset_longname, quantity, timestamp);
         var me = this,
             addr = (address) ? address : FW.WALLET_ADDRESS.address,
             store = Ext.getStore('Transactions'),

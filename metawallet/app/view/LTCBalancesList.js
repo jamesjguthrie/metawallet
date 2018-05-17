@@ -1,5 +1,5 @@
 ﻿/*
- * BalancesList.js - View
+ * LTCBalancesList.js - View
  * 
  * Display list of balances
  */
@@ -90,7 +90,7 @@ Ext.define('FW.view.LTCBalancesList', {
         if(me.main.deviceType=='phone')
             me.tb.menuBtn.show();
         // Display address label in titlebar, wrap at 220 pixels, display address on tap
-        me.tb.tb.setTitle(FW.LTCWALLET_ADDRESS.label);
+        me.tb.tb.setTitle("Litecoin");
         var title = me.tb.tb.element.down('.x-title');
         title.setMaxWidth(220);
         title.on('tap',function(){ me.main.showQRCodeView({ text: FW.LTCWALLET_ADDRESS.address }); });

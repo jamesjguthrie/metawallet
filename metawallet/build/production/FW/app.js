@@ -29309,6 +29309,12 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   FW.ETHWALLET_ADDRESS = sm.getItem('ETHaddress') || null;
   FW.ETHNETWORK_INFO = {};
   FW.ETHAPI_KEYS = {};
+  FW.LTCWALLET_HEX = null;
+  FW.LTCWALLET_KEYS = {};
+  FW.LTCWALLET_NETWORK = sm.getItem('LTCnetwork') || 1;
+  FW.LTCWALLET_PREFIX = sm.getItem('LTCprefix') || null;
+  FW.LTCWALLET_ADDRESS = sm.getItem('LTCaddress') || null;
+  FW.LTCNETWORK_INFO = {};
   FW.SERVER_INFO = {mainnet:{cpHost:'52.87.221.111', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}, testnet:{cpHost:'52.87.221.111', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}};
   FW.LTCSERVER_INFO = {mainnet:{cpHost:'34.230.76.175', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}, testnet:{cpHost:'34.230.76.175', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}};
   FW.ETHSERVER_INFO = {ETHmainnet:{cpHost:'52.87.221.111', cpPort:8545, cpUser:'rpc', cpPass:'1234', cpSSL:true}, ETHtestnet:{cpHost:'52.87.221.111', cpPort:8545, cpUser:'rpc', cpPass:'1234', cpSSL:true}};
@@ -29513,8 +29519,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   me.encryptWallet();
   FW.WALLET_PREFIX = String(h.substr(0, 5));
   sm.setItem('prefix', FW.WALLET_PREFIX);
-  me.addWalletAddress(10, 1, false);
-  me.addWalletAddress(10, 2, false);
+  me.addWalletAddress(1, 1, false);
   var addr = me.getFirstWalletAddress(FW.WALLET_NETWORK);
   if (addr) {
     me.setWalletAddress(addr, true);
@@ -29533,11 +29538,10 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   me.encryptLTCWallet();
   FW.LTCWALLET_PREFIX = String(h.substr(0, 5));
   sm.setItem('LTCprefix', FW.LTCWALLET_PREFIX);
-  me.addLTCWalletAddress(10, 1, false);
-  me.addLTCWalletAddress(10, 2, false);
+  me.addLTCWalletAddress(1, 1, false);
   var addr = me.getFirstLTCWalletAddress(FW.WALLET_NETWORK);
   if (addr) {
-    me.setWalletAddress(addr, true);
+    me.setLTCWalletAddress(addr, true);
   }
   if (typeof callback === 'function') {
     callback(p);
@@ -29897,6 +29901,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
       while (1) {
         switch($jscomp$generator$state) {
           case 0:
+            console.log('setLTCWalletAddress address, load\x3d', address, load);
             me = $jscomp$async$this;
             sm = localStorage;
             info = false;
@@ -30100,6 +30105,22 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     }
   });
   return value;
+}, getLTCCurrencyPrice:function(currency, type) {
+  var value = false;
+  Ext.each(FW.LTCNETWORK_INFO.currency_info, function(item) {
+    if (item.id == currency) {
+      if (type == 'usd') {
+        value = item.price_usd;
+      }
+      if (type == 'btc') {
+        value = item.price_btc;
+      }
+      if (type == 'ltc') {
+        value = item.price_ltc;
+      }
+    }
+  });
+  return value;
 }, getAddressBalances:function(address, callback) {
   var $jscomp$async$this = this;
   function $jscomp$async$generator() {
@@ -30123,7 +30144,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             net = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
             hostA = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
             hostB = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
-            APIurl = 'https://blockchain.info/q/addressbalance/' + address;
+            APIurl = 'https://api.blockcypher.com/v1/btc/main/addrs/' + address;
             console.log(APIurl);
             $jscomp$generator$state = 1;
             return {value:fetch(APIurl, {}).then(function(response) {
@@ -30131,7 +30152,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
               return response.json();
             }).then(function(data) {
               console.log(data);
-              var quantity = data ? numeral(o * 1.0E-8).format('0.00000000') : '0.00000000', price_usd = me.getCurrencyPrice('bitcoin', 'usd'), values = {usd:numeral(parseFloat(price_usd * quantity)).format('0.00000000'), btc:'1.00000000'};
+              var quantity = data.balance ? numeral(o * 1.0E-8).format('0.00000000') : '0.00000000', price_usd = me.getCurrencyPrice('bitcoin', 'usd'), values = {usd:numeral(parseFloat(price_usd * quantity)).format('0.00000000'), btc:'1.00000000'};
               me.updateAddressBalance(address, 1, 'BTC', '', quantity, values);
               console.log('BTC Address ', address);
               console.log('Balance ', quantity);
@@ -30151,6 +30172,86 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
               }
             })['catch'](function() {
               console.log('Fetch BTC balance does not work');
+            }), done:false};
+          case 1:
+            if (!($jscomp$generator$action$arg == 1)) {
+              $jscomp$generator$state = 2;
+              break;
+            }
+            $jscomp$generator$state = -1;
+            throw $jscomp$generator$throw$arg;
+          case 2:
+            $jscomp$generator$state = -1;
+          default:
+            return {value:undefined, done:true};
+        }
+      }
+    }
+    var iterator = {next:function(arg) {
+      return $jscomp$generator$impl(0.0, arg, undefined);
+    }, 'throw':function(arg) {
+      return $jscomp$generator$impl(1.0, undefined, arg);
+    }, 'return':function(arg) {
+      throw Error('Not yet implemented');
+    }};
+    $jscomp.initSymbolIterator();
+    iterator[Symbol.iterator] = function() {
+      return this;
+    };
+    return iterator;
+  }
+  return $jscomp.executeAsyncGenerator($jscomp$async$generator());
+}, getLTCAddressBalances:function(address, callback) {
+  var $jscomp$async$this = this;
+  function $jscomp$async$generator() {
+    var $jscomp$generator$state = 0;
+    var hostB;
+    var hostA;
+    var net;
+    var store;
+    var prefix;
+    var addr;
+    var me;
+    function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
+      while (1) {
+        switch($jscomp$generator$state) {
+          case 0:
+            console.log('Called getLTCAddressBalances, address: ', address);
+            me = $jscomp$async$this;
+            addr = address ? address : FW.LTCWALLET_ADDRESS.address;
+            prefix = addr.substr(0, 5);
+            store = Ext.getStore('LTCBalances');
+            net = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
+            hostA = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
+            hostB = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
+            APIurl = 'https://api.blockcypher.com/v1/ltc/main/addrs/' + address;
+            console.log(APIurl);
+            $jscomp$generator$state = 1;
+            return {value:fetch(APIurl, {}).then(function(response) {
+              console.log(response);
+              return response.json();
+            }).then(function(data) {
+              console.log(data);
+              var quantity = data.balance ? numeral(o * 1.0E-8).format('0.00000000') : '0.00000000', price_usd = me.getLTCCurrencyPrice('litecoin', 'usd'), values = {usd:numeral(parseFloat(price_usd * quantity)).format('0.00000000'), ltc:'1.00000000'};
+              me.updateLTCAddressBalance(address, 1, 'LTC', '', quantity, values);
+              console.log('LTC Address ', address);
+              console.log('LTC Balance ', quantity);
+              me.saveStore('LTCBalances');
+              if (Ext.os.name == 'iOS') {
+                var cmp = Ext.getCmp('aboutView');
+                if (cmp) {
+                  if (quantity == '0.00000000') {
+                    cmp.donate.hide();
+                  } else {
+                    cmp.donate.show();
+                  }
+                }
+              }
+              if (callback) {
+                callback();
+              }
+            })['catch'](function() {
+              console.log('Fetch LTC balance does not work');
             }), done:false};
           case 1:
             if (!($jscomp$generator$action$arg == 1)) {
@@ -30261,7 +30362,6 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
               return response.json();
             }).then(function(data) {
               price_usd = data.USD;
-              console.log(price_usd);
             })['catch'](function() {
               console.log('Check price does not work');
             }), done:false};
@@ -30399,7 +30499,13 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     store.sync();
   }
 }, updateAddressBalance:function(address, type, asset, asset_longname, quantity, estimated_value) {
+  console.log('updateAddressBalance address, type, asset, asset_longname, quantity, estimated_value\x3d', address, type, asset, asset_longname, quantity, estimated_value);
   var me = this, addr = address ? address : FW.WALLET_ADDRESS, prefix = addr.substr(0, 5), store = Ext.getStore('Balances');
+  record = store.add({id:prefix + '-' + asset, type:type, prefix:prefix, asset:asset, asset_longname:asset_longname, display_name:asset_longname != '' ? asset_longname : asset, quantity:quantity, estimated_value:estimated_value});
+  record[0].setDirty();
+}, updateLTCAddressBalance:function(address, type, asset, asset_longname, quantity, estimated_value) {
+  console.log('updateLTCAddressBalance address, type, asset, asset_longname, quantity, estimated_value\x3d', address, type, asset, asset_longname, quantity, estimated_value);
+  var me = this, addr = address ? address : FW.LTCWALLET_ADDRESS, prefix = addr.substr(0, 5), store = Ext.getStore('LTCBalances');
   record = store.add({id:prefix + '-' + asset, type:type, prefix:prefix, asset:asset, asset_longname:asset_longname, display_name:asset_longname != '' ? asset_longname : asset, quantity:quantity, estimated_value:estimated_value});
   record[0].setDirty();
 }, updateETHAddressBalance:function(address, type, asset, asset_longname, quantity, estimated_value) {
@@ -30513,6 +30619,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
 }, getAddressHistory:function(address, callback) {
   var me = this;
   me.getTransactionHistory(address, callback);
+}, getLTCAddressHistory:function(address, callback) {
+  var me = this;
+  callback;
 }, getTransactionHistory:function(address, callback) {
   var me = this, net = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111', hostA = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111', hostB = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111', types = ['bets', 'broadcasts', 'burns', 'dividends', 'issuances', 'orders', 'sends', 'mempool'];
   me.ajaxRequest({url:'http://52.87.221.111:3001/insight-api/addr/' + address, headers:{}, success:function(o) {
@@ -30533,6 +30642,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
 }, getETHAddressHistory:function(address, callback) {
   var me = this;
 }, updateTransactionHistory:function(address, tx, type, asset, asset_longname, quantity, timestamp) {
+  console.log('updateTransactionHistory address, tx, type, asset, asset_longname, amount, timestamp\x3d', address, tx, type, asset, asset_longname, quantity, timestamp);
   var me = this, addr = address ? address : FW.WALLET_ADDRESS.address, store = Ext.getStore('Transactions'), time = timestamp ? timestamp : 0, record = {};
   store.each(function(rec) {
     if (rec.raw.hash == tx) {
@@ -31394,6 +31504,52 @@ Ext.cmd.derive('FW.view.ETHBalancesList', Ext.dataview.List, {config:{id:'ETHbal
   Ext.dataview.List.prototype.initialize.call(this);
   me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
 }}, 0, ['fw-ethbalanceslist'], ['component', 'container', 'dataview', 'list', 'fw-ethbalanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-ethbalanceslist':true}, ['widget.fw-ethbalanceslist'], 0, [FW.view, 'ETHBalancesList'], 0);
+Ext.cmd.derive('FW.view.LTCBalancesList', Ext.dataview.List, {config:{id:'LTCbalancesList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'LTCBalances', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{display_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{[this.numberFormat(values)]}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
+{toUpper:function(val) {
+  return String(val).toUpperCase();
+}, numberFormat:function(values) {
+  var fmt = '0,0', qty = values.quantity;
+  if (/\./.test(qty) || values.asset == 'LTC') {
+    fmt += '.00000000';
+  }
+  return numeral(qty).format(fmt);
+}, priceFormat:function(values) {
+  var txt = '';
+  if (values.estimated_value && values.estimated_value.usd != '0.00') {
+    var txt = '$' + numeral(values.estimated_value.usd).format('0,0.00');
+  }
+  return txt;
+}}), listeners:{itemtap:function(cmp, index, target, record, e, eOpts) {
+  Ext.getCmp('balancesView').showTokenInfo(record.data);
+}}, items:[{xtype:'fw-toptoolbar', title:'LTC Balances', refresh:true, onRefresh:function() {
+  var me = Ext.getCmp('LTCbalancesList');
+  if (me.refreshing) {
+    return;
+  }
+  me.refreshing = true;
+  me.getStore().removeAll();
+  me.setMasked({xtype:'loadmask', message:'Refreshing Balances', showAnimation:'fadeIn', indicator:true});
+  var cb = function() {
+    me.setMasked(false);
+    me.refreshing = false;
+  };
+  me.main.getLTCAddressBalances(FW.LTCWALLET_ADDRESS.address, cb);
+}}]}, initialize:function() {
+  var me = this;
+  me.main = FW.app.getController('Main');
+  me.tb = me.down('fw-toptoolbar');
+  if (me.main.deviceType == 'phone') {
+    me.tb.menuBtn.show();
+  }
+  me.tb.tb.setTitle('Litecoin');
+  var title = me.tb.tb.element.down('.x-title');
+  title.setMaxWidth(220);
+  title.on('tap', function() {
+    me.main.showQRCodeView({text:FW.LTCWALLET_ADDRESS.address});
+  });
+  Ext.dataview.List.prototype.initialize.call(this);
+  me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
+}}, 0, ['fw-ltcbalanceslist'], ['component', 'container', 'dataview', 'list', 'fw-ltcbalanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-ltcbalanceslist':true}, ['widget.fw-ltcbalanceslist'], 0, [FW.view, 'LTCBalancesList'], 0);
 Ext.cmd.derive('FW.view.ERC20TokensList', Ext.dataview.List, {config:{id:'ERC20TokensList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'ERC20Tokens', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{token_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{quantity / Math.pow(10, decimal)}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
 {toUpper:function(val) {
   return String(val).toUpperCase();
@@ -31435,7 +31591,7 @@ Ext.cmd.derive('FW.view.ERC20TokensList', Ext.dataview.List, {config:{id:'ERC20T
   Ext.dataview.List.prototype.initialize.call(this);
   me.getStore().sort([{property:'id', direction:'ASC'}, {property:'token_symbol', direction:'ASC'}, {property:'token_name', direction:'ASC'}]);
 }}, 0, ['fw-erc20tokenslist'], ['component', 'container', 'dataview', 'list', 'fw-erc20tokenslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-erc20tokenslist':true}, ['widget.fw-erc20tokenslist'], 0, [FW.view, 'ERC20TokensList'], 0);
-Ext.cmd.derive('FW.view.phone.Balances', Ext.Container, {config:{itemId:'balances', layout:'card', items:[{xtype:'fw-balanceslist'}, {xtype:'fw-ethbalanceslist'}, {xtype:'fw-erc20tokenslist'}]}}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view.phone, 'Balances'], 0);
+Ext.cmd.derive('FW.view.phone.Balances', Ext.Container, {config:{itemId:'balances', layout:'card', items:[{xtype:'fw-balanceslist'}, {xtype:'fw-ethbalanceslist'}, {xtype:'fw-ltcbalanceslist'}, {xtype:'fw-erc20tokenslist'}]}}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view.phone, 'Balances'], 0);
 Ext.cmd.derive('FW.profile.Phone', Ext.app.Profile, {config:{name:'Phone', views:['Balances']}, isActive:function() {
   var vp = Ext.Viewport, s = vp.getSize(), w = s.width > s.height ? s.width : s.height;
   return w < 1000;
@@ -31558,8 +31714,8 @@ Ext.cmd.derive('FW.view.TokenInfo', Ext.Container, {config:{layout:'card', items
     }
   }});
 }}, 0, ['fw-tokeninfo'], ['component', 'container', 'fw-tokeninfo'], {'component':true, 'container':true, 'fw-tokeninfo':true}, ['widget.fw-tokeninfo'], 0, [FW.view, 'TokenInfo'], 0);
-Ext.cmd.derive('FW.view.tablet.Balances', Ext.Container, {config:{layout:'hbox', items:[{xtype:'fw-balanceslist', width:320}, {xtype:'fw-ethbalanceslist', width:320}, {xtype:'fw-erc20tokenslist', width:320}, {flex:1, xtype:'container', layout:'card', itemId:'balances', cls:'fw-panel fw-panel-separator', items:[{xtype:'container', itemId:'placeholder', scrollable:'vertical', layout:{type:'vbox', align:'center', pack:'top'}, items:[{xtype:'fw-toptoolbar', menu:true}, {margin:'10 0 0 0', html:'\x3ccenter\x3e\x3cimg src\x3d"resources/images/logo.png" width\x3d"90%" style\x3d"max-width:350px;"\x3e\x3c/center\x3e'}, 
-{margin:'10 0 0 0', cls:'fw-currencyinfo-instructions', html:'\x3ccenter\x3ePlease select an item\x3cbr/\x3efrom the list on the left\x3c/center\x3e'}]}, {xtype:'fw-tokeninfo', flex:1}]}]}}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view.tablet, 'Balances'], 0);
+Ext.cmd.derive('FW.view.tablet.Balances', Ext.Container, {config:{layout:'hbox', items:[{xtype:'fw-balanceslist', width:320}, {xtype:'fw-ethbalanceslist', width:320}, {xtype:'fw-erc20tokenslist', width:320}, {xtype:'fw-ltcbalanceslist', width:320}, {flex:1, xtype:'container', layout:'card', itemId:'balances', cls:'fw-panel fw-panel-separator', items:[{xtype:'container', itemId:'placeholder', scrollable:'vertical', layout:{type:'vbox', align:'center', pack:'top'}, items:[{xtype:'fw-toptoolbar', menu:true}, 
+{margin:'10 0 0 0', html:'\x3ccenter\x3e\x3cimg src\x3d"resources/images/logo.png" width\x3d"90%" style\x3d"max-width:350px;"\x3e\x3c/center\x3e'}, {margin:'10 0 0 0', cls:'fw-currencyinfo-instructions', html:'\x3ccenter\x3ePlease select an item\x3cbr/\x3efrom the list on the left\x3c/center\x3e'}]}, {xtype:'fw-tokeninfo', flex:1}]}]}}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view.tablet, 'Balances'], 0);
 Ext.cmd.derive('FW.profile.Tablet', Ext.app.Profile, {config:{name:'Tablet', views:['Balances']}, isActive:function() {
   var vp = Ext.Viewport, s = vp.getSize(), w = s.width > s.height ? s.width : s.height;
   return w >= 1000;
@@ -31570,6 +31726,8 @@ Ext.cmd.derive('FW.view.Balances', Ext.Container, {config:{id:'balancesView', la
   me.add({xclass:'FW.view.' + me.main.deviceType + '.Balances'});
   me.cards = me.down('fw-balanceslist');
   me.cards = me.down('fw-ethbalanceslist');
+  me.cards = me.down('fw-erc20tokenslist');
+  me.cards = me.down('fw-ltcbalanceslist');
   Ext.Container.prototype.initialize.call(this);
 }, showTokenInfo:function(data) {
   var me = this;
@@ -33050,7 +33208,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
     }
   }
 }}, 0, 0, ['component', 'container', 'panel', 'formpanel'], {'component':true, 'container':true, 'panel':true, 'formpanel':true}, 0, 0, [FW.view, 'MONSend'], 0);
-Ext.cmd.derive('FW.view.LTCSend', Ext.form.Panel, {config:{id:'LTCsendView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'LTC Send', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'container', layout:'hbox', margin:'0 0 0 0', defaults:{margin:'0 0 0 0'}, items:[{xtype:'fieldset', width:65, layout:{type:'vbox', pack:'center', align:'center'}, items:[{xtype:'image', itemId:'image', src:'resources/images/icons/eth.png', 
+Ext.cmd.derive('FW.view.LTCSend', Ext.form.Panel, {config:{id:'LTCsendView', layout:'vbox', scrollable:'vertical', cls:'fw-panel', items:[{xtype:'fw-toptoolbar', title:'LTC Send', menu:true}, {xtype:'container', layout:'vbox', margin:'5 5 5 5', cls:'no-label-ellipsis', items:[{xtype:'container', layout:'hbox', margin:'0 0 0 0', defaults:{margin:'0 0 0 0'}, items:[{xtype:'fieldset', width:65, layout:{type:'vbox', pack:'center', align:'center'}, items:[{xtype:'image', itemId:'image', src:'resources/images/icons/btc.png', 
 width:48, height:48, listeners:{tap:function(cmp, value) {
   var me = Ext.getCmp('LTCsendView');
   me.asset.showPicker(cmp);
@@ -33078,7 +33236,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
       newVal = 0;
     }
     if (!me.price.isDisabled() && me.tokenInfo && me.tokenInfo.estimated_value.btc != '0.00000000') {
-      var price_usd = me.main.getCurrencyPrice('bitcoin', 'usd');
+      var price_usd = me.main.getCurrencyPrice('litecoin', 'usd');
       var amount = numeral(newVal).value() / price_usd / me.tokenInfo.estimated_value.btc;
       me.amount.suspendEvents();
       me.amount.setValue(numeral(amount).format(me.amount.getNumberFormat()));
@@ -33097,7 +33255,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
     }
   }
 }}}]}, {xtype:'fw-transactionpriority', margin:'0 0 0 0'}, {margin:'5 0 0 0', xtype:'button', text:'Send', iconCls:'fa fa-send', ui:'confirm', handler:function(btn) {
-  Ext.getCmp('LTCsendView').validate();
+  Ext.getCmp('sendView').validate();
 }}]}]}, initialize:function() {
   var me = this, cfg = me.config;
   me.main = FW.app.getController('Main');
@@ -33137,10 +33295,9 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
   me.getTokenInfo(asset);
 }, getTokenInfo:function(asset) {
   var me = this;
-  price_ltc = 1;
   if (asset == 'LTC') {
-    var price_usd = me.main.getCurrencyPrice('litecoin', 'usd'), price_btc = me.main.getCurrencyPrice('counterparty', 'ltc');
-    me.tokenInfo = {asset:'LTC', estimated_value:{LTC:1, usd:price_usd, xcp:price_ltc ? numeral(1 / price_ltc).format('0.00000000') : '0.00000000'}};
+    var price_usd = me.main.getCurrencyPrice('litecoin', 'usd'), price_ltc = me.main.getCurrencyPrice('counterparty', 'ltc');
+    me.tokenInfo = {asset:'LTC', estimated_value:{ltc:1, usd:price_usd, xcp:price_ltc ? numeral(1 / price_ltc).format('0.00000000') : '0.00000000'}};
     me.price.enable();
   } else {
     me.main.getTokenInfo(asset, function(o) {
@@ -33148,7 +33305,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
       if (String(o.asset_longname).trim().length) {
         me.asset.setValue(o.asset_longname);
       }
-      if (o.estimated_value.btc != '0.00000000') {
+      if (o.estimated_value.ltc != '0.00000000') {
         me.price.enable();
       } else {
         me.price.disable();
@@ -33161,7 +33318,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
     src = 'https://xchain.io/icon/' + asset.toUpperCase() + '.png';
   }
   if (asset == 'LTC') {
-    src = 'resources/images/icons/ltc.png';
+    src = 'resources/images/icons/btc.png';
   }
   me.image.setSrc(src);
 }, updateBalance:function(asset) {
@@ -33188,7 +33345,7 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
   me.amount.setMaxValue(bal.value());
   me.available.setValue(amt);
 }, validate:function() {
-  var me = this, vals = me.getValues(), dest = vals.destination, msg = false, amount = String(vals.amount).replace(',', ''), amt_sat = me.main.getSatoshis(amount), fee_sat = me.main.getSatoshis(String(vals.feeAmount).replace(' BTC', '')), bal_sat = me.main.getSatoshis(me.main.getBalance('BTC'));
+  var me = this, vals = me.getValues(), dest = vals.destination, msg = false, amount = String(vals.amount).replace(',', ''), amt_sat = me.main.getSatoshis(amount), fee_sat = me.main.getSatoshis(String(vals.feeAmount).replace(' LTC', '')), bal_sat = me.main.getSatoshis(me.main.getBalance('LTC'));
   if (vals.amount == 0) {
     msg = 'You must enter a send amount';
   }
@@ -33207,8 +33364,8 @@ width:48, height:48, listeners:{tap:function(cmp, value) {
         me.priority.reset();
       }
     };
-    console.log(vals);
-    me.main.LTCSend(vals.destination, vals.amount, cb);
+    amt_sat = /\./.test(vals.available) ? amt_sat : String(vals.amount).replace(/\,/g, '');
+    me.main.LTCSend(vals.destination, amt_sat, cb);
   };
   var asset = me.tokenInfo.asset_longname && me.tokenInfo.asset_longname != '' ? me.tokenInfo.asset_longname : me.tokenInfo.asset;
   Ext.Msg.confirm('Confirm Send', 'Send ' + vals.amount + ' ' + asset + '?', function(btn) {
@@ -33643,52 +33800,6 @@ Ext.cmd.derive('FW.view.MONBalancesList', Ext.dataview.List, {config:{id:'MONbal
   Ext.dataview.List.prototype.initialize.call(this);
   me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
 }}, 0, ['fw-monbalanceslist'], ['component', 'container', 'dataview', 'list', 'fw-monbalanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-monbalanceslist':true}, ['widget.fw-monbalanceslist'], 0, [FW.view, 'MONBalancesList'], 0);
-Ext.cmd.derive('FW.view.LTCBalancesList', Ext.dataview.List, {config:{id:'LTCbalancesList', cls:'fw-panel fw-balanceslist x-list-nopadding', bgCls:'fw-background', infinite:true, striped:true, disableSelection:false, store:'LTCBalances', emptyText:'', itemHeight:60, itemTpl:new Ext.XTemplate('\x3cdiv class\x3d"fw-balanceslist-item"\x3e\x3cdiv class\x3d"fw-balanceslist-icon"\x3e\x3cimg src\x3d"https://xchain.io/icon/{[this.toUpper(values.asset)]}.png"\x3e\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-info"\x3e\x3cdiv class\x3d"fw-balanceslist-currency"\x3e{display_name}\x3c/div\x3e\x3cdiv\x3e\x3cdiv class\x3d"fw-balanceslist-amount"\x3e{[this.numberFormat(values)]}\x3c/div\x3e\x3cdiv class\x3d"fw-balanceslist-price"\x3e{[this.priceFormat(values)]}\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e\x3c/div\x3e', 
-{toUpper:function(val) {
-  return String(val).toUpperCase();
-}, numberFormat:function(values) {
-  var fmt = '0,0', qty = values.quantity;
-  if (/\./.test(qty) || values.asset == 'LTC') {
-    fmt += '.00000000';
-  }
-  return numeral(qty).format(fmt);
-}, priceFormat:function(values) {
-  var txt = '';
-  if (values.estimated_value && values.estimated_value.usd != '0.00') {
-    var txt = '$' + numeral(values.estimated_value.usd).format('0,0.00');
-  }
-  return txt;
-}}), listeners:{itemtap:function(cmp, index, target, record, e, eOpts) {
-  Ext.getCmp('balancesView').showTokenInfo(record.data);
-}}, items:[{xtype:'fw-toptoolbar', title:'LTC Balances', refresh:true, onRefresh:function() {
-  var me = Ext.getCmp('LTCbalancesList');
-  if (me.refreshing) {
-    return;
-  }
-  me.refreshing = true;
-  me.getStore().removeAll();
-  me.setMasked({xtype:'loadmask', message:'Refreshing Balances', showAnimation:'fadeIn', indicator:true});
-  var cb = function() {
-    me.setMasked(false);
-    me.refreshing = false;
-  };
-  me.main.getLTCAddressBalances(FW.LTCWALLET_ADDRESS.address, cb);
-}}]}, initialize:function() {
-  var me = this;
-  me.main = FW.app.getController('Main');
-  me.tb = me.down('fw-toptoolbar');
-  if (me.main.deviceType == 'phone') {
-    me.tb.menuBtn.show();
-  }
-  me.tb.tb.setTitle(FW.LTCWALLET_ADDRESS.label);
-  var title = me.tb.tb.element.down('.x-title');
-  title.setMaxWidth(220);
-  title.on('tap', function() {
-    me.main.showQRCodeView({text:FW.LTCWALLET_ADDRESS.address});
-  });
-  Ext.dataview.List.prototype.initialize.call(this);
-  me.getStore().sort([{property:'type', direction:'ASC'}, {property:'asset', direction:'ASC'}, {property:'asset_longname', direction:'ASC'}]);
-}}, 0, ['fw-ltcbalanceslist'], ['component', 'container', 'dataview', 'list', 'fw-ltcbalanceslist'], {'component':true, 'container':true, 'dataview':true, 'list':true, 'fw-ltcbalanceslist':true}, ['widget.fw-ltcbalanceslist'], 0, [FW.view, 'LTCBalancesList'], 0);
 Ext.cmd.derive('FW.view.Passcode', Ext.Panel, {config:{fullscreen:true, id:'passcodeView', centered:true, modal:true, scroll:false, width:300, height:350, value:'', layout:{type:'vbox', pack:'center', align:'stretch'}, items:[{xtype:'toolbar', itemId:'toolbar', docked:'top', cls:'fw-panel', title:'Please enter your passcode'}, {xtype:'container', itemId:'indicator', margin:'0 5 0 5', height:44, html:'\x3cdiv class\x3d"passcode-indicator"\x3e\x3c/div\x3e'}, {flex:1, layout:{type:'vbox', align:'stretch'}, 
 itemId:'buttons', defaults:{flex:1, xtype:'container', layout:{type:'hbox', align:'stretch'}, defaults:{xtype:'button', flex:1, margin:'5 5 5 5'}}}]}, initialize:function() {
   var me = this, cfg = me.config, vp = Ext.Viewport, items = [];
@@ -33789,7 +33900,7 @@ Ext.cmd.derive('FW.view.MainMenu', Ext.Menu, {config:{layout:'fit', width:211, c
 }}, {text:'ERC20 Send', icon:'fa-paper-plane', leaf:true, handler:function() {
   FW.app.getController('Main').showTool('ERC20Send', {reset:true});
 }}, {text:'LTC Send', icon:'fa-paper-plane', leaf:true, handler:function() {
-  FW.app.getController('Main').showTool('LTCSend', {reset:true});
+  FW.app.getController('Main').showTool('LTCsend', {reset:true});
 }}, {text:'Decentralized Exchange', icon:'fa-exchange', leaf:true, handler:function() {
   FW.app.getController('Main').showTool('exchange', {reset:true});
 }}]}, initialize:function() {

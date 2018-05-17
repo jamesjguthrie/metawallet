@@ -22,6 +22,10 @@ Ext.define('FW.view.tablet.Balances', {
             width: 320
         },
         {
+            xtype: 'fw-ltcbalanceslist',
+            width: 320
+        },
+        {
             flex: 1,
             xtype: 'container',
             layout: 'card',
