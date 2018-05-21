@@ -397,6 +397,7 @@ Ext.define('FW.controller.Main', {
 
     // Handle generating 128-bit mnemonic wallet, or using an existing wallet
     generateLTCWallet: function (phrase, callback) {
+        litecore = require('litecore-lib');
         var me = this,
             sm = localStorage,
             store = Ext.getStore('LTCAddresses'),
@@ -779,7 +780,6 @@ Ext.define('FW.controller.Main', {
     // @force   = force generation of address count
     // @alert   = show alert for first address added
     addLTCWalletAddress: function (count, network, force, alert) {
-        litecore = require('litecore-lib');
         var me = this,
             addr = null,
             network = (network) ? network : FW.LTCWALLET_NETWORK,
@@ -958,7 +958,7 @@ Ext.define('FW.controller.Main', {
             // Handle loading address balances and history
             if (load) {
                 history.removeAll();
-                await (me.getAddressBalances(address));
+                me.getAddressBalances(address);
                 me.getAddressHistory(address);
             }
             // Filter stores to only display info for this address
@@ -992,8 +992,9 @@ Ext.define('FW.controller.Main', {
         });
         // Only proceed if we have valid wallet information
         if (info) {
+            console.log('Valid LTC wallet info exists');
             // Save current address info to statemanager
-            sm.setItem('LTCaddress', info.address)
+            sm.setItem('address', info.address)
             // Save the full wallet info
             FW.LTCWALLET_ADDRESS = info;
             // Try to lookup settings panel and set/update address and label
@@ -1005,7 +1006,7 @@ Ext.define('FW.controller.Main', {
             // Handle loading address balances and history
             if (load) {
                 history.removeAll();
-                await (me.getLTCAddressBalances(address));
+                me.getLTCAddressBalances(address);
                 me.getLTCAddressHistory(address);
             }
             // Filter stores to only display info for this address
@@ -1242,7 +1243,7 @@ Ext.define('FW.controller.Main', {
             return response.json();
         }).then(function (data) {
             console.log(data);
-            var quantity = (data.balance) ? numeral(o * 0.00000001).format('0.00000000') : '0.00000000',
+            var quantity = (data.balance) ? numeral(data.balance * 0.00000001).format('0.00000000') : '0.00000000',
                 price_usd = me.getCurrencyPrice('bitcoin', 'usd'),
                 values = {
                     usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
@@ -1292,8 +1293,8 @@ Ext.define('FW.controller.Main', {
             return response.json();
         }).then(function (data) {
             console.log(data);
-            var quantity = (data.balance) ? numeral(o * 0.00000001).format('0.00000000') : '0.00000000',
-                price_usd = me.getLTCCurrencyPrice('litecoin', 'usd'),
+            var quantity = (data.balance) ? numeral(data.balance * 0.00000001).format('0.00000000') : '0.00000000',
+                price_usd = 1; //me.getLTCCurrencyPrice('litecoin', 'usd'),
                 values = {
                     usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
                     ltc: '1.00000000',
@@ -1486,26 +1487,26 @@ Ext.define('FW.controller.Main', {
         record[0].setDirty();
     },
 
-        // Handle creating/updating address balance records in datastore
-        updateLTCAddressBalance: function (address, type, asset, asset_longname, quantity, estimated_value) {
-            console.log('updateLTCAddressBalance address, type, asset, asset_longname, quantity, estimated_value=',address, type, asset, asset_longname, quantity, estimated_value);
-            var me = this,
-                addr = (address) ? address : FW.LTCWALLET_ADDRESS,
-                prefix = addr.substr(0, 5),
-                store = Ext.getStore('LTCBalances');
-            record = store.add({
-                id: prefix + '-' + asset,
-                type: type,
-                prefix: prefix,
-                asset: asset,
-                asset_longname: asset_longname,
-                display_name: (asset_longname != '') ? asset_longname : asset,
-                quantity: quantity,
-                estimated_value: estimated_value
-            });
-            // Mark record as dirty, so we save it to disk on the next sync
-            record[0].setDirty();
-        },
+    // Handle creating/updating address balance records in datastore
+    updateLTCAddressBalance: function (address, type, asset, asset_longname, quantity, estimated_value) {
+        console.log('updateLTCAddressBalance address, type, asset, asset_longname, quantity, estimated_value=', address, type, asset, asset_longname, quantity, estimated_value);
+        var me = this,
+            addr = (address) ? address : FW.LTCWALLET_ADDRESS,
+            prefix = addr.substr(0, 5),
+            store = Ext.getStore('LTCBalances');
+        record = store.add({
+            id: prefix + '-' + asset,
+            type: type,
+            prefix: prefix,
+            asset: asset,
+            asset_longname: asset_longname,
+            display_name: (asset_longname != '') ? asset_longname : asset,
+            quantity: quantity,
+            estimated_value: estimated_value
+        });
+        // Mark record as dirty, so we save it to disk on the next sync
+        record[0].setDirty();
+    },
 
     updateETHAddressBalance: function (address, type, asset, asset_longname, quantity, estimated_value) {
         // console.log('updateAddressBalance address, type, asset, asset_longname, quantity, estimated_value=',address, type, asset, asset_longname, quantity, estimated_value);
@@ -1704,7 +1705,8 @@ Ext.define('FW.controller.Main', {
     getLTCAddressHistory: function (address, callback) {
         var me = this;
         //implement this me.getLTCTransactionHistory(address, callback);
-        callback;
+        if (callback)
+        callback();
     },
 
     // Handle getting Bitcoin transaction history

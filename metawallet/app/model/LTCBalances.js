@@ -1,5 +1,5 @@
 ﻿/*
- * Balances.js - Model
+ * LTCBalances.js - Model
  */
 Ext.define('FW.model.LTCBalances', {
     extend: 'Ext.data.Model',

@@ -21,7 +21,7 @@ Ext.define('FW.view.LTCBalancesList', {
         itemTpl: new Ext.XTemplate(
             '<div class="fw-balanceslist-item">' +
                 '<div class="fw-balanceslist-icon">' +
-                    '<img src="https://xchain.io/icon/{[this.toUpper(values.asset)]}.png">' + 
+                    '<img src="ltc.png">' + 
                 '</div>' +
                 '<div class="fw-balanceslist-info">' +
                     '<div class="fw-balanceslist-currency">{display_name}</div>' +
@@ -98,6 +98,7 @@ Ext.define('FW.view.LTCBalancesList', {
         me.callParent();
         // Handle sorting currencies by type and name
         // We do this so we show currencies (BTC,XCP) before assets
+        console.log('about to getstore');
         me.getStore().sort([{
             property : 'type',
             direction: 'ASC'

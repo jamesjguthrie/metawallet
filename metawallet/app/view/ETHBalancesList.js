@@ -1,5 +1,5 @@
 ﻿/*
- * BalancesList.js - View
+ * ETHBalancesList.js - View
  * 
  * Display list of balances
  */
