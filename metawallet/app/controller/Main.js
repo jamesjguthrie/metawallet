@@ -18,8 +18,8 @@ Ext.define('FW.controller.Main', {
             wall = sm.getItem('wallet'),
             pass = sm.getItem('passcode');
         var ETHme = this,
-            ETHsm = localStorage,
-            ETHvp = Ext.ETHViewport,
+            //ETHsm = localStorage,
+            //ETHvp = Ext.ETHViewport,
             ETHwall = sm.getItem('ETHwallet'),
             ETHpass = sm.getItem('ETHpasscode');
 
@@ -1010,8 +1010,8 @@ Ext.define('FW.controller.Main', {
                 me.getLTCAddressHistory(address);
             }
             // Filter stores to only display info for this address
-            balances.filter('LTCprefix', prefix);
-            history.filter('LTCprefix', prefix);
+            balances.filter('prefix', prefix);
+            history.filter('prefix', prefix);
             // Handle updating any views which display the current address
             var view = Ext.getCmp('receiveView');
             if (view)
@@ -1233,7 +1233,19 @@ Ext.define('FW.controller.Main', {
             net = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
             hostA = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
             hostB = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111';
-        // Get Address balance from Insight API
+        await (fetch('https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD', {
+                //modes go here
+            }).then(function (response) {
+                //console.log(response);
+                return response.json();
+            }).then(function (data) {
+                //console.log(data);
+                price_usd = data.USD;
+                //console.log(price_usd);
+            }).catch(function () {
+                console.log("Check price does not work");
+            }));
+        // Get Address balance from blockcypher API
         APIurl = 'https://api.blockcypher.com/v1/btc/main/addrs/' + address;
         console.log(APIurl);
         await (fetch(APIurl, {
@@ -1244,10 +1256,8 @@ Ext.define('FW.controller.Main', {
         }).then(function (data) {
             console.log(data);
             var quantity = (data.balance) ? numeral(data.balance * 0.00000001).format('0.00000000') : '0.00000000',
-                price_usd = me.getCurrencyPrice('bitcoin', 'usd'),
                 values = {
-                    usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
-                    btc: '1.00000000',
+                    usd: numeral(parseFloat(price_usd * quantity)).format('0.00')
                 };
             me.updateAddressBalance(address, 1, 'BTC', '', quantity, values);
             console.log("BTC Address ", address);
@@ -1283,7 +1293,22 @@ Ext.define('FW.controller.Main', {
             net = (FW.LTCWALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
             hostA = (FW.LTCWALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
             hostB = (FW.LTCWALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111';
-        // Get Address balance from Insight API
+        await (fetch('https://min-api.cryptocompare.com/data/price?fsym=LTC&tsyms=USD', {
+                //modes go here
+            }).then(function (response) {
+                //console.log(response);
+                return response.json();
+            }).then(function (data) {
+                //console.log(data);
+                price_usd = data.USD;
+                //console.log(price_usd);
+            }).catch(function () {
+                console.log("Check price does not work");
+            }));
+            //price_usd = me.getCurrencyPrice('ethereum', 'usd'),
+            //price_eth = me.getCurrencyPrice('counterparty', 'eth'),
+            
+        // Get Address balance from blockcypher API
         APIurl = 'https://api.blockcypher.com/v1/ltc/main/addrs/' + address;
         console.log(APIurl);
         await (fetch(APIurl, {
@@ -1294,10 +1319,8 @@ Ext.define('FW.controller.Main', {
         }).then(function (data) {
             console.log(data);
             var quantity = (data.balance) ? numeral(data.balance * 0.00000001).format('0.00000000') : '0.00000000',
-                price_usd = 1; //me.getLTCCurrencyPrice('litecoin', 'usd'),
                 values = {
-                    usd: numeral(parseFloat(price_usd * quantity)).format('0.00000000'),
-                    ltc: '1.00000000',
+                    usd: numeral(parseFloat(price_usd * quantity)).format('0.00')
                 };
             me.updateLTCAddressBalance(address, 1, 'LTC', '', quantity, values);
             console.log("LTC Address ", address);

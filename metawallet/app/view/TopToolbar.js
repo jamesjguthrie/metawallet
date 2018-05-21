@@ -16,7 +16,7 @@ Ext.define('FW.view.TopToolbar', {
         height: 37,
         items:[{
             xtype: 'toolbar',
-            ui: 'dark',
+            ui: 'neutral',
             height: 37,
             defaults: {
                 xtype: 'button',

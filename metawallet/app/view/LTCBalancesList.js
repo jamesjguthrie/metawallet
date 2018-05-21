@@ -21,7 +21,7 @@ Ext.define('FW.view.LTCBalancesList', {
         itemTpl: new Ext.XTemplate(
             '<div class="fw-balanceslist-item">' +
                 '<div class="fw-balanceslist-icon">' +
-                    '<img src="ltc.png">' + 
+                    '<img src="https://xchain.io/icon/{[this.toUpper(values.asset)]}.png">' + 
                 '</div>' +
                 '<div class="fw-balanceslist-info">' +
                     '<div class="fw-balanceslist-currency">{display_name}</div>' +
