@@ -137,7 +137,7 @@ Ext.define('Ext.MessageBox', {
 
     platformConfig: [{
         theme: ['Windows'],
-        ui: 'light',
+        ui: 'neutral',
         showAnimation: {
             type: 'fadeIn'
         },

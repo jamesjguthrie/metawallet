@@ -21,7 +21,7 @@ Ext.define('Ext.scroll.indicator.Abstract', {
 
         hidden: true,
 
-        ui: 'dark',
+        ui: 'neutral',
 
         /**
          * @cfg {Boolean} [autoHide=true] Set to `false` to always show the indicator for this axis.

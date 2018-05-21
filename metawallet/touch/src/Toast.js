@@ -37,7 +37,7 @@ Ext.define('Ext.Toast', {
          * @cfg
          * @inheritdoc
          */
-        ui: 'dark',
+        ui: 'neutral',
 
         /**
          * @cfg

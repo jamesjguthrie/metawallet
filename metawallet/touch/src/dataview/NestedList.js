@@ -183,7 +183,7 @@ Ext.define('Ext.dataview.NestedList', {
         toolbar: {
             docked: 'top',
             xtype: 'titlebar',
-            ui: 'light',
+            ui: 'neutral',
             inline: true
         },
 
@@ -654,7 +654,7 @@ Ext.define('Ext.dataview.NestedList', {
             Ext.apply(config, {
                 docked: 'top',
                 xtype: 'titlebar',
-                ui: 'light'
+                ui: 'neutral'
             });
 
             var containerConfig = (config.splitNavigation === true) ? {} : config.splitNavigation;
@@ -663,7 +663,7 @@ Ext.define('Ext.dataview.NestedList', {
                 xtype: 'toolbar',
                 docked: 'bottom',
                 hidden: true,
-                ui: 'dark'
+                ui: 'neutral'
             }, containerConfig));
         }
 

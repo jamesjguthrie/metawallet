@@ -28,7 +28,7 @@ Ext.define('FW.view.QRCode', {
         },{
             docked: 'bottom',
             xtype: 'toolbar',
-            ui: 'light',
+            ui: 'neutral',
             defaults: {
                 xtype: 'button',
                 flex: 1

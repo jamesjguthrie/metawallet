@@ -80,7 +80,7 @@ Ext.define('FW.view.Callback', {
         },{
             docked: 'bottom',
             xtype: 'toolbar',
-            ui: 'light',
+            ui: 'neutral',
             defaults: {
                 xtype: 'button',
                 flex: 1

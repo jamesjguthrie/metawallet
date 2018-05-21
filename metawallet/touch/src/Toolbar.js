@@ -106,7 +106,7 @@ Ext.define('Ext.Toolbar', {
          * The ui for this {@link Ext.Toolbar}. Either 'light' or 'dark'. You can create more UIs by using using the CSS Mixin {@link #sencha-toolbar-ui}
          * @accessor
          */
-        ui: 'dark',
+        ui: 'neutral',
 
         /**
          * @cfg {String/Ext.Title} title

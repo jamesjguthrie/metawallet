@@ -49,7 +49,7 @@ Ext.define('FW.view.Passphrase', {
         },{
             docked: 'bottom',
             xtype: 'toolbar',
-            ui: 'light',
+            ui: 'neutral',
             defaults: {
                 xtype: 'button',
                 flex: 1

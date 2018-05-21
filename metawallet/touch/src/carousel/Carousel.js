@@ -130,7 +130,7 @@ Ext.define('Ext.carousel.Carousel', {
          * Style options for Carousel. Default is 'dark'. 'light' is also available.
          * @accessor
          */
-        ui: 'dark',
+        ui: 'neutral',
 
         itemConfig: {},
 

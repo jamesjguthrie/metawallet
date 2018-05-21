@@ -21,7 +21,7 @@ Ext.define('Ext.scroll.View', {
          * @cfg {String} indicatorsUi
          * The style of the indicators of this view. Available options are `dark` or `light`.
          */
-        indicatorsUi: 'dark',
+        indicatorsUi: 'neutral',
 
         element: null,
 

@@ -447,7 +447,7 @@ Ext.define('Ext.navigation.View', {
             this.$titleContainer = this.add({
                 docked: 'top',
                 xtype: 'titlebar',
-                ui: 'light',
+                ui: 'neutral',
                 title: this.$currentTitle || ''
             });
 

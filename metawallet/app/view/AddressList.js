@@ -74,7 +74,7 @@ Ext.define('FW.view.AddressList', {
             docked: 'top',
             xtype: 'toolbar',
             cls: 'tbe-search-toolbar',
-            ui: 'light',
+            ui: 'neutral',
             itemId: 'listSearch',
             items:[{
                 flex: 1,

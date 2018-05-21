@@ -69,7 +69,7 @@ Ext.define('Ext.tab.Panel', {
          * Available values are: `light` and `dark`.
          * @accessor
          */
-        ui: 'dark',
+        ui: 'neutral',
 
         /**
          * @cfg {Object} tabBar

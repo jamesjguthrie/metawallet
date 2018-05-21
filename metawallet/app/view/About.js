@@ -30,7 +30,7 @@
                 html:'<p align="justify">MetaWallet is a secure mobile and browser wallet which supports multiple coins and ERC20 tokens.</p>'
             },{
                 margin: '10 0 0 0',
-                html:'<p align="justify"><b>Send a donation to support FreeWallet hosting and development.</b></p>' + 
+                html:'<p align="justify"><b>Send a donation to support MetaWallet hosting and development.</b></p>' + 
                      '<p align="justify">FreeWallet is non-profit, self-funded, open source and community supported project. We appreciate any donations, and all donations go directly towards supporting future development.</p>'
             },{
                 xtype: 'button',

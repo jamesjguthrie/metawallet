@@ -33,7 +33,7 @@ Ext.define('Ext.navigation.Bar', {
          * Style options for Toolbar. Either 'light' or 'dark'.
          * @accessor
          */
-        ui: 'dark',
+        ui: 'neutral',
 
         /**
          * @cfg {String} title
