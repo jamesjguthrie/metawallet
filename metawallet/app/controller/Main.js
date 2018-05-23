@@ -56,14 +56,14 @@ Ext.define('FW.controller.Main', {
         // Define default server/host settings
         FW.SERVER_INFO = {
             mainnet: {
-                cpHost: '52.87.221.111',          // BTC Host
+                cpHost: '34.226.66.53',          // BTC Host
                 cpPort: 3001,                           // BTC Port
                 cpUser: 'metawallet',                   // BTC Username
                 cpPass: 'pass',                         // BTC Password
                 cpSSL: false                             // BTC SSL Enabled (true=https, false=http)
             },
             testnet: {
-                cpHost: '52.87.221.111',          // BTC Host
+                cpHost: '34.226.66.53',          // BTC Host
                 cpPort: 3001,                          // BTC Port
                 cpUser: 'metawallet',                          // BTC Username
                 cpPass: 'pass',                         // BTC Password
@@ -73,14 +73,14 @@ Ext.define('FW.controller.Main', {
 
         FW.LTCSERVER_INFO = {
             mainnet: {
-                cpHost: '34.230.76.175',          // LTC Host
+                cpHost: '18.233.55.147',          // LTC Host
                 cpPort: 3001,                           // LTC Port
                 cpUser: 'metawallet',                   // LTC Username
                 cpPass: 'pass',                         // LTC Password
                 cpSSL: false                             // LTC SSL Enabled (true=https, false=http)
             },
             testnet: {
-                cpHost: '34.230.76.175',          // LTC Host
+                cpHost: '18.233.55.147',          // LTC Host
                 cpPort: 3001,                          // LTC Port
                 cpUser: 'metawallet',                   // LTC Username
                 cpPass: 'pass',                         // LTC Password
@@ -90,14 +90,14 @@ Ext.define('FW.controller.Main', {
 
         FW.ETHSERVER_INFO = {
             ETHmainnet: {
-                cpHost: '52.87.221.111',                // ETH Host
+                cpHost: '34.226.66.53',                // ETH Host
                 cpPort: 8545,                           // ETH port
                 cpUser: 'rpc',                          // Username - not currently used Geth doesnt support
                 cpPass: '1234',                         // Password - as above
                 cpSSL: true                             // ETH node SSL Enabled (true=https, false=http)
             },
             ETHtestnet: {
-                cpHost: '52.87.221.111',                // ETH Host
+                cpHost: '34.226.66.53',                // ETH Host
                 cpPort: 8545,                           // ETH port
                 cpUser: 'rpc',                          // Username - not currently used Geth doesnt support
                 cpPass: '1234',                         // Password - as above
@@ -440,7 +440,7 @@ Ext.define('FW.controller.Main', {
             sm = localStorage,
             store = Ext.getStore('ETHAddresses');
 
-        web3 = new Web3("http://52.87.221.111:8545");
+        web3 = new Web3("http://18.233.55.147:8545");
 
         var ETH = web3.eth.accounts.create();
         ETHprivkey = ETH.privateKey; //basically global variable, probably very insecure, will our security implementations make it ok?
@@ -731,9 +731,10 @@ Ext.define('FW.controller.Main', {
             force = (force) ? true : false,
             net = bc.Networks[n],
             key = bc.HDPrivateKey.fromSeed(FW.WALLET_HEX, net);   // HD Private key object
-        count = (typeof count === 'number') ? count : 1,
+            count = (typeof count === 'number') ? count : 1,
             store = Ext.getStore('Addresses'),
             total = 0;
+        store.removeAll();
         // Remove any filters on the store so we are dealing with all the data
         // store.clearFilter();
         // Handle generating wallet addresses and adding them to the Addresses data store
@@ -1230,9 +1231,9 @@ Ext.define('FW.controller.Main', {
             addr = (address) ? address : FW.WALLET_ADDRESS.address,
             prefix = addr.substr(0, 5),
             store = Ext.getStore('Balances'),
-            net = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
-            hostA = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
-            hostB = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111';
+            net = (FW.WALLET_NETWORK == 2) ? '34.226.66.53' : '34.226.66.53',
+            hostA = (FW.WALLET_NETWORK == 2) ? '34.226.66.53' : '34.226.66.53',
+            hostB = (FW.WALLET_NETWORK == 2) ? '34.226.66.53' : '34.226.66.53';
         await (fetch('https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD', {
                 //modes go here
             }).then(function (response) {
@@ -1290,9 +1291,9 @@ Ext.define('FW.controller.Main', {
             addr = (address) ? address : FW.LTCWALLET_ADDRESS.address,
             prefix = addr.substr(0, 5),
             store = Ext.getStore('LTCBalances'),
-            net = (FW.LTCWALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
-            hostA = (FW.LTCWALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
-            hostB = (FW.LTCWALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111';
+            net = (FW.LTCWALLET_NETWORK == 2) ? '34.226.66.53' : '34.226.66.53',
+            hostA = (FW.LTCWALLET_NETWORK == 2) ? '34.226.66.53' : '34.226.66.53',
+            hostB = (FW.LTCWALLET_NETWORK == 2) ? '34.226.66.53' : '34.226.66.53';
         await (fetch('https://min-api.cryptocompare.com/data/price?fsym=LTC&tsyms=USD', {
                 //modes go here
             }).then(function (response) {
@@ -1347,7 +1348,6 @@ Ext.define('FW.controller.Main', {
     },
 
     callWeb3GetBalance: async function (address) {
-        //var web3 = new Web3("http://52.87.221.111:8545");
         var balance = await (web3.eth.getBalance(address));
         return web3.utils.fromWei(balance, 'ether');
     },
@@ -1735,13 +1735,13 @@ Ext.define('FW.controller.Main', {
     // Handle getting Bitcoin transaction history
     getTransactionHistory: function (address, callback) {
         var me = this,
-            net = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
-            hostA = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
-            hostB = (FW.WALLET_NETWORK == 2) ? '52.87.221.111' : '52.87.221.111',
+            net = (FW.WALLET_NETWORK == 2) ? '34.226.66.53' : '34.226.66.53',
+            hostA = (FW.WALLET_NETWORK == 2) ? '34.226.66.53' : '34.226.66.53',
+            hostB = (FW.WALLET_NETWORK == 2) ? '34.226.66.53' : '34.226.66.53',
             types = ['bets', 'broadcasts', 'burns', 'dividends', 'issuances', 'orders', 'sends', 'mempool'];
 
         me.ajaxRequest({ //recoded now test 13-april
-            url: 'http://52.87.221.111:3001/insight-api/addr/' + address,
+            url: 'http://34.226.66.53:3001/insight-api/addr/' + address,
             headers: {
 
             },
@@ -2371,7 +2371,7 @@ Ext.define('FW.controller.Main', {
     broadcastTransaction: function (network, tx, callback) {
         var me = this,
             net = (network == 2) ? 'BTCTEST' : 'BTC';
-        host = (FW.WALLET_NETWORK == 2) ? '52.87.221.111:3001' : '52.87.221.111:3001',
+        host = (FW.WALLET_NETWORK == 2) ? '34.226.66.53:3001' : '34.226.66.53:3001',
             // First try to broadcast using the Insight API
             me.ajaxRequest({ //recoded now test 13-april
                 url: 'http://' + host + '/insight-api/tx/send',
@@ -2398,7 +2398,6 @@ Ext.define('FW.controller.Main', {
 
     broadcastETHTransaction: function (network, tx, callback) {
         var me = this;
-        //var web3 = new Web3("http://52.87.221.111:8545");
         web3.eth.sendTransaction({ data: tx }, function (err, transactionHash) {
             if (!err)
                 console.log(transactionHash);
@@ -2411,7 +2410,7 @@ Ext.define('FW.controller.Main', {
         var me = this,
             sm = localStorage;
         me.ajaxRequest({
-            url: 'http://52.87.221.111:3001/insight-api/status',
+            url: 'http://34.226.66.53:3001/insight-api/status',
             method: 'GET',
             headers: {
                 'Access-Control-Allow-Origin': '*'
@@ -2466,18 +2465,30 @@ Ext.define('FW.controller.Main', {
 
 
     // Handle generating a send transaction
-    cpSend: function (network, source, destination, currency, amount, fee, callback) {
+    cpSend: async function (network, source, destination, currency, amount, fee, callback) {
         console.log('cpSend network, source, destination, currency, amount, fee=', network, source, destination, currency, amount, fee);
         var me = this,
             cb = (typeof callback === 'function') ? callback : false;
         // Handle creating the transaction
+        APIurl = 'https://api.blockcypher.com/v1/btc/main/addrs/' + source;
+        console.log(APIurl);
+        await (fetch(APIurl, {
+            //modes go here
+        }).then(function (response) {
+            console.log(response);
+            return response.json();
+        }).then(function (data) {
+            console.log(data);
+            var utxotxid = data.txs[0].hash;
+        }));
 
         var utxo = new bitcore.Transaction.UnspentOutput({
-            "txid": "73da3f388acaab54f277fbb4e2da37bdaadde3e95598fbf98da0d8d20c22f96c", //need to pull this from the API based on first transaction received into the address 14-april
+            "txid": utxotxid, //need to pull this from the API based on first transaction received into the address 14-april
             "outputIndex": 1,
             "address": source,
             "script": new bitcore.Script.buildPublicKeyHashOut(source).toHex(),
-            "satoshis": amount
+            "satoshis": amount,
+            "change": source
         });
 
         me.signTransaction(network, source, destination, utxo, amount, function (signedTx) {

@@ -1,2 +1,4 @@
 metawallet/.vscode/tasks.json
 metawallet/build/
+*.log
+metawallet/build/production/FW/app.js

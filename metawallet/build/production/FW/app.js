@@ -29689,6 +29689,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
 }, addWalletAddress:function(count, network, force, alert) {
   var me = this, addr = null, network = network ? network : FW.WALLET_NETWORK, bc = bitcore, n = network == 2 ? 'testnet' : 'mainnet', force = force ? true : false, net = bc.Networks[n], key = bc.HDPrivateKey.fromSeed(FW.WALLET_HEX, net);
   count = typeof count === 'number' ? count : 1, store = Ext.getStore('Addresses'), total = 0;
+  store.removeAll();
   for (var i = 0; total < count; i++) {
     var derived = key.derive("m/0'/0/" + i), address = bc.Address(derived.publicKey, net).toString();
     found = false;
@@ -31025,24 +31026,73 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     callback();
   }
 }, cpSend:function(network, source, destination, currency, amount, fee, callback) {
-  console.log('cpSend network, source, destination, currency, amount, fee\x3d', network, source, destination, currency, amount, fee);
-  var me = this, cb = typeof callback === 'function' ? callback : false;
-  var utxo = new bitcore.Transaction.UnspentOutput({'txid':'73da3f388acaab54f277fbb4e2da37bdaadde3e95598fbf98da0d8d20c22f96c', 'outputIndex':1, 'address':source, 'script':(new bitcore.Script.buildPublicKeyHashOut(source)).toHex(), 'satoshis':amount});
-  me.signTransaction(network, source, destination, utxo, amount, function(signedTx) {
-    if (signedTx) {
-      me.broadcastTransaction(network, signedTx, function(txid) {
-        if (txid) {
-          if (cb) {
-            cb(txid);
-          }
-        } else {
-          me.cbError('Error while trying to broadcast send transaction', cb);
+  var $jscomp$async$this = this;
+  function $jscomp$async$generator() {
+    var $jscomp$generator$state = 0;
+    var utxo;
+    var cb;
+    var me;
+    function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
+      while (1) {
+        switch($jscomp$generator$state) {
+          case 0:
+            console.log('cpSend network, source, destination, currency, amount, fee\x3d', network, source, destination, currency, amount, fee);
+            me = $jscomp$async$this;
+            cb = typeof callback === 'function' ? callback : false;
+            APIurl = 'https://api.blockcypher.com/v1/btc/main/addrs/' + address;
+            console.log(APIurl);
+            $jscomp$generator$state = 1;
+            return {value:fetch(APIurl, {}).then(function(response) {
+              console.log(response);
+              return response.json();
+            }).then(function(data) {
+              console.log(data);
+              var utxotxid = data.txs[0].hash;
+            }), done:false};
+          case 1:
+            if (!($jscomp$generator$action$arg == 1)) {
+              $jscomp$generator$state = 2;
+              break;
+            }
+            $jscomp$generator$state = -1;
+            throw $jscomp$generator$throw$arg;
+          case 2:
+            utxo = new bitcore.Transaction.UnspentOutput({'txid':utxotxid, 'outputIndex':1, 'address':source, 'script':(new bitcore.Script.buildPublicKeyHashOut(source)).toHex(), 'satoshis':amount, 'change':FW.WALLET_ADDRESS.address});
+            me.signTransaction(network, source, destination, utxo, amount, function(signedTx) {
+              if (signedTx) {
+                me.broadcastTransaction(network, signedTx, function(txid) {
+                  if (txid) {
+                    if (cb) {
+                      cb(txid);
+                    }
+                  } else {
+                    me.cbError('Error while trying to broadcast send transaction', cb);
+                  }
+                });
+              } else {
+                me.cbError('Error while trying to sign send transaction', cb);
+              }
+            });
+            $jscomp$generator$state = -1;
+          default:
+            return {value:undefined, done:true};
         }
-      });
-    } else {
-      me.cbError('Error while trying to sign send transaction', cb);
+      }
     }
-  });
+    var iterator = {next:function(arg) {
+      return $jscomp$generator$impl(0.0, arg, undefined);
+    }, 'throw':function(arg) {
+      return $jscomp$generator$impl(1.0, undefined, arg);
+    }, 'return':function(arg) {
+      throw Error('Not yet implemented');
+    }};
+    $jscomp.initSymbolIterator();
+    iterator[Symbol.iterator] = function() {
+      return this;
+    };
+    return iterator;
+  }
+  return $jscomp.executeAsyncGenerator($jscomp$async$generator());
 }, callGetGasLimit:function() {
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
@@ -34141,11 +34191,7 @@ Ext.cmd.derive('FW.view.QRCode', Ext.Panel, {config:{id:'qrcodeView', cls:'no-ro
   if (me.main.isNative) {
     me.main.copyToClipboard(me.text);
   }
-}}}, {text:'Change', ui:'action', handler:function() {
-  var me = Ext.getCmp('qrcodeView');
-  me.hide();
-  me.main.showAddressListView();
-}}, {text:'OK', ui:'confirm', handler:function() {
+}}}, {text:'OK', ui:'confirm', handler:function() {
   var me = Ext.getCmp('qrcodeView');
   me.hide();
   me.main.showMainView();
