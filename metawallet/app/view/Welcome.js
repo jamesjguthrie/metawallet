@@ -23,10 +23,6 @@ Ext.define('FW.view.Welcome', {
                 margin: '10 0 10 0'
             },{
                 xtype: 'container',
-                margin: '10 0 10 0',
-                html:'<p align="justify">Please click a button below to indicate if you would like to generate a new wallet, or use an existing wallet passphrase.'
-            },{
-                xtype: 'container',
                 layout: 'vbox',
                 defaults: {
                     xtype: 'button',
@@ -48,10 +44,6 @@ Ext.define('FW.view.Welcome', {
                         Ext.getCmp('welcomeView').existingWallet();
                     }
                 }]
-            },{
-                xtype: 'container',
-                margin: '10 0 10 0',
-                html:'<p align="justify">You should only have to complete this wallet setup process once, after which your wallet is encrypted and saved to your device or browser.</p>'
             },{
                 xtype: 'container',
                 margin: '10 0 10 0',
