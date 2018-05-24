@@ -59,15 +59,6 @@ Ext.define('FW.view.QRCode', {
                     }
                 }
             },{
-                text: 'Change',
-                // iconCls: 'fa fa-edit margin-bottom-4',
-                ui: 'action',
-                handler: function(){
-                    var me = Ext.getCmp('qrcodeView');
-                    me.hide();
-                    me.main.showAddressListView();
-                }
-            },{
                 text: 'OK',
                 // iconCls: 'fa fa-thumbs-up margin-bottom-4',
                 ui: 'confirm',
