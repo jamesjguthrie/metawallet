@@ -20,25 +20,26 @@ Ext.define('FW.view.Welcome', {
                 docked: 'top',
                 src: 'resources/images/logo.png',
                 height: '160px',
-                margin: '10 0 10 0'
             },{
                 xtype: 'container',
-                layout: 'vbox',
+                layout: { 
+                    type: 'hbox',
+                    pack: 'center'
+                },
                 defaults: {
                     xtype: 'button',
-                        height: 100,
-                        margin: '10 10 10 10'
+                    height: 50,
                 },
                 items:[{
-                    iconCls: 'fa fa-spinner',
-                    text: 'New Wallet',
+                    margin: '50 50 50 400',
+                    text: 'Create New Wallet',
                     ui: 'confirm',
                     handler: function(btn){
                         Ext.getCmp('welcomeView').createWallet();
                     }
                 },{
-                    iconCls: 'fa fa-keyboard-o margin-bottom-4',
-                    text: 'Existing Wallet',
+                    margin: '50 400 50 50',
+                    text: 'Use Existing Wallet',
                     ui: 'action',
                     handler: function(btn){
                         Ext.getCmp('welcomeView').existingWallet();
