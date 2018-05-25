@@ -14,7 +14,7 @@ Ext.define('FW.view.Welcome', {
         cls: 'fw-welcomepanel',
         items:[{
             xtype: 'container',
-            margin: '0 5 0 5',
+            margin: '100 5 0 5',
             items:[{
                 xtype: 'image',
                 docked: 'top',
