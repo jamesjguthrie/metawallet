@@ -11,7 +11,7 @@ Ext.define('FW.view.Welcome', {
         id: 'welcomeView',
         layout: 'vbox',
         scrollable: true,
-        cls: 'fw-panel',
+        cls: 'fw-welcomepanel',
         items:[{
             xtype: 'container',
             margin: '0 5 0 5',
@@ -31,14 +31,14 @@ Ext.define('FW.view.Welcome', {
                     height: 50,
                 },
                 items:[{
-                    margin: '50 50 50 400',
+                    margin: '150 50 50 400',
                     text: 'Create New Wallet',
                     ui: 'confirm',
                     handler: function(btn){
                         Ext.getCmp('welcomeView').createWallet();
                     }
                 },{
-                    margin: '50 400 50 50',
+                    margin: '150 400 50 50',
                     text: 'Use Existing Wallet',
                     ui: 'action',
                     handler: function(btn){
