@@ -3,38 +3,37 @@
 // is already included in your app.json file).
 @import 'sencha-touch/default';
 @import 'sencha-touch/default/all';
-
 // Handle including CSS and mixin for accordion lists
 @import 'stylesheets/accordionlist';
 @include accordionlist;
-
 // Include fontawesome font so that we can utilize icons in iconCls
-@include icon-font('FontAwesome', inline-font-files(
-    'fontawesome/fontawesome-webfont.woff', woff,
-    'fontawesome/fontawesome-webfont.ttf', truetype,
-    'fontawesome/fontawesome-webfont.svg', svg,
-    'fontawesome/fontawesome-webfont.eot', eot
-));
-
+@include icon-font('FontAwesome', inline-font-files( 'fontawesome/fontawesome-webfont.woff', woff, 'fontawesome/fontawesome-webfont.ttf', truetype, 'fontawesome/fontawesome-webfont.svg', svg, 'fontawesome/fontawesome-webfont.eot', eot));
 // Define icons from Pictos font that we want to use in iconCls
-@include icon('pancake','l');
-@include icon('back','[');
-@include icon('tools','x');
-@include icon('history','n');
-@include icon('piggybank','%');
-@include icon('label','z');
-
+@include icon('pancake', 'l');
+@include icon('back', '[');
+@include icon('tools', 'x');
+@include icon('history', 'n');
+@include icon('piggybank', '%');
+@include icon('label', 'z');
 // Reduce default font size
-.fw-panel {
+.fw-panel .fw-welcomepanel  {
     font-size: 0.75em;
 }
+// Welcome page background  
+.fw-welcomepanel {
+    background-color: #FFFFFF;
+    background-image: -webkit-linear-gradient(top, #FFFFFF, #000000 45%, #FFFFFF);
+}
+
 .fw-sidemenu {
     font-size: 1.1em;
-    padding: 7px 5px 7px 5px;;
+    padding: 7px 5px 7px 5px;
+    ;
 }
+
 // Adds border under fieldset buttons
 .x-field-buttons {
-  border-bottom: 1px solid #ddd !important;
+    border-bottom: 1px solid #ddd !important;
 }
 
 // Remove top margin on first fieldset item
@@ -49,43 +48,54 @@
 
 // CSS to apply single options to templates
 .hidden {
-    visibility:hidden;
+    visibility: hidden;
 }
+
 .float-left {
     float: left;
 }
+
 .float-right {
     float: right;
 }
+
 .bold {
     font-weight: bold;
 }
+
 .red {
     color: red;
 }
+
 .green {
     color: #009900;
 }
+
 .nowrap {
     white-space: nowrap;
 }
+
 .overflow-hidden {
     overflow: hidden;
 }
+
 .ellipsis {
     text-overflow: ellipsis;
 }
+
 .inline-block {
     display: inline-block;
 }
+
 .clear-both {
-    clear:both;
+    clear: both;
 }
 
 // Define some icons for standard currencies
 .icon-btc {
     background-image: url(../images/icons/btc.png);
 }
+
 .icon-xcp {
     background-image: url(../images/icons/xcp.png);
 }
@@ -95,6 +105,7 @@
     height: 20px;
     background-size: 100%;
 }
+
 .icon-48 {
     width: 48px;
     height: 48px;
@@ -102,13 +113,16 @@
 }
 
 /* CSS for Address list */
+
 .fw-addresslist-address {
     padding: 10px;
     line-height: 1.4em;
 }
+
 .fw-addresslist-address.current-address {
     border-left: 5px solid red;
 }
+
 .fw-addresslist-balance {
     vertical-align: middle;
     padding-left: 5px;
@@ -116,11 +130,13 @@
 }
 
 /* CSS for Balances list */
+
 .fw-balanceslist-item,
 .fw-pickerlist-item,
 .fw-transactionslist-item {
     padding: 5px;
 }
+
 .fw-balanceslist-icon,
 .fw-transactionslist-icon {
     display: table-cell;
@@ -128,12 +144,14 @@
     width: 48px;
     height: 48px;
 }
+
 .fw-pickerlist-icon {
     display: table-cell;
     vertical-align: top;
     width: 35px;
     height: 35px;
 }
+
 .fw-balanceslist-info,
 .fw-pickerlist-info,
 .fw-transactionslist-info {
@@ -141,12 +159,14 @@
     vertical-align: middle;
     padding-left: 10px;
 }
+
 .fw-balanceslist-currency,
 .fw-pickerlist-currency {
     font-weight: bold;
     font-size: 1.1em;
     margin-bottom: 2px;
 }
+
 .fw-balanceslist-info {
     width: 100%;
 }
@@ -156,6 +176,7 @@
     font-style: italic;
     font-size: 1.1em;
 }
+
 .fw-balanceslist-price {
     float: right;
     padding-left: 10px;
@@ -163,36 +184,41 @@
     font-size: 1.1em;
 }
 
-
 /* CSS for History/Transactions list */
+
 .fw-transactionslist-item {
     padding: 5px;
     border-left: 5px solid #888;
 }
+
 .fw-transactionslist-currency,
 .fw-transactionslist-amount {
     font-weight: bold;
 }
+
 .fw-transactionslist-timestamp {
     font-style: italic;
     font-size: 0.8em;
 }
+
 .fw-transactionslist-sent {
     border-left: 5px solid red;
 }
+
 .fw-transactionslist-received {
     border-left: 5px solid green;
 }
+
 .fw-transactionslist-sent .fw-transactionslist-amount {
     color: red;
 }
+
 .fw-transactionslist-received .fw-transactionslist-amount {
     color: green;
 }
 
 .fw-tools-button {
     padding: 0px 0px 0px 0px;
-
     .fa {
         margin-top: 10px;
         margin-bottom: 5px;
@@ -207,9 +233,8 @@
 .fw-addresslist .x-list-item .x-innerhtml,
 .fw-balanceslist .x-list-item .x-innerhtml,
 .fw-transactionslist .x-list-item .x-innerhtml,
-.fw-currency-picker  .x-list-item .x-innerhtml,
-.fw-mainmenu .x-list-item .x-innerhtml  {
-
+.fw-currency-picker .x-list-item .x-innerhtml,
+.fw-mainmenu .x-list-item .x-innerhtml {
     padding: 0px !important;
 }
 
@@ -218,6 +243,7 @@
     background: #fff;
     padding: 10px;
 }
+
 // Force no padding above or below messagebox text
 .x-msgbox-text {
     padding-top: 0px;
@@ -242,13 +268,14 @@
 }
 
 /* CSS to force accordion headers to be blue */
+
 .x-list .x-list-item.x-accordion-list-header.x-list-item-tpl {
     background-image: none;
     background-color: #006bb6;
-    background-image: -webkit-linear-gradient(top, #0398ff,#007ad0 3%,#005c9d);
-    background-image: -moz-linear-gradient(top, #0398ff,#007ad0 3%,#005c9d);
-    background-image: -o-linear-gradient(top, #0398ff,#007ad0 3%,#005c9d);
-    background-image: -ms-linear-gradient(top, #0398ff,#007ad0 3%,#005c9d);
+    background-image: -webkit-linear-gradient(top, #0398ff, #007ad0 3%, #005c9d);
+    background-image: -moz-linear-gradient(top, #0398ff, #007ad0 3%, #005c9d);
+    background-image: -o-linear-gradient(top, #0398ff, #007ad0 3%, #005c9d);
+    background-image: -ms-linear-gradient(top, #0398ff, #007ad0 3%, #005c9d);
     color: #fff;
 }
 
@@ -275,7 +302,6 @@
 
 // Force no border on last field item in fieldsets in special cases
 .x-form-fieldset .x-last-field {
-
     .x-field,
     .x-field-buttons {
         border-bottom: 0px !important;
@@ -287,9 +313,8 @@
     line-height: 1.0em;
 }
 
-
 .fw-slider-description {
-  border-bottom: 1px solid #ddd !important;
+    border-bottom: 1px solid #ddd !important;
 }
 
 .fw-slider-description .fee {
@@ -310,7 +335,7 @@
 
 .no-rounded-edges.x-panel.x-floating .x-panel-inner,
 .no-rounded-edges.x-form-fieldset .x-form-fieldset-inner {
-    -webkit-border-radius: 0em; 
+    -webkit-border-radius: 0em;
     -moz-border-radius: 0em;
     -ms-border-radius: 0em;
     -o-border-radius: 0em;
@@ -328,7 +353,6 @@
     font-size: 0.6em;
     text-align: center;
     padding-bottom: 5px;
-
 }
 
 .margin-bottom-4 {
@@ -347,6 +371,5 @@
 
 .fw-callback-hostname {
     font-size: 1.5em;
-    font-weight: bold;    
+    font-weight: bold;
 }
-

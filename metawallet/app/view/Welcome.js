@@ -11,47 +11,40 @@ Ext.define('FW.view.Welcome', {
         id: 'welcomeView',
         layout: 'vbox',
         scrollable: true,
-        cls: 'fw-panel',
+        cls: 'fw-welcomepanel',
         items:[{
             xtype: 'container',
-            margin: '0 5 0 5',
+            margin: '100 5 0 5',
             items:[{
                 xtype: 'image',
                 docked: 'top',
                 src: 'resources/images/logo.png',
                 height: '160px',
-                margin: '10 0 10 0'
             },{
                 xtype: 'container',
-                margin: '10 0 10 0',
-                html:'<p align="justify">Please click a button below to indicate if you would like to generate a new wallet, or use an existing wallet passphrase.'
-            },{
-                xtype: 'container',
-                layout: 'vbox',
+                layout: { 
+                    type: 'hbox',
+                    pack: 'center'
+                },
                 defaults: {
                     xtype: 'button',
-                        height: 100,
-                        margin: '10 10 10 10'
+                    height: 50,
                 },
                 items:[{
-                    iconCls: 'fa fa-spinner',
-                    text: 'New Wallet',
+                    margin: '150 50 50 400',
+                    text: 'Create New Wallet',
                     ui: 'confirm',
                     handler: function(btn){
                         Ext.getCmp('welcomeView').createWallet();
                     }
                 },{
-                    iconCls: 'fa fa-keyboard-o margin-bottom-4',
-                    text: 'Existing Wallet',
+                    margin: '150 400 50 50',
+                    text: 'Use Existing Wallet',
                     ui: 'action',
                     handler: function(btn){
                         Ext.getCmp('welcomeView').existingWallet();
                     }
                 }]
-            },{
-                xtype: 'container',
-                margin: '10 0 10 0',
-                html:'<p align="justify">You should only have to complete this wallet setup process once, after which your wallet is encrypted and saved to your device or browser.</p>'
             },{
                 xtype: 'container',
                 margin: '10 0 10 0',
