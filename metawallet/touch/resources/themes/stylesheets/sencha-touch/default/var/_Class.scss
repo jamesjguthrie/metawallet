@@ -82,13 +82,13 @@ $alert-color: red !default;
  * @var {color} $confirm-color
  * Color used for elements like success messages, and "confirm" UIs (eg. on buttons).
  */
-$confirm-color: #92cf00 !default; // Green
+$confirm-color:rgba(0, 0, 0, 0) !default; // Green
 
 /**
  * @var {color} $active-color
  * Color used for elements like selected rows, "action" UIs (eg. on buttons) and certain overlays like the picker mask.
  */
-$active-color: darken(saturate($base-color, 55%), 10%) !default;
+$active-color: rgba(0, 0, 0, 0) !default;
 
 /**
  * @var {color} $neutral-color
