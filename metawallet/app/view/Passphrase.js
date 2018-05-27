@@ -20,7 +20,7 @@ Ext.define('FW.view.Passphrase', {
             docked: 'top',
             cls: 'fw-panel',
             xtype: 'toolbar',
-            title: 'Your Wallet Passphrase is'
+            title: 'Your Wallet Passphrase'
         },{
             // styleHtmlContent: true,
             xtype: 'container',
@@ -52,13 +52,11 @@ Ext.define('FW.view.Passphrase', {
             ui: 'neutral',
             defaults: {
                 xtype: 'button',
+                style: 'border: 1px solid black',
                 flex: 1
             },
             items:[{
                 text: 'Copy',
-                iconCls: 'fa fa-copy margin-bottom-4',
-                ui: 'action',
-                cls: 'x-copy-button',
                 listeners: {
                     // Setup listener on copy button element to copy text to clipboard
                     painted: function(cmp){
@@ -80,8 +78,6 @@ Ext.define('FW.view.Passphrase', {
                 }
             },{
                 text: 'OK',
-                iconCls: 'fa fa-thumbs-up margin-bottom-4',
-                ui: 'confirm',
                 handler: function(){
                     var me = Ext.getCmp('passphraseView');
                     me.hide();

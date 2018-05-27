@@ -10,7 +10,6 @@ Ext.define('FW.view.Welcome', {
     config: {
         id: 'welcomeView',
         layout: 'vbox',
-        scrollable: true,
         cls: 'fw-welcomepanel',
         items:[{
             xtype: 'container',
@@ -29,6 +28,7 @@ Ext.define('FW.view.Welcome', {
                 defaults: {
                     xtype: 'button',
                     height: 50,
+                    style: 'border: 1px solid white',
                 },
                 items:[{
                     margin: '150 50 50 400',
