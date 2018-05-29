@@ -1558,10 +1558,14 @@ Ext.define('FW.controller.Main', {
             message: 'Please enter your<br/>12-word passphrase',
             multiLine: true,
             buttons: Ext.MessageBox.OKCANCEL,
+            style: {
+                border: '3px solid white',
+                color: 'white'
+            },
             prompt: {
                 cls: 'fw-panel',
                 xtype: 'textareafield',
-                placeholder: 'Enter Wallet Passphrase'
+                placeholder: 'Enter Wallet Passphrase',
             },
             fn: function (btn, val) {
                 // Handle validating that the entered value is a valid passphrase

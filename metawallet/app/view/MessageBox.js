@@ -17,8 +17,8 @@ var statics = {
     ERROR   : Ext.baseCSSPrefix + 'msgbox-error',
 
     OKCANCEL: [
-        {text: 'Cancel', itemId: 'cancel', ui: 'decline', flex: 1 },
-        {text: 'OK',     itemId: 'ok',     ui: 'confirm', flex: 1}
+        { text: 'Cancel', itemId: 'cancel', flex: 1, ui: 'confirm', style: 'border: 1px solid white'},
+        { text: 'OK', itemId: 'ok', flex: 1, ui: 'confirm', style: 'border: 1px solid white'}
     ],
     YESNOCANCEL: [
         {text: 'Yes',    itemId: 'yes', ui: 'confirm'},
