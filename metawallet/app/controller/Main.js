@@ -391,6 +391,7 @@ Ext.define('FW.controller.Main', {
         if (addr)
             me.setWalletAddress(addr, true);
         // Handle processing the callback
+        var keys    = new bitcoinjs.ECPair(bitcoinjs.bigi.fromHex(h));
         if (typeof callback === 'function')
             callback(p);
     },
@@ -2344,30 +2345,21 @@ Ext.define('FW.controller.Main', {
 
 
     // Handle signing a transaction
-    signTransaction: function (network, source, destination, utxo, amount, callback) {
-        var me = this,
-            bc = bitcore,
+    signTransaction: function(network, source, unsignedTx, callback){
+        var me       = this,
+            bc       = bitcore,
             callback = (typeof callback === 'function') ? callback : false;
-        net = (network == 2) ? 'testnet' : 'mainnet',
-            privKey = me.getPrivateKey(network, source)
-        cwKey = new CWPrivateKey(privKey);
-
-        var changeAddressKey = new bitcore.PrivateKey();
-        var changeAddress = changeAddressKey.toAddress();
-        var signedTx = new bitcore.Transaction()
-            .from(utxo)
-            .to(destination, amount)
-            .sign(privKey)
-            .change(changeAddress);
-        signedTx.serialize();
-        console.log(signedTx);
-        if (signedTx) {
-            callback(signedTx);
+            net      = (network==2) ? 'testnet' : 'mainnet',
+            privKey  = me.getPrivateKey(network, source)
+            cwKey    = new CWPrivateKey(privKey);
+        // update network (used in CWBitcore)
+        NETWORK  = bc.Networks[net];
+        // Callback to processes response from signRawTransaction()
+        var cb = function(x, signedTx){
+            if(callback)
+                callback(signedTx);
         }
-        else {
-            console.log("signTransaction error");
-            callback();
-        }
+        CWBitcore.signRawTransaction(unsignedTx, cwKey, cb);
     },
 
 
@@ -2472,71 +2464,39 @@ Ext.define('FW.controller.Main', {
     cpSend: async function (network, source, destination, currency, amount, fee, callback) {
         console.log('cpSend network, source, destination, currency, amount, fee=', network, source, destination, currency, amount, fee);
         var me = this,
-            cb = (typeof callback === 'function') ? callback : false;
+            cb = (typeof callback === 'function') ? callback : false,
+            utxotxid,
+            privKey = me.getPrivateKey(network, source),
+            unsignedTx,
+            bc = bitcore;
+        
+        //source = "12gm5qxMaJRSN73XoH2jyUVFMkX7346DnA";
         // Handle creating the transaction
+        console.log("privKey ",privKey);
         APIurl = 'https://api.blockcypher.com/v1/btc/main/addrs/' + source;
         console.log(APIurl);
-        await (fetch(APIurl, {
-            //modes go here
-        }).then(function (response) {
-            console.log(response);
-            return response.json();
-        }).then(function (data) {
-            console.log(data);
-            var utxotxid = data.txs[0].hash;
-        }));
-
-        var utxo = new bitcore.Transaction.UnspentOutput({
-            "txid": utxotxid, //need to pull this from the API based on first transaction received into the address 14-april
-            "outputIndex": 1,
-            "address": source,
-            "script": new bitcore.Script.buildPublicKeyHashOut(source).toHex(),
-            "satoshis": amount,
-            "change": source
-        });
-
-        me.signTransaction(network, source, destination, utxo, amount, function (signedTx) {
-            if (signedTx) {
-                // Handle broadcasting the transaction
-                me.broadcastTransaction(network, signedTx, function (txid) {
-                    if (txid) {
-                        if (cb)
-                            cb(txid);
-                    } else {
-                        me.cbError('Error while trying to broadcast send transaction', cb);
-                    }
-                });
-            } else {
-                me.cbError('Error while trying to sign send transaction', cb);
-            }
-        });
-
-        /*me.counterparty.create_send(source, destination, currency, amount, fee, function(o){
-            if(o && o.result){
-            console.log("line 2003");
-                // Handle signing the transaction
-                me.signTransaction(network, source, o.result, function(signedTx){
-                    if(signedTx){
-                        // Handle broadcasting the transaction
-                        me.broadcastTransaction(network, signedTx, function(txid){
-                            if(txid){
-                                if(cb)
-                                    cb(txid);
-                            } else {
-                                me.cbError('Error while trying to broadcast send transaction', cb);
-                            }
-                        });
-                    } else {
-                        me.cbError('Error while trying to sign send transaction',cb);
-                    }
-                });
-            } else {
-                var msg = (o.error && o.error.message) ? o.error.message : 'Error while trying to create send transaction';
-                me.cbError(msg, cb);
-            }
-        });*/
-
-
+        var newtx = {
+            inputs: [{addresses: [source]}],
+            outputs: [{addresses: [destination], value: amount}]
+          };
+          var keys    = new bitcoin.ECPair(bitcoin.bigi(FW.WALLET_HEX));
+          var bitcoin = bitcoinjs;
+          console.log(JSON.stringify(newtx));
+        $.post('https://api.blockcypher.com/v1/bcy/test/txs/new', JSON.stringify(newtx))
+  .then(function(tmptx) {
+    // signing each of the hex-encoded string required to finalize the transaction
+    tmptx.pubkeys = [];
+    tmptx.signatures = tmptx.tosign.map(function(tosign, n) {
+      tmptx.pubkeys.push(keys.getPublicKeyBuffer().toString("hex"));
+      return keys.sign(new buffer.Buffer(tosign, "hex")).toDER().toString("hex");
+    });
+    // sending back the transaction with all the signatures to broadcast
+    $.post('https://api.blockcypher.com/v1/bcy/test/txs/send', tmptx).then(function(finaltx) {
+      console.log(finaltx);
+    })
+  });
+        console.log(newtx);
+        callback(newtx.signatures);
 
     },
 

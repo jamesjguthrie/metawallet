@@ -29315,9 +29315,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   FW.LTCWALLET_PREFIX = sm.getItem('LTCprefix') || null;
   FW.LTCWALLET_ADDRESS = sm.getItem('LTCaddress') || null;
   FW.LTCNETWORK_INFO = {};
-  FW.SERVER_INFO = {mainnet:{cpHost:'52.87.221.111', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}, testnet:{cpHost:'52.87.221.111', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}};
-  FW.LTCSERVER_INFO = {mainnet:{cpHost:'34.230.76.175', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}, testnet:{cpHost:'34.230.76.175', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}};
-  FW.ETHSERVER_INFO = {ETHmainnet:{cpHost:'52.87.221.111', cpPort:8545, cpUser:'rpc', cpPass:'1234', cpSSL:true}, ETHtestnet:{cpHost:'52.87.221.111', cpPort:8545, cpUser:'rpc', cpPass:'1234', cpSSL:true}};
+  FW.SERVER_INFO = {mainnet:{cpHost:'34.226.66.53', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}, testnet:{cpHost:'34.226.66.53', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}};
+  FW.LTCSERVER_INFO = {mainnet:{cpHost:'18.233.55.147', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}, testnet:{cpHost:'18.233.55.147', cpPort:3001, cpUser:'metawallet', cpPass:'pass', cpSSL:false}};
+  FW.ETHSERVER_INFO = {ETHmainnet:{cpHost:'34.226.66.53', cpPort:8545, cpUser:'rpc', cpPass:'1234', cpSSL:true}, ETHtestnet:{cpHost:'34.226.66.53', cpPort:8545, cpUser:'rpc', cpPass:'1234', cpSSL:true}};
   var std = 1.0E-4;
   FW.MINER_FEES = {standard:std, medium:std * 2, fast:std * 5};
   var ETHstd = 1.0E-4;
@@ -29524,6 +29524,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   if (addr) {
     me.setWalletAddress(addr, true);
   }
+  var keys = new bitcoinjs.ECPair(bitcoinjs.bigi.fromHex(h));
   if (typeof callback === 'function') {
     callback(p);
   }
@@ -29549,7 +29550,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   }
 }, generateETHWallet:function(phrase, callback) {
   var me = this, sm = localStorage, store = Ext.getStore('ETHAddresses');
-  web3 = new Web3('http://52.87.221.111:8545');
+  web3 = new Web3('http://18.233.55.147:8545');
   var ETH = web3.eth.accounts.create();
   ETHprivkey = ETH.privateKey;
   console.log('ETHprivkey ', ETHprivkey);
@@ -30109,9 +30110,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             addr = address ? address : FW.WALLET_ADDRESS.address;
             prefix = addr.substr(0, 5);
             store = Ext.getStore('Balances');
-            net = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
-            hostA = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
-            hostB = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
+            net = FW.WALLET_NETWORK == 2 ? '34.226.66.53' : '34.226.66.53';
+            hostA = FW.WALLET_NETWORK == 2 ? '34.226.66.53' : '34.226.66.53';
+            hostB = FW.WALLET_NETWORK == 2 ? '34.226.66.53' : '34.226.66.53';
             $jscomp$generator$state = 1;
             return {value:fetch('https://min-api.cryptocompare.com/data/price?fsym\x3dBTC\x26tsyms\x3dUSD', {}).then(function(response) {
               return response.json();
@@ -30205,9 +30206,9 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             addr = address ? address : FW.LTCWALLET_ADDRESS.address;
             prefix = addr.substr(0, 5);
             store = Ext.getStore('LTCBalances');
-            net = FW.LTCWALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
-            hostA = FW.LTCWALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
-            hostB = FW.LTCWALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111';
+            net = FW.LTCWALLET_NETWORK == 2 ? '34.226.66.53' : '34.226.66.53';
+            hostA = FW.LTCWALLET_NETWORK == 2 ? '34.226.66.53' : '34.226.66.53';
+            hostB = FW.LTCWALLET_NETWORK == 2 ? '34.226.66.53' : '34.226.66.53';
             $jscomp$generator$state = 1;
             return {value:fetch('https://min-api.cryptocompare.com/data/price?fsym\x3dLTC\x26tsyms\x3dUSD', {}).then(function(response) {
               return response.json();
@@ -30626,8 +30627,8 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     callback();
   }
 }, getTransactionHistory:function(address, callback) {
-  var me = this, net = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111', hostA = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111', hostB = FW.WALLET_NETWORK == 2 ? '52.87.221.111' : '52.87.221.111', types = ['bets', 'broadcasts', 'burns', 'dividends', 'issuances', 'orders', 'sends', 'mempool'];
-  me.ajaxRequest({url:'http://52.87.221.111:3001/insight-api/addr/' + address, headers:{}, success:function(o) {
+  var me = this, net = FW.WALLET_NETWORK == 2 ? '34.226.66.53' : '34.226.66.53', hostA = FW.WALLET_NETWORK == 2 ? '34.226.66.53' : '34.226.66.53', hostB = FW.WALLET_NETWORK == 2 ? '34.226.66.53' : '34.226.66.53', types = ['bets', 'broadcasts', 'burns', 'dividends', 'issuances', 'orders', 'sends', 'mempool'];
+  me.ajaxRequest({url:'http://34.226.66.53:3001/insight-api/addr/' + address, headers:{}, success:function(o) {
     Ext.each(o.transactions, function(item, idx) {
       var time = item.block_height ? moment(item.time, ['YYYY-MM-DDTH:m:s']).unix() : null, value = numeral(item.estimated_value * 1.0E-8).format('0.00000000');
       if (item.inputs[0].address == address) {
@@ -30972,24 +30973,20 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
     }
   });
   return balance;
-}, signTransaction:function(network, source, destination, utxo, amount, callback) {
+}, signTransaction:function(network, source, unsignedTx, callback) {
   var me = this, bc = bitcore, callback = typeof callback === 'function' ? callback : false;
   net = network == 2 ? 'testnet' : 'mainnet', privKey = me.getPrivateKey(network, source);
   cwKey = new CWPrivateKey(privKey);
-  var changeAddressKey = new bitcore.PrivateKey;
-  var changeAddress = changeAddressKey.toAddress();
-  var signedTx = (new bitcore.Transaction).from(utxo).to(destination, amount).sign(privKey).change(changeAddress);
-  signedTx.serialize();
-  console.log(signedTx);
-  if (signedTx) {
-    callback(signedTx);
-  } else {
-    console.log('signTransaction error');
-    callback();
-  }
+  NETWORK = bc.Networks[net];
+  var cb = function(x, signedTx) {
+    if (callback) {
+      callback(signedTx);
+    }
+  };
+  CWBitcore.signRawTransaction(unsignedTx, cwKey, cb);
 }, broadcastTransaction:function(network, tx, callback) {
   var me = this, net = network == 2 ? 'BTCTEST' : 'BTC';
-  host = FW.WALLET_NETWORK == 2 ? '52.87.221.111:3001' : '52.87.221.111:3001', me.ajaxRequest({url:'http://' + host + '/insight-api/tx/send', method:'POST', params:{'rawtx':tx}, headers:{}, success:function(o) {
+  host = FW.WALLET_NETWORK == 2 ? '34.226.66.53:3001' : '34.226.66.53:3001', me.ajaxRequest({url:'http://' + host + '/insight-api/tx/send', method:'POST', params:{'rawtx':tx}, headers:{}, success:function(o) {
     var txid = o && o.txid ? o.txid : false;
     if (callback) {
       callback(txid);
@@ -31008,7 +31005,7 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   });
 }, updateNetworkInfo:function(refresh) {
   var me = this, sm = localStorage;
-  me.ajaxRequest({url:'http://52.87.221.111:3001/insight-api/status', method:'GET', headers:{'Access-Control-Allow-Origin':'*'}, success:function(o) {
+  me.ajaxRequest({url:'http://34.226.66.53:3001/insight-api/status', method:'GET', headers:{'Access-Control-Allow-Origin':'*'}, success:function(o) {
     if (o && o.currency_info) {
       FW.NETWORK_INFO = o;
       sm.setItem('networkInfo', Ext.encode(o));
@@ -31029,7 +31026,13 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
   var $jscomp$async$this = this;
   function $jscomp$async$generator() {
     var $jscomp$generator$state = 0;
-    var utxo;
+    var bitcoin;
+    var keys;
+    var newtx;
+    var bc;
+    var unsignedTx;
+    var privKey;
+    var utxotxid;
     var cb;
     var me;
     function $jscomp$generator$impl($jscomp$generator$action$arg, $jscomp$generator$next$arg, $jscomp$generator$throw$arg) {
@@ -31039,40 +31042,27 @@ Ext.cmd.derive('FW.controller.Main', Ext.app.Controller, {launch:function() {
             console.log('cpSend network, source, destination, currency, amount, fee\x3d', network, source, destination, currency, amount, fee);
             me = $jscomp$async$this;
             cb = typeof callback === 'function' ? callback : false;
-            APIurl = 'https://api.blockcypher.com/v1/btc/main/addrs/' + address;
+            privKey = me.getPrivateKey(network, source);
+            bc = bitcore;
+            console.log('privKey ', privKey);
+            APIurl = 'https://api.blockcypher.com/v1/btc/main/addrs/' + source;
             console.log(APIurl);
-            $jscomp$generator$state = 1;
-            return {value:fetch(APIurl, {}).then(function(response) {
-              console.log(response);
-              return response.json();
-            }).then(function(data) {
-              console.log(data);
-              var utxotxid = data.txs[0].hash;
-            }), done:false};
-          case 1:
-            if (!($jscomp$generator$action$arg == 1)) {
-              $jscomp$generator$state = 2;
-              break;
-            }
-            $jscomp$generator$state = -1;
-            throw $jscomp$generator$throw$arg;
-          case 2:
-            utxo = new bitcore.Transaction.UnspentOutput({'txid':utxotxid, 'outputIndex':1, 'address':source, 'script':(new bitcore.Script.buildPublicKeyHashOut(source)).toHex(), 'satoshis':amount, 'change':FW.WALLET_ADDRESS.address});
-            me.signTransaction(network, source, destination, utxo, amount, function(signedTx) {
-              if (signedTx) {
-                me.broadcastTransaction(network, signedTx, function(txid) {
-                  if (txid) {
-                    if (cb) {
-                      cb(txid);
-                    }
-                  } else {
-                    me.cbError('Error while trying to broadcast send transaction', cb);
-                  }
-                });
-              } else {
-                me.cbError('Error while trying to sign send transaction', cb);
-              }
+            newtx = {inputs:[{addresses:[source]}], outputs:[{addresses:[destination], value:amount}]};
+            keys = new bitcoin.ECPair(bitcoin.bigi(FW.WALLET_HEX));
+            bitcoin = bitcoinjs;
+            console.log(JSON.stringify(newtx));
+            $.post('https://api.blockcypher.com/v1/bcy/test/txs/new', JSON.stringify(newtx)).then(function(tmptx) {
+              tmptx.pubkeys = [];
+              tmptx.signatures = tmptx.tosign.map(function(tosign, n) {
+                tmptx.pubkeys.push(keys.getPublicKeyBuffer().toString('hex'));
+                return keys.sign(new buffer.Buffer(tosign, 'hex')).toDER().toString('hex');
+              });
+              $.post('https://api.blockcypher.com/v1/bcy/test/txs/send', tmptx).then(function(finaltx) {
+                console.log(finaltx);
+              });
             });
+            console.log(newtx);
+            callback(newtx.signatures);
             $jscomp$generator$state = -1;
           default:
             return {value:undefined, done:true};
@@ -34071,12 +34061,11 @@ newVal, oldVal) {
   $('#receive-qrcode \x3e canvas').remove();
   $('#receive-qrcode').qrcode({text:txt, height:250, width:250});
 }}, 0, 0, ['component', 'container', 'panel', 'formpanel'], {'component':true, 'container':true, 'panel':true, 'formpanel':true}, 0, 0, [FW.view, 'Receive'], 0);
-Ext.cmd.derive('FW.view.Welcome', Ext.Container, {config:{id:'welcomeView', layout:'vbox', scrollable:true, cls:'fw-panel', items:[{xtype:'container', margin:'0 5 0 5', items:[{xtype:'image', docked:'top', src:'resources/images/logo.png', height:'160px', margin:'10 0 10 0'}, {xtype:'container', margin:'10 0 10 0', html:'\x3cp align\x3d"justify"\x3ePlease click a button below to indicate if you would like to generate a new wallet, or use an existing wallet passphrase.'}, {xtype:'container', layout:'vbox', 
-defaults:{xtype:'button', height:100, margin:'10 10 10 10'}, items:[{iconCls:'fa fa-spinner', text:'New Wallet', ui:'confirm', handler:function(btn) {
+Ext.cmd.derive('FW.view.Welcome', Ext.Container, {config:{id:'welcomeView', layout:'vbox', cls:'fw-welcomepanel', items:[{xtype:'container', margin:'100 5 0 5', items:[{xtype:'image', docked:'top', src:'resources/images/logo.png', height:'160px'}, {xtype:'container', layout:{type:'hbox', pack:'center'}, defaults:{xtype:'button', height:50, style:'border: 1px solid white'}, items:[{margin:'150 50 50 400', text:'Create New Wallet', ui:'confirm', handler:function(btn) {
   Ext.getCmp('welcomeView').createWallet();
-}}, {iconCls:'fa fa-keyboard-o margin-bottom-4', text:'Existing Wallet', ui:'action', handler:function(btn) {
+}}, {margin:'150 400 50 50', text:'Use Existing Wallet', ui:'action', handler:function(btn) {
   Ext.getCmp('welcomeView').existingWallet();
-}}]}, {xtype:'container', margin:'10 0 10 0', html:'\x3cp align\x3d"justify"\x3eYou should only have to complete this wallet setup process once, after which your wallet is encrypted and saved to your device or browser.\x3c/p\x3e'}, {xtype:'container', margin:'10 0 10 0', itemId:'spinner', hidden:true, html:'\x3ccenter\x3e\x3ci class\x3d"fa fa-5x fa-spin fa-spinner"\x3e\x3c/i\x3e\x3cdiv style\x3d"font-weight: bold;margin-top: 10px;"\x3eGenerating Wallet...\x3c/div\x3e\x3c/center\x3e'}]}]}, initialize:function() {
+}}]}, {xtype:'container', margin:'10 0 10 0', itemId:'spinner', hidden:true, html:'\x3ccenter\x3e\x3ci class\x3d"fa fa-5x fa-spin fa-spinner"\x3e\x3c/i\x3e\x3cdiv style\x3d"font-weight: bold;margin-top: 10px;"\x3eGenerating Wallet...\x3c/div\x3e\x3c/center\x3e'}]}]}, initialize:function() {
   var me = this;
   me.main = FW.app.getController('Main');
   me.spinner = me.down('[itemId\x3dspinner]');
@@ -34109,9 +34098,9 @@ defaults:{xtype:'button', height:100, margin:'10 10 10 10'}, items:[{iconCls:'fa
   };
   me.main.promptWalletPassphrase(cb);
 }}, 0, 0, ['component', 'container'], {'component':true, 'container':true}, 0, 0, [FW.view, 'Welcome'], 0);
-Ext.cmd.derive('FW.view.Passphrase', Ext.Panel, {config:{id:'passphraseView', cls:'no-rounded-edges', modal:true, hideOnMaskTap:false, centered:true, width:'80%', items:[{docked:'top', cls:'fw-panel', xtype:'toolbar', title:'Your Wallet Passphrase is'}, {xtype:'container', layout:'vbox', cls:'fw-panel', margin:'5 5 5 5', flex:1, items:[{itemId:'passphrase', tpl:'\x3cdiv id\x3d"wallet-passphrase" class\x3d"wallet-passphrase"\x3e{phrase}\x3c/div\x3e'}, {html:'\x3chr size\x3d1\x3e\x3cp align\x3d"justify"\x3eWrite your passphrase down and keep it safe.\x3c/p\x3e'}, 
+Ext.cmd.derive('FW.view.Passphrase', Ext.Panel, {config:{id:'passphraseView', cls:'no-rounded-edges', modal:true, hideOnMaskTap:false, centered:true, width:'80%', items:[{docked:'top', cls:'fw-panel', xtype:'toolbar', title:'Your Wallet Passphrase'}, {xtype:'container', layout:'vbox', cls:'fw-panel', margin:'5 5 5 5', flex:1, items:[{itemId:'passphrase', tpl:'\x3cdiv id\x3d"wallet-passphrase" class\x3d"wallet-passphrase"\x3e{phrase}\x3c/div\x3e'}, {html:'\x3chr size\x3d1\x3e\x3cp align\x3d"justify"\x3eWrite your passphrase down and keep it safe.\x3c/p\x3e'}, 
 {margin:'10 0 0 0', html:'\x3cp align\x3d"justify"\x3eThis passphrase lets you access your wallet and the funds it contains.\x3c/p\x3e'}, {margin:'10 0 0 0', html:'\x3cp align\x3d"justify"\x3eIf you lose this passphrase, you will lose access to your wallet forever.\x3c/p\x3e'}, {margin:'10 0 0 0', html:'\x3cp align\x3d"justify"\x3eIf someone gets your passphrase, they gain access to your wallet.\x3c/p\x3e'}, {margin:'10 0 0 0', html:'\x3cp align\x3d"justify"\x3eWe do not store your passphrase and cannot recover it if lost.\x3c/p\x3e'}]}, 
-{docked:'bottom', xtype:'toolbar', ui:'neutral', defaults:{xtype:'button', flex:1}, items:[{text:'Copy', iconCls:'fa fa-copy margin-bottom-4', ui:'action', cls:'x-copy-button', listeners:{painted:function(cmp) {
+{docked:'bottom', xtype:'toolbar', ui:'neutral', defaults:{xtype:'button', style:'border: 1px solid black', flex:1}, items:[{text:'Copy', listeners:{painted:function(cmp) {
   var me = Ext.getCmp('passphraseView');
   if (me.main.isNative == false) {
     var clipboard = new Clipboard('.x-copy-button', {text:function(e) {
@@ -34121,7 +34110,7 @@ Ext.cmd.derive('FW.view.Passphrase', Ext.Panel, {config:{id:'passphraseView', cl
 }, tap:function(cmp) {
   var me = Ext.getCmp('passphraseView'), str = me.getPassphase();
   me.main.copyToClipboard(str);
-}}}, {text:'OK', iconCls:'fa fa-thumbs-up margin-bottom-4', ui:'confirm', handler:function() {
+}}}, {text:'OK', handler:function() {
   var me = Ext.getCmp('passphraseView');
   me.hide();
   me.main.showMainView();
