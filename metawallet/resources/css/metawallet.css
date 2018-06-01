@@ -4457,7 +4457,7 @@ html,body {
   }
   
   .x-msgbox-dark .x-msgbox-text {
-    color: rgba(35, 161, 157, 0.9);
+    color: rgba(255, 255, 255, 1);
     text-shadow: rgba(0,0,0,0.5) 0 -0.08em 0;
   }
   
