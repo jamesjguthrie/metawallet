@@ -13,7 +13,6 @@ Ext.define('FW.view.MainMenu', {
         width: 211,
         cls: 'fw-panel fw-mainmenu',
         items:[{
-            title: 'MetaWallet',
             xtype: 'toolbar',
             height: 37,
             border: 0,
@@ -35,20 +34,6 @@ Ext.define('FW.view.MainMenu', {
         }],
         // Define the menuitems we want in the data store
         storeData: [{
-            text: 'View Wallet Addresses', 
-            icon: 'fa-bitcoin', 
-            leaf: true,
-            handler: function(){
-                FW.app.getController('Main').showQRCodeView({ text: FW.WALLET_ADDRESS.address });
-            }
-        },{
-            text: 'Scan QR Code', 
-            icon: 'fa-qrcode', 
-            leaf: true,
-            handler: function(){
-                FW.app.getController('Main').generalQRCodeScan();
-            }
-        },{
             text: 'BTC Send',
             icon: 'fa-paper-plane',
             leaf: true,
