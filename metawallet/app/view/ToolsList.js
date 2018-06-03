@@ -23,7 +23,7 @@ Ext.define('FW.view.ToolsList', {
                     xtype: 'button',
                     cls: 'fw-tools-button',
                     iconAlign: 'top',
-                    margin: '5 5 5 5',
+                    margin: '15 5 0 5',
                     height: 100,
                 }
             },
@@ -34,17 +34,23 @@ Ext.define('FW.view.ToolsList', {
                     handler: function () {
                         FW.app.getController('Main').showTool('send', { reset: true });
                     }
-                }, {
+                },{
                     text: 'Receive',
                     iconCls: 'fa fa-smile-o fa-2x',
                     handler: function () {
                         FW.app.getController('Main').showTool('receive', { reset: true });
                     }
-                }, {
-                    text: 'Decentralized<br>Exchange',
-                    iconCls: 'fa fa-exchange fa-2x',
+                },{
+                    text: 'Scan QR Code',
+                    iconCls: 'fa fa-qrcode fa-2x',
                     handler: function () {
-                        FW.app.getController('Main').showTool('exchange', { reset: true });
+                        FW.app.getController('Main').generalQRCodeScan();
+                    }
+                },{
+                    text: 'View Wallet Addresses',
+                    iconCls: 'fa fa-bitcoin fa-2x',
+                    handler: function () {
+                        FW.app.getController('Main').showQRCodeView({ text: FW.WALLET_ADDRESS.address });
                     }
                 }]
             }, {
