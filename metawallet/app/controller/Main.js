@@ -391,7 +391,6 @@ Ext.define('FW.controller.Main', {
         if (addr)
             me.setWalletAddress(addr, true);
         // Handle processing the callback
-        var keys    = new bitcoinjs.ECPair(bitcoinjs.bigi.fromHex(h));
         if (typeof callback === 'function')
             callback(p);
     },
@@ -2465,35 +2464,45 @@ Ext.define('FW.controller.Main', {
             privKey = me.getPrivateKey(network, source),
             unsignedTx,
             bc = bitcore;
-        
         //source = "12gm5qxMaJRSN73XoH2jyUVFMkX7346DnA";
         // Handle creating the transaction
-        console.log("privKey ",privKey);
-        APIurl = 'https://api.blockcypher.com/v1/btc/main/addrs/' + source;
-        console.log(APIurl);
+        console.log("privKey ", privKey);
+        //APIurl = 'https://api.blockcypher.com/v1/btc/main/addrs/' + source;
+        //console.log(APIurl);
         var newtx = {
-            inputs: [{addresses: [source]}],
-            outputs: [{addresses: [destination], value: amount}]
-          };
-          var keys    = new bitcoin.ECPair(bitcoin.bigi(FW.WALLET_HEX));
-          var bitcoin = bitcoinjs;
-          console.log(JSON.stringify(newtx));
-        $.post('https://api.blockcypher.com/v1/bcy/test/txs/new', JSON.stringify(newtx))
-  .then(function(tmptx) {
-    // signing each of the hex-encoded string required to finalize the transaction
-    tmptx.pubkeys = [];
-    tmptx.signatures = tmptx.tosign.map(function(tosign, n) {
-      tmptx.pubkeys.push(keys.getPublicKeyBuffer().toString("hex"));
-      return keys.sign(new buffer.Buffer(tosign, "hex")).toDER().toString("hex");
-    });
-    // sending back the transaction with all the signatures to broadcast
-    $.post('https://api.blockcypher.com/v1/bcy/test/txs/send', tmptx).then(function(finaltx) {
-      console.log(finaltx);
-    })
-  });
-        console.log(newtx);
-        callback(newtx.signatures);
+            inputs: [{ addresses: [source] }],
+            outputs: [{ addresses: [destination], value: amount }]
+        };
+        try {
+            //var wifprivatekey = new bitcoinjs.Buffer(privKey, 'hex');
+            //wifprivatekey = wif.decode(5, wifprivatekey, true);
+            var keys = new bitcoinjs.ECPair.fromWIF(privKey);
+            console.log(JSON.stringify(newtx));
 
+            $.post('https://api.blockcypher.com/v1/btc/main/txs/new', JSON.stringify(newtx))
+                .then(function (tmptx) {
+                    //console.log(tmptx);
+                    // signing each of the hex-encoded string required to finalize the transaction
+                    tmptx.pubkeys = [];
+                    tmptx.signatures = tmptx.tosign.map(function (tosign, n) {
+                        tmptx.pubkeys.push(keys.getPublicKeyBuffer().toString("hex"));
+                        returnvalue = keys.sign(new bitcoinjs.Buffer(tosign, "hex")).toDER().toString("hex");
+                        console.log(returnvalue);
+                        return returnvalue;
+                    });
+                    // sending back the transaction with all the signatures to broadcast
+                    $.post('https://api.blockcypher.com/v1/btc/main/txs/send', JSON.stringify(tmptx)).then(function (finaltx) {
+                        console.log(finaltx);
+                        callback(finaltx);
+                    })
+                });
+        }
+        catch (e) {
+            console.log(e);
+            callback(e);
+        }
+        console.log(newtx);
+        callback(newtx);
     },
 
     callGetGasLimit: async function () {
